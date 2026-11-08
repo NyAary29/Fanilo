@@ -1,0 +1,74 @@
+# ======================================================================================
+#  !!!  DÉMONSTRATION — NON VALIDÉ — NE PAS UTILISER EN SOINS  !!!
+# ======================================================================================
+#  Lexique FICTIF du classifieur d'intention baseline (services/ai), destiné aux tests et
+#  aux démonstrations techniques uniquement.
+#
+#  - Les mots-clés MALGACHES (`mg`) ont été proposés par l'équipe technique SANS relecture :
+#    leur exactitude, leur orthographe et leurs variantes dialectales NE SONT PAS GARANTIES.
+#    Ils DOIVENT être relus et complétés par des locuteurs natifs (plusieurs variétés, dont
+#    celles des zones de déploiement) ET par le responsable clinique avant tout usage réel.
+#  - Les mots-clés français sont eux aussi indicatifs.
+#  - L'association mot-clé -> SIGN_DEMO_xx est ARBITRAIRE : les codes du référentiel de démo
+#    (services/rules/rulesets/demo/sign_codes.demo.yaml) sont fictifs et ne désignent aucun
+#    signe clinique réel. La liste réelle des signes de danger relève de l'exigence F-07.
+#  - Ce lexique ne fait que PROPOSER une intention et des codes ; la décision revient au
+#    moteur de règles déterministe (voir docs/securite-medicale.md).
+#
+#  Normalisation appliquée aux mots-clés et au texte : minuscules, accents retirés,
+#  apostrophes et ponctuation remplacées par une espace (voir app/nlu/normalize.py).
+#  Un mot-clé correspond uniquement sur des mots entiers.
+# ======================================================================================
+lexicon_id: fanilo-intents-demo
+version: 0.1.0
+status: demo
+validated_by: null
+validated_at: null
+# Référentiel de codes de signes visé (catalog_id dans services/rules).
+sign_catalog: fanilo-demo-signs
+
+# Intentions classées par mots-clés, dans l'ordre de priorité en cas d'égalité.
+# `report_danger_sign` et `out_of_scope` sont dérivées automatiquement : ne pas les déclarer.
+intents:
+  - name: ask_anc_schedule
+    modules: [reny]
+    keywords:
+      fr: ["consultation prenatale", "cpn", "visite prenatale", "rendez-vous"]
+      mg: ["fizahana vohoka", "fanaraha-maso ny vohoka"]   # À RELIRE (locuteurs natifs)
+  - name: ask_nutrition
+    modules: [reny, tanora]
+    keywords:
+      fr: ["manger", "nourriture", "alimentation", "nutrition"]
+      mg: ["sakafo", "mihinana", "hanina"]                  # À RELIRE (locuteurs natifs)
+  - name: ask_menstruation
+    modules: [tanora]
+    keywords:
+      fr: ["regles", "menstruation"]
+      mg: ["fadimbolana", "fadim-bolana"]                   # À RELIRE (locuteurs natifs)
+
+# Mots-clés -> codes de signes FICTIFS (association arbitraire, voir en-tête).
+signs:
+  - code: SIGN_DEMO_01
+    keywords:
+      fr: ["saignement", "saigne", "perte de sang"]
+      mg: ["mandeha ra", "mandehan-dra", "misy ra"]         # À RELIRE (locuteurs natifs)
+  - code: SIGN_DEMO_02
+    keywords:
+      fr: ["convulsion", "convulsions"]
+      mg: ["torana"]                                        # À RELIRE (locuteurs natifs)
+  - code: SIGN_DEMO_03
+    keywords:
+      fr: ["fievre", "forte fievre"]
+      mg: ["tazo", "mafana be ny vatana"]                   # À RELIRE (locuteurs natifs)
+  - code: SIGN_DEMO_04
+    keywords:
+      fr: ["ne bouge plus", "ne bouge pas"]
+      mg: ["tsy mihetsika ny zaza", "tsy mihetsika intsony"]  # À RELIRE (locuteurs natifs)
+  - code: SIGN_DEMO_05
+    keywords:
+      fr: ["mal de tete severe", "vision trouble"]
+      mg: ["marary loha mafy", "manjavozavo ny maso"]       # À RELIRE (locuteurs natifs)
+  - code: SIGN_DEMO_06
+    keywords:
+      fr: ["violence", "violences"]
+      mg: ["herisetra"]                                     # À RELIRE (locuteurs natifs)

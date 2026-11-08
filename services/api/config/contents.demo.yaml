@@ -1,0 +1,74 @@
+# ============================================================================
+# DÉMONSTRATION — NON VALIDÉ CLINIQUEMENT — NE PAS UTILISER EN SOINS
+# ============================================================================
+# Catalogue FICTIF de contenus, pour le développement et les démonstrations.
+# - Messages neutres d'ORIENTATION uniquement : aucune information médicale,
+#   aucun diagnostic, aucun médicament, aucun dosage, aucune conduite à tenir.
+# - Aucun message ne promet une prise en charge ou un délai d'intervention.
+# - Les codes couvrent les message_code des règles de démonstration de
+#   services/rules (rulesets/demo) et leur fallback_message_code, ainsi que le
+#   message de rappel du calendrier CPN de démonstration.
+# - Français uniquement : les versions malgaches doivent être rédigées par des
+#   locuteurs natifs puis validées (en attendant, l'API sert le français en
+#   repli).
+# Importé au statut "demo" par :
+#   uv run python -m app.modules.contents.cli import-demo
+# et servi seulement si FANILO_ALLOW_DEMO_CONTENT=true (jamais en production).
+# Les contenus réels passent par draft -> in_review -> validated (API /contents).
+# ============================================================================
+
+catalog_id: fanilo-contents-demo
+version: 0.1.0
+status: demo
+source: "DÉMO — messages d'orientation fictifs, non validés cliniquement"
+
+items:
+  - code: MSG_DEMO_CRITICAL
+    module: reny
+    language: fr
+    title: "[DÉMO] Orientation vers une structure de référence"
+    body: >-
+      [DÉMO] Rendez-vous sans attendre à la structure de santé de référence la
+      plus proche, accompagnée si possible. Prévenez votre agent communautaire.
+
+  - code: MSG_DEMO_URGENT
+    module: reny
+    language: fr
+    title: "[DÉMO] Orientation vers le CSB"
+    body: >-
+      [DÉMO] Rendez-vous au CSB dès que possible. Votre agent communautaire
+      peut vous indiquer le CSB le plus proche.
+
+  - code: MSG_DEMO_URGENT_PREGNANCY
+    module: reny
+    language: fr
+    title: "[DÉMO] Contacter l'agent communautaire"
+    body: >-
+      [DÉMO] Contactez votre agent communautaire dès que possible. Si vous ne
+      pouvez pas le joindre, rendez-vous directement au centre de santé le plus
+      proche.
+
+  - code: MSG_DEMO_ROUTINE
+    module: reny
+    language: fr
+    title: "[DÉMO] En parler à l'agent communautaire"
+    body: >-
+      [DÉMO] Parlez-en à votre agent communautaire lors de sa prochaine visite,
+      ou au CSB lors de votre prochain passage.
+
+  - code: MSG_DEMO_TRANSFER_COUNSELOR
+    module: common
+    language: fr
+    title: "[DÉMO] Question transmise à un conseiller"
+    body: >-
+      [DÉMO] Votre question est transmise à un conseiller, qui pourra vous
+      recontacter ; aucun délai de rappel n'est garanti. En cas d'urgence,
+      rendez-vous directement au centre de santé le plus proche.
+
+  - code: MSG_DEMO_ANC_REMINDER
+    module: reny
+    language: fr
+    title: "[DÉMO] Rappel de consultation prénatale"
+    body: >-
+      [DÉMO] Une consultation prénatale est prévue prochainement au CSB.
+      Rendez-vous au CSB à la date convenue avec votre agent communautaire.

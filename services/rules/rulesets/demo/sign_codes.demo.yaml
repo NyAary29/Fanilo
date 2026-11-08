@@ -1,0 +1,34 @@
+# ======================================================================================
+#  !!!  DÉMONSTRATION — NON VALIDÉ CLINIQUEMENT — NE PAS UTILISER EN SOINS  !!!
+# ======================================================================================
+#  Référentiel FICTIF de codes de signes, destiné uniquement aux tests et aux démos
+#  techniques. Les codes et libellés ne correspondent à aucun protocole clinique.
+#  La liste réelle des signes de danger (exigence F-07) doit être rédigée et validée
+#  par le responsable clinique (voir docs/securite-medicale.md).
+# ======================================================================================
+catalog_id: fanilo-demo-signs
+version: 0.1.0
+status: demo
+validated_by: null
+validated_at: null
+source: "DÉMO — aucun protocole de référence (référentiel fictif)"
+language: fr
+signs:
+  - code: SIGN_DEMO_01
+    modules: [reny]
+    label: "[DÉMO] Signe fictif n° 1 — libellé de démonstration"
+  - code: SIGN_DEMO_02
+    modules: [reny]
+    label: "[DÉMO] Signe fictif n° 2 — libellé de démonstration"
+  - code: SIGN_DEMO_03
+    modules: [reny]
+    label: "[DÉMO] Signe fictif n° 3 — libellé de démonstration"
+  - code: SIGN_DEMO_04
+    modules: [reny]
+    label: "[DÉMO] Signe fictif n° 4 — libellé de démonstration"
+  - code: SIGN_DEMO_05
+    modules: [reny, tanora]
+    label: "[DÉMO] Signe fictif n° 5 — libellé de démonstration"
+  - code: SIGN_DEMO_06
+    modules: [tanora]
+    label: "[DÉMO] Signe fictif n° 6 — libellé de démonstration (module tanora)"

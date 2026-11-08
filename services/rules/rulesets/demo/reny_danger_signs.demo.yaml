@@ -1,0 +1,72 @@
+# ======================================================================================
+#  !!!  DÉMONSTRATION — NON VALIDÉ CLINIQUEMENT — NE PAS UTILISER EN SOINS  !!!
+# ======================================================================================
+#  Jeu de règles FICTIF pour tests et démonstrations techniques uniquement.
+#  - Les codes de signes (SIGN_DEMO_*) sont génériques et sans signification clinique.
+#  - Les sévérités et orientations sont arbitraires et servent à exercer le moteur.
+#  - Aucun délai réel : tous les délais sont des placeholders (is_placeholder: true).
+#  - Le seuil de confiance est une valeur technique de démonstration.
+#  Le chargement de ce fichier est REFUSÉ en production (allow_demo=False).
+#  Validation clinique : voir docs/securite-medicale.md et services/rules/README.md.
+# ======================================================================================
+ruleset_id: fanilo-reny-danger-signs-demo
+version: 0.1.0
+status: demo
+validated_by: null
+validated_at: null
+source: "DÉMO — aucun protocole de référence (règles fictives)"
+language: fr
+sign_catalog:
+  catalog_id: fanilo-demo-signs
+  version: 0.1.0
+min_detection_confidence: 0.8   # DÉMO — seuil technique à fixer et valider
+fallback_message_code: MSG_DEMO_TRANSFER_COUNSELOR
+
+rules:
+  - id: DEMO-RENY-001
+    version: 0.1.0
+    module: reny
+    conditions:
+      match: any
+      signs: [SIGN_DEMO_01, SIGN_DEMO_02]
+    severity: critical
+    action: refer_reference_facility
+    message_code: MSG_DEMO_CRITICAL
+    response_delay:
+      is_placeholder: true   # DÉMO — délai à définir par le responsable clinique
+
+  - id: DEMO-RENY-002
+    version: 0.1.0
+    module: reny
+    conditions:
+      match: all
+      signs: [SIGN_DEMO_03, SIGN_DEMO_04]
+    severity: urgent
+    action: refer_csb
+    message_code: MSG_DEMO_URGENT
+    response_delay:
+      is_placeholder: true   # DÉMO — délai à définir par le responsable clinique
+
+  - id: DEMO-RENY-003
+    version: 0.1.0
+    module: reny
+    conditions:
+      match: any
+      signs: [SIGN_DEMO_03]
+      context:
+        pregnant: true
+    severity: urgent
+    action: refer_community_agent
+    message_code: MSG_DEMO_URGENT_PREGNANCY
+    response_delay:
+      is_placeholder: true   # DÉMO — délai à définir par le responsable clinique
+
+  - id: DEMO-RENY-004
+    version: 0.1.0
+    module: reny
+    conditions:
+      match: any
+      signs: [SIGN_DEMO_05]
+    severity: routine
+    action: refer_community_agent
+    message_code: MSG_DEMO_ROUTINE

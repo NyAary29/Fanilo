@@ -1,0 +1,49 @@
+# ============================================================================
+# DÉMONSTRATION — NON VALIDÉ — NE PAS PRÉSENTER À DES BÉNÉFICIAIRES RÉELLES
+# ============================================================================
+# Résumés FICTIFS de l'information présentée lors du recueil du consentement.
+# Les textes réels (français et malgache) doivent être rédigés, relus
+# juridiquement et validés, puis publiés dans un NOUVEAU fichier
+# (status: validated). Ce fichier reste à jamais au statut demo.
+# Servi par GET /reference/consent-information seulement si
+# FANILO_ALLOW_DEMO_CONTENT=true.
+# ============================================================================
+
+catalog_id: fanilo-consent-information-demo
+version: 0.1.0
+status: demo
+source: "DÉMO — résumés fictifs, non relus juridiquement"
+
+items:
+  - scope: reny
+    version: demo-0.1
+    summary_fr: >-
+      [DÉMO] FANILO enregistre des informations de suivi de grossesse (sans
+      votre nom dans le dossier de suivi) pour aider votre agent communautaire
+      et le CSB à organiser les consultations. Vous pouvez retirer votre
+      consentement à tout moment.
+    summary_mg: null
+
+  - scope: tanora
+    version: demo-0.1
+    summary_fr: >-
+      [DÉMO] FANILO enregistre vos questions pour vous orienter vers un agent
+      communautaire, un conseiller ou un centre de santé. Vous pouvez retirer
+      votre consentement à tout moment.
+    summary_mg: null
+
+  - scope: reminders
+    version: demo-0.1
+    summary_fr: >-
+      [DÉMO] FANILO peut vous envoyer des rappels de rendez-vous par le canal
+      que vous choisissez. Vous pouvez les arrêter à tout moment en retirant ce
+      consentement.
+    summary_mg: null
+
+  - scope: voice_processing
+    version: demo-0.1
+    summary_fr: >-
+      [DÉMO] Vos messages vocaux sont transcrits automatiquement pour orienter
+      votre question. L'enregistrement audio n'est pas conservé. Vous pouvez
+      retirer votre consentement à tout moment.
+    summary_mg: null

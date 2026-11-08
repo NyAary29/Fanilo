@@ -1,0 +1,54 @@
+[project]
+name = "fanilo-ai"
+version = "0.1.0"
+description = "Service IA interne de FANILO : transcription (ASR) et intention proposées, jamais décisionnelles"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "fastapi>=0.115",
+    "uvicorn[standard]>=0.30",
+    "pydantic>=2.7",
+    "pydantic-settings>=2.3",
+    "python-multipart>=0.0.9",
+    "PyYAML>=6.0",
+]
+
+[project.optional-dependencies]
+# Backends ASR Hugging Face. NON installés par défaut : `uv sync --extra asr`.
+# Le décodage des formats compressés (ogg, webm, mp3...) requiert aussi le binaire ffmpeg.
+asr = [
+    "torch>=2.3",
+    "transformers>=4.44",
+    "numpy>=1.26",
+]
+# Harnais d'évaluation (eval/) hors tests.
+eval = [
+    "jiwer>=3.0",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=8.2",
+    "pytest-cov>=5.0",
+    "httpx>=0.27",
+    "ruff>=0.5",
+    "jiwer>=3.0",
+]
+
+[tool.uv]
+package = false
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
+addopts = "-ra --strict-markers"
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "UP", "S", "N", "SIM"]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["S101"]

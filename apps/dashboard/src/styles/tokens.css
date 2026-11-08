@@ -1,0 +1,40 @@
+/* Jetons de design FANILO : couleurs à contraste AA minimum sur leur fond. */
+:root {
+  --color-bg: #f6f7f9;
+  --color-surface: #ffffff;
+  --color-text: #1b1f24;
+  --color-muted: #555e69;
+  --color-border: #d3d8de;
+  --color-primary: #0b5e6b;
+  --color-primary-hover: #084852;
+  --color-primary-text: #ffffff;
+  --color-focus: #f2a900;
+  --color-danger: #a4161a;
+  --color-danger-bg: #fdecec;
+  --color-warning: #7a4b00;
+  --color-warning-bg: #fff3d6;
+  --color-success: #1d6b2f;
+  --color-success-bg: #e5f4e8;
+  --color-info: #1e4f8f;
+  --color-info-bg: #e6eef9;
+  --color-demo: #5b2a86;
+  --color-demo-bg: #f1e8fa;
+
+  --font-sans: system-ui, -apple-system, 'Segoe UI', Roboto, 'Noto Sans', sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --text-sm: 0.875rem;
+  --text-base: 1rem;
+  --text-lg: 1.25rem;
+  --text-xl: 1.6rem;
+
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+
+  --radius: 6px;
+  --shadow: 0 1px 2px rgb(0 0 0 / 8%);
+  --max-width: 1200px;
+}

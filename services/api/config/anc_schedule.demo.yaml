@@ -1,0 +1,51 @@
+# ============================================================================
+# DÉMONSTRATION — NON VALIDÉ CLINIQUEMENT — NE PAS UTILISER EN SOINS
+# ============================================================================
+# Calendrier CPN FICTIF, pour le développement et les démonstrations.
+# Les semaines ci-dessous sont des PLACEHOLDERS DE DÉMO : elles ne reflètent
+# aucun protocole. Elles doivent être remplacées par le protocole CPN validé du
+# Ministère de la Santé publique de Madagascar, dans un NOUVEAU fichier
+# (ex. anc_schedule.v1.yaml) passant par draft -> in_review -> validated
+# (voir docs/securite-medicale.md). Ce fichier reste à jamais au statut demo.
+#
+# Avec status != validated, l'API refuse de générer un calendrier tant que
+# FANILO_ALLOW_DEMO_CONTENT=false (valeur par défaut, imposée en production).
+# ============================================================================
+
+schedule_id: fanilo-anc-schedule-demo
+version: 0.1.0
+status: demo
+source: "DÉMO — placeholders fictifs, à remplacer par le protocole validé du Ministère de la Santé"
+validated_by: null
+validated_at: null
+
+# Durée de référence servant à déduire la date des dernières règles d'une date
+# prévue d'accouchement (placeholder de démo).
+pregnancy_duration_days: 280
+
+reminders:
+  # Nombre de jours avant la visite où le rappel est envoyé (placeholder).
+  days_before: 2
+  # Heure d'envoi, en UTC (06:00 UTC = 09:00 à Madagascar).
+  send_hour_utc: 6
+  message_code: MSG_DEMO_ANC_REMINDER
+
+visits:
+  # gestational_week : semaine d'aménorrhée depuis la date des dernières règles.
+  # PLACEHOLDERS DE DÉMO — non validés.
+  - sequence: 1
+    gestational_week: 12
+  - sequence: 2
+    gestational_week: 20
+  - sequence: 3
+    gestational_week: 26
+  - sequence: 4
+    gestational_week: 30
+  - sequence: 5
+    gestational_week: 34
+  - sequence: 6
+    gestational_week: 36
+  - sequence: 7
+    gestational_week: 38
+  - sequence: 8
+    gestational_week: 40
