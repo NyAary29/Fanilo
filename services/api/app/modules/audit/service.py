@@ -67,6 +67,7 @@ class AuditAction(StrEnum):
     REFERRAL_UPDATE = "referral.update"
     REFERRAL_TRANSITION = "referral.transition"
     REFERRAL_DELETE = "referral.delete"
+    EXPORT_AGGREGATES = "export.aggregates"
 
 
 def record_audit(

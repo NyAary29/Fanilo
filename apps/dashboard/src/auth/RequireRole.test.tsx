@@ -6,7 +6,7 @@ import { renderApp } from '../test/utils';
 describe('garde de rôle et navigation', () => {
   it("redirige vers la connexion sans session, avec le pied de page permanent", async () => {
     await renderApp('/alertes');
-    expect(await screen.findByRole('heading', { name: 'FANILO — Connexion' })).toBeInTheDocument();
+    expect(await screen.findByRole('heading', { name: 'Connexion' })).toBeInTheDocument();
     expect(screen.getByText('FANILO ne remplace pas un professionnel de santé.')).toBeInTheDocument();
   });
 
@@ -18,7 +18,7 @@ describe('garde de rôle et navigation', () => {
     await user.click(screen.getByRole('button', { name: 'Se connecter' }));
     expect(await screen.findByRole('heading', { name: 'Tableau de bord' })).toBeInTheDocument();
     const nav = screen.getByRole('navigation', { name: 'Navigation principale' });
-    expect(within(nav).getAllByRole('link').map((l) => l.textContent)).toEqual(['Tableau de bord', "Journal d'audit"]);
+    expect(within(nav).getAllByRole('link').map((l) => l.textContent)).toEqual(['Tableau de bord', 'Statistiques', "Journal d'audit"]);
   });
 
   it('refuse un écran non autorisé pour le rôle (admin → audit)', async () => {
@@ -48,8 +48,8 @@ describe('garde de rôle et navigation', () => {
     view.server.expireAccessTokens();
     window.sessionStorage.clear(); // plus de jeton de rafraîchissement
     view.tokenStore.clear();
-    await userEvent.setup().click(screen.getByRole('link', { name: 'Alertes' }));
-    expect(await screen.findByRole('heading', { name: 'FANILO — Connexion' })).toBeInTheDocument();
+    await userEvent.setup().click(within(screen.getByRole('navigation', { name: 'Navigation principale' })).getByRole('link', { name: /^Alertes/ }));
+    expect(await screen.findByRole('heading', { name: 'Connexion' })).toBeInTheDocument();
     expect(screen.getByText(/session a expiré/)).toBeInTheDocument();
   });
 });

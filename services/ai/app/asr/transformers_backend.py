@@ -14,6 +14,7 @@ import threading
 from typing import Any
 
 from app.asr.base import AsrBackend, AsrUnavailableError, TranscriptionResult
+from app.asr.guards import is_near_silent, looks_hallucinated
 from app.audio import AudioInput, UndecodableAudioError, check_duration
 
 ASR_EXTRA_MISSING = (
@@ -81,6 +82,11 @@ class _TransformersAsrBackend(AsrBackend):
         samples = self._decode(audio)
         duration_s = len(samples) / float(self._sampling_rate)
         check_duration(duration_s, max_seconds)
+        if is_near_silent(samples):
+            # Rien à transcrire : un modèle génératif inventerait une phrase.
+            return TranscriptionResult(
+                text="", confidence=None, model=self._model, duration_s=round(duration_s, 3)
+            )
         try:
             with self._lock:
                 output = self._pipe(
@@ -90,6 +96,8 @@ class _TransformersAsrBackend(AsrBackend):
         except Exception as exc:  # erreur d'inférence : l'API basculera en fallback
             raise AsrUnavailableError(f"Échec de l'inférence ASR ({type(exc).__name__}).") from exc
         text = str(output.get("text", "")).strip() if isinstance(output, dict) else ""
+        if looks_hallucinated(text):
+            text = ""  # boucle de répétition typique d'une hallucination : rien n'est affiché
         # Le pipeline ne fournit pas de confiance calibrée : on renvoie None plutôt qu'un
         # chiffre trompeur. L'API traite alors la transcription comme « à revoir ».
         return TranscriptionResult(

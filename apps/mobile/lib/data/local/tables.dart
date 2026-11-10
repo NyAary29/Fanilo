@@ -124,6 +124,40 @@ class Alerts extends Table {
   Set<Column> get primaryKey => {id};
 }
 
+/// Sites (lecture seule, pull uniquement) : servent au choix de `to_site_id`
+/// d'une référence hors ligne (contrat, sections 2 et 8).
+@DataClassName('SiteRow')
+class Sites extends Table {
+  TextColumn get id => text()();
+  TextColumn get name => text()();
+
+  /// `csb`, `reference_facility` ou `community_zone`.
+  TextColumn get kind => text()();
+  TextColumn get code => text().nullable()();
+  TextColumn get district => text().nullable()();
+  TextColumn get region => text().nullable()();
+  TextColumn get parentSiteId => text().nullable()();
+  BoolColumn get isActive => boolean().withDefault(const Constant(true))();
+  IntColumn get version => integer().withDefault(const Constant(0))();
+  TextColumn get deletedAt => text().nullable()();
+
+  @override
+  Set<Column> get primaryKey => {id};
+}
+
+/// Référentiels distribués par l'API (contrat, section 8 bis), conservés tels
+/// que reçus (JSON) pour fonctionner hors ligne.
+@DataClassName('ReferenceCacheRow')
+class ReferenceCache extends Table {
+  /// Ex. `sign-codes:reny`, `consent-information`.
+  TextColumn get key => text()();
+  TextColumn get json => text()();
+  DateTimeColumn get fetchedAt => dateTime()();
+
+  @override
+  Set<Column> get primaryKey => {key};
+}
+
 /// File d'attente des modifications locales à pousser (`/sync/push`).
 @DataClassName('OutboxRow')
 class Outbox extends Table {

@@ -1,8 +1,11 @@
+import 'dart:convert';
+
 import 'package:uuid/uuid.dart';
 
 import '../../domain/enums.dart';
 import '../local/database.dart';
 import '../local/entity_store.dart';
+import '../reference/reference_repository.dart';
 
 /// Données de démonstration **fictives**, comme si elles venaient du serveur
 /// (version 1, aucune entrée d'outbox). Réservé au mode debug, pour montrer
@@ -23,6 +26,14 @@ class DemoSeeder {
     final store = EntityStore(db);
     final ts = _now().toUtc().toIso8601String();
     await db.transaction(() async {
+      await store.applyServer(SyncEntity.site, 'site-demo-csb', 1, null, {
+        'name': 'CSB fictif (DÉMO)',
+        'kind': 'csb',
+        'code': 'CSB-DEMO',
+        'parent_site_id': null,
+        'is_active': true,
+      });
+      await _seedReferenceIfMissing();
       for (var i = 1; i <= 2; i++) {
         final b = _uuid.v4();
         await store.applyServer(SyncEntity.beneficiary, b, 1, null, {
@@ -43,7 +54,7 @@ class DemoSeeder {
           'beneficiary_id': b,
           'scope': 'reny',
           'method': 'oral',
-          'information_version': 'INFO-DEMO-0.1',
+          'information_version': 'demo-0.1',
           'collected_at': ts,
         });
         final p = _uuid.v4();
@@ -90,6 +101,46 @@ class DemoSeeder {
           });
         }
       }
+    });
+  }
+
+  /// Référentiels fictifs, seulement si aucune copie serveur n'existe
+  /// (marqués `is_demo` / `status: demo` : le bandeau DÉMO reste affiché).
+  Future<void> _seedReferenceIfMissing() async {
+    Future<void> put(String key, Map<String, dynamic> json) async {
+      final existing = await (db.select(db.referenceCache)
+            ..where((r) => r.key.equals(key)))
+          .getSingleOrNull();
+      if (existing != null) return;
+      await db.into(db.referenceCache).insert(ReferenceCacheCompanion.insert(
+          key: key, json: jsonEncode(json), fetchedAt: DateTime.utc(2000)));
+    }
+
+    await put(ReferenceRepository.signCodesKey('reny'), {
+      'catalog_id': 'fanilo-demo-signs',
+      'version': '0.0.0-local',
+      'status': 'demo',
+      'is_demo': true,
+      'items': [
+        for (var n = 1; n <= 3; n++)
+          {
+            'code': 'SIGN_DEMO_0$n',
+            'label_fr': '[DÉMO] Signe fictif n° $n',
+            'label_mg': null,
+            'modules': ['reny'],
+          },
+      ],
+    });
+    await put(ReferenceRepository.consentInformationKey, {
+      'items': [
+        {
+          'scope': 'reny',
+          'version': 'demo-0.1',
+          'status': 'demo',
+          'summary_fr': '[DÉMO] Information fictive de démonstration.',
+          'summary_mg': null,
+        },
+      ],
     });
   }
 }

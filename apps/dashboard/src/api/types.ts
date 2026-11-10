@@ -165,31 +165,115 @@ export type ContentUpdate = Partial<ContentCreate>;
 export type InteractionOutcome = 'answer' | 'danger_sign' | 'fallback';
 export type Severity = 'critical' | 'urgent' | 'routine';
 
-/**
- * HYPOTHÈSE : le contrat (§6) ne décrit pas le schéma renvoyé par `GET /interactions`
- * ni le corps de `POST /interactions/{id}/review`. Les champs ci-dessous reprennent
- * ceux de la réponse de `/interactions/ask` ; ils seront alignés dès que le contrat
- * sera précisé (voir README, « Limites »).
- */
+/** Schéma réel de `GET /interactions` (services/api, InteractionOut). */
 export interface Interaction {
   id: Uuid;
+  created_at: IsoDateTime;
   module: ContentModule;
   beneficiary_id: Uuid | null;
+  site_id?: Uuid | null;
+  asked_by_user_id?: Uuid | null;
+  /** « public_app » : question anonyme de l'application Femmes & Adolescentes. */
+  channel?: 'agent' | 'public_app';
   transcript: string | null;
   transcript_needs_review: boolean;
+  sign_codes?: string[];
+  intent?: string | null;
+  detection_confidence?: number | null;
   outcome: InteractionOutcome;
-  severity: Severity | null;
   actions: string[];
+  severity: Severity | null;
+  content_code?: string | null;
   alert_id: Uuid | null;
   is_demo: boolean;
-  created_at: IsoDateTime;
+  fallback_reasons?: string[];
+  review_status?: 'pending' | 'reviewed' | 'not_required';
   reviewed_at: IsoDateTime | null;
   reviewed_by_user_id: Uuid | null;
   review_note: string | null;
+  orientation_site_id?: Uuid | null;
+  triage?: Triage | null;
+  follow_up_code?: string | null;
+  follow_up_status?: FollowUpStatus | null;
+  follow_up_at?: IsoDateTime | null;
+  follow_up_note?: string | null;
 }
+
+export type Triage = 'urgent' | 'follow_up' | 'info';
+export type FollowUpStatus = 'expected' | 'came' | 'no_show';
 
 export interface InteractionReview {
   note: string;
+  triage?: Triage;
+  /** Centre de santé conseillé (CSB ou hôpital de référence). */
+  orientation_site_id?: Uuid | null;
+}
+
+export type AskModule = 'reny' | 'tanora';
+export type AskLanguage = 'mg' | 'fr';
+
+/** Corps JSON de `POST /interactions/ask` : texte transcrit OU codes de signes. */
+export interface AskJson {
+  module: AskModule;
+  beneficiary_id?: Uuid;
+  text?: string;
+  sign_codes?: string[];
+  language?: AskLanguage;
+}
+
+export interface AskContent {
+  code: string;
+  title: string;
+  body: string;
+  audio_url: string | null;
+  status: 'validated' | 'demo';
+}
+
+export interface AskResponse {
+  interaction_id: Uuid;
+  transcript: string | null;
+  transcript_needs_review: boolean;
+  outcome: InteractionOutcome;
+  actions: string[];
+  severity: Severity | null;
+  content: AskContent | null;
+  alert_id: Uuid | null;
+  is_demo: boolean;
+  disclaimer: string;
+}
+
+// --- 8 bis. Référentiels ----------------------------------------------------
+
+export interface SignCodeItem {
+  code: string;
+  label_fr: string;
+  label_mg: string | null;
+  modules: string[];
+}
+
+export interface SignCodes {
+  catalog_id: string;
+  version: string;
+  status: string;
+  is_demo: boolean;
+  items: SignCodeItem[];
+}
+
+export interface MenuItem {
+  key: number;
+  code: string;
+  title: string;
+  body: string;
+  audio_url: string | null;
+  status: string;
+}
+
+export interface VoiceMenu {
+  config_id: string;
+  version: string;
+  is_demo: boolean;
+  module: AskModule;
+  items: MenuItem[];
 }
 
 // --- 7. Alertes et références ----------------------------------------------
@@ -199,7 +283,7 @@ export type AlertStatus = (typeof ALERT_STATUSES)[number];
 
 export interface Alert {
   id: Uuid;
-  beneficiary_id: Uuid;
+  beneficiary_id: Uuid | null; // nul : question anonyme (TANORA, simulateur)
   interaction_id: Uuid | null;
   rule_id: string;
   ruleset_version: string;
@@ -285,4 +369,106 @@ export interface AuditFilters extends PageParams {
   actor_user_id?: string;
   from?: string;
   to?: string;
+}
+
+// --- Statistiques thématiques (F-16) et export DHIS2 (F-17) ----------------
+
+export interface TopicCell {
+  module: string;
+  intent: string | null;
+  outcome: InteractionOutcome;
+  content_code: string | null;
+  count: number;
+}
+
+export interface TopicStats {
+  period_days: number;
+  min_cell_size: number;
+  total: number;
+  suppressed_cells: number;
+  suppressed_total: number;
+  items: TopicCell[];
+  generated_at: IsoDateTime;
+}
+
+export interface DataValueSet {
+  dataSet: string;
+  period: string;
+  completeDate: string;
+  generated_at: IsoDateTime;
+  min_cell_size: number;
+  suppressed_values: number;
+  data_elements: Record<string, string>;
+  dataValues: { dataElement: string; orgUnit: string; period: string; value: string }[];
+}
+
+// --- Activité mensuelle et par CSB (graphique du tableau de bord) ------------
+
+export interface MonthActivity {
+  month: string; // AAAA-MM
+  pregnancies: number;
+  alerts: number;
+  questions: number;
+  anc_done: number;
+}
+
+export interface SiteActivity {
+  site_id: Uuid;
+  name: string;
+  code: string;
+  region: string;
+  active_pregnancies: number;
+  open_alerts: number;
+}
+
+export interface Activity {
+  months: MonthActivity[];
+  sites: SiteActivity[];
+  generated_at: IsoDateTime;
+}
+
+// --- Suivi des patientes (espace agent) ------------------------------------
+
+export interface Patient {
+  beneficiary_id: Uuid;
+  code: string;
+  site_id: Uuid;
+  site_name: string;
+  age: number | null;
+  display_name: string | null;
+  village: string | null;
+  pregnancy: { id: Uuid; month: number | null; lmp_date: string | null; estimated_due_date: string | null } | null;
+  next_anc: { visit_id: Uuid; sequence: number; scheduled_date: string; days: number } | null;
+  anc_done: number;
+  anc_total: number;
+  missed_anc: number;
+  open_alerts: number;
+  latest_alert_id: Uuid | null;
+  status: 'a_jour' | 'a_suivre';
+  reasons: string[];
+}
+
+// --- Suivi des orientations (responsable du centre) -------------------------
+
+export interface OrientationItem {
+  id: Uuid;
+  created_at: IsoDateTime;
+  module: string;
+  channel: string;
+  question: string | null;
+  triage: Triage | null;
+  answer: string | null;
+  reviewed_at: IsoDateTime | null;
+  orientation_site_id: Uuid;
+  site_name: string;
+  follow_up_code: string | null;
+  follow_up_status: FollowUpStatus | null;
+  follow_up_at: IsoDateTime | null;
+  follow_up_note: string | null;
+}
+
+export interface OrientationList {
+  items: OrientationItem[];
+  total: number;
+  counts: Record<FollowUpStatus, number>;
 }

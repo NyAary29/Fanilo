@@ -1,0 +1,24 @@
+[Script Info]
+ScriptType: v4.00+
+PlayResX: 1920
+PlayResY: 1080
+WrapStyle: 0
+
+[V4+ Styles]
+Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
+Style: Sub,Noto Sans,32,&H00FFFFFF,&H00FFFFFF,&H00202020,&H64000000,-1,0,0,0,100,100,0,0,1,2.2,1,2,200,200,90,1
+Style: SubTop,Noto Sans,32,&H00FFFFFF,&H00FFFFFF,&H00202020,&H64000000,-1,0,0,0,100,100,0,0,1,2.2,1,8,520,320,34,1
+
+[Events]
+Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
+Dialogue: 0,0:00:00.50,0:00:06.80,Sub,,0,0,0,,FANILO — Fahasalamana ho an'ny rehetra, amin'ny feo, amin'ny teny malagasy.
+Dialogue: 0,0:00:07.00,0:00:17.00,Sub,,0,0,0,,Tsy mila kaonty, tsy mila anarana. Manontany amin'ny teny malagasy fotsiny i Hanta, 16 taona.
+Dialogue: 0,0:00:17.00,0:00:28.30,Sub,,0,0,0,,Valiny avy amin'ireo hafatra nankatoavin'ny mpitsabo ihany no azony.
+Dialogue: 0,0:00:28.50,0:00:43.33,SubTop,,0,0,0,,Raha mila olona ny fanontaniana, mpanolotsaina no mamaly avy amin'ny tabilao fanaraha-maso.
+Dialogue: 0,0:00:43.53,0:00:56.93,Sub,,0,0,0,,Tonga ao amin'ny findainy ny valiny. Tsy fantatra ny anarany, voaaro ny tsiambaratelo.
+Dialogue: 0,0:00:57.13,0:01:17.73,Sub,,0,0,0,,Lova, mpiasan'ny fahasalamana eny ifotony, no manoratra an'i Voahirana. Ny fanekeny no voalohany, na tsy misy tambajotra aza.
+Dialogue: 0,0:01:17.93,0:01:37.80,Sub,,0,0,0,,Voasoratra ny fitondrany vohoka. Voalamina ho azy ny fizahana mialoha ny fiterahana sy ny fampahatsiahivana.
+Dialogue: 0,0:01:38.00,0:01:57.40,Sub,,0,0,0,,Mandritra ny fitsidihana, mahita famantarana loza i Lova. Tsindry iray dia voampahafantatra ny tobim-pahasalamana.
+Dialogue: 0,0:01:57.60,0:02:12.40,Sub,,0,0,0,,Olona voatendry no mandray ny fampitandremana, misy fe-potoana sy mpisolo toerana, ary manamarina fa voaray izany.
+Dialogue: 0,0:02:12.60,0:02:30.03,Sub,,0,0,0,,Arahin'ny tobim-pahasalamana ny vohoka, ny fizahana tsy natao, ny fampitandremana sy ny famindrana marary, tsy misy anarana.
+Dialogue: 0,0:02:30.73,0:02:36.03,Sub,,0,0,0,,Tsy manao fitiliana mihitsy i FANILO ary tsy misolo toerana ny mpitsabo.

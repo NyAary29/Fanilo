@@ -2,7 +2,8 @@
 /// `snake_case` comme côté serveur.
 library;
 
-/// Entités synchronisables (section 8). `alert` est en lecture seule.
+/// Entités synchronisables (section 8). `alert` et `site` sont en lecture
+/// seule (pull uniquement).
 enum SyncEntity {
   beneficiary('beneficiary'),
   beneficiaryIdentity('beneficiary_identity'),
@@ -10,13 +11,14 @@ enum SyncEntity {
   pregnancy('pregnancy'),
   ancVisit('anc_visit'),
   referral('referral'),
-  alert('alert');
+  alert('alert'),
+  site('site');
 
   const SyncEntity(this.wire);
   final String wire;
 
   /// Seules ces entités peuvent être poussées par le client.
-  bool get isWritable => this != SyncEntity.alert;
+  bool get isWritable => this != SyncEntity.alert && this != SyncEntity.site;
 
   static SyncEntity? fromWire(String value) {
     for (final e in values) {
@@ -118,6 +120,23 @@ enum ReferralStatus {
   final String wire;
 
   static ReferralStatus? fromWire(String? v) {
+    for (final e in values) {
+      if (e.wire == v) return e;
+    }
+    return null;
+  }
+}
+
+/// Types de site (contrat, section 2).
+enum SiteKind {
+  csb('csb'),
+  referenceFacility('reference_facility'),
+  communityZone('community_zone');
+
+  const SiteKind(this.wire);
+  final String wire;
+
+  static SiteKind? fromWire(String? v) {
     for (final e in values) {
       if (e.wire == v) return e;
     }

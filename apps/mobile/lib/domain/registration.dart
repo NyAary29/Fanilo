@@ -5,24 +5,34 @@ class ConsentInput {
   const ConsentInput({
     required this.scopes,
     required this.method,
-    required this.informationVersion,
+    required this.informationVersions,
     required this.informationPresented,
   });
 
   final Set<ConsentScope> scopes;
   final ConsentMethod? method;
-  final String? informationVersion;
+
+  /// Version de l'information présentée, **par portée** (servie par
+  /// `GET /reference/consent-information`).
+  final Map<ConsentScope, String> informationVersions;
 
   /// L'AC confirme avoir présenté l'information et recueilli l'accord.
   final bool informationPresented;
 
   /// Le consentement est complet : au moins une portée, une méthode, une
-  /// version de l'information et la confirmation de présentation.
+  /// version de l'information pour chaque portée et la confirmation de
+  /// présentation.
   bool get isComplete =>
       scopes.isNotEmpty &&
       method != null &&
-      (informationVersion?.trim().isNotEmpty ?? false) &&
+      scopes.every((s) => versionFor(s) != null) &&
       informationPresented;
+
+  /// Version (non vide) de l'information présentée pour [scope].
+  String? versionFor(ConsentScope scope) {
+    final v = informationVersions[scope]?.trim();
+    return (v == null || v.isEmpty) ? null : v;
+  }
 
   bool get coversReny => scopes.contains(ConsentScope.reny);
 }

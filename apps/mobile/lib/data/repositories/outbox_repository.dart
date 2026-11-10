@@ -5,6 +5,22 @@ import 'package:uuid/uuid.dart';
 
 import '../../domain/enums.dart';
 import '../local/database.dart';
+import '../local/entity_store.dart';
+
+/// Effet de l'abandon d'une modification refusée sur la donnée locale.
+enum DiscardOutcome {
+  /// L'entité n'a jamais été confirmée par le serveur : la ligne locale est
+  /// supprimée (elle n'existe pas côté serveur).
+  removedLocal,
+
+  /// L'entité existe côté serveur : le curseur est remis à zéro, le prochain
+  /// pull recharge l'état serveur et remplace la donnée locale.
+  reloadFromServer,
+
+  /// D'autres modifications de la même entité sont encore dans l'outbox :
+  /// elles la réconcilieront (rien d'autre à faire).
+  none,
+}
 
 /// File d'attente locale des modifications à pousser.
 ///
@@ -90,10 +106,38 @@ class OutboxRepository {
         ..orderBy([(o) => OrderingTerm.asc(o.seq)]))
       .watch();
 
-  /// Abandonne une modification refusée. La donnée locale sera corrigée par
-  /// le prochain pull si le serveur la modifie ; voir README (limites).
-  Future<void> discard(String changeId) =>
-      (db.delete(db.outbox)..where((o) => o.changeId.equals(changeId))).go();
+  /// Abandonne une modification refusée **et** remet la donnée locale dans
+  /// l'état du serveur :
+  /// - entité jamais confirmée (`version == 0`) : ligne locale supprimée ;
+  /// - entité connue du serveur : curseur remis à zéro, le prochain pull
+  ///   (à lancer par l'appelant) recharge l'état serveur.
+  ///
+  /// Si d'autres entrées de la même entité restent dans l'outbox, la donnée
+  /// locale est laissée telle quelle : ces entrées la réconcilieront.
+  Future<DiscardOutcome> discard(String changeId) => db.transaction(() async {
+        final row = await (db.select(db.outbox)
+              ..where((o) => o.changeId.equals(changeId)))
+            .getSingleOrNull();
+        await (db.delete(db.outbox)..where((o) => o.changeId.equals(changeId))).go();
+        if (row == null) return DiscardOutcome.none;
+        final entity = SyncEntity.fromWire(row.entity);
+        if (entity == null || !entity.isWritable) return DiscardOutcome.none;
+        final others = await (db.select(db.outbox)
+              ..where((o) =>
+                  o.entity.equals(row.entity) & o.entityId.equals(row.entityId))
+              ..limit(1))
+            .get();
+        if (others.isNotEmpty) return DiscardOutcome.none;
+        final store = EntityStore(db);
+        final version = await store.currentVersion(entity, row.entityId);
+        if (version == null) return DiscardOutcome.none;
+        if (version == 0) {
+          await store.deleteLocal(entity, row.entityId);
+          return DiscardOutcome.removedLocal;
+        }
+        await db.resetCursor();
+        return DiscardOutcome.reloadFromServer;
+      });
 
   /// Renvoie une modification refusée (après correction côté serveur, par ex.).
   ///

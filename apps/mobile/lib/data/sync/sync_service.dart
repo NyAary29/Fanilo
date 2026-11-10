@@ -11,6 +11,7 @@ import '../api/api_client.dart';
 import '../api/dto.dart';
 import '../local/database.dart';
 import '../local/entity_store.dart';
+import '../reference/reference_repository.dart';
 
 /// Délai exponentiel entre deux tentatives d'envoi d'une même entrée.
 class BackoffPolicy {
@@ -70,6 +71,7 @@ class SyncService {
   SyncService({
     required this.db,
     required this.api,
+    this.references,
     EntityStore? store,
     this.batchSize = 50,
     this.pullLimit = 500,
@@ -82,6 +84,9 @@ class SyncService {
 
   final AppDatabase db;
   final SyncApi api;
+
+  /// Référentiels rafraîchis après un pull réussi (facultatif).
+  final ReferenceRepository? references;
   final EntityStore store;
   final int batchSize;
   final int pullLimit;
@@ -125,6 +130,9 @@ class SyncService {
     try {
       await _push(report, force: force);
       if (report.error == null) await _pull(report);
+      // Les référentiels n'influencent pas le résultat de la synchronisation :
+      // en cas d'échec, la copie locale reste en vigueur.
+      if (report.error == null) await references?.refresh(force: force);
     } on NetworkException {
       report.error = SyncErrorCode.offline;
     } on SessionExpiredException {
@@ -205,6 +213,23 @@ class SyncService {
         if (e.isUnauthorized) {
           report.error = SyncErrorCode.sessionExpired;
           return;
+        }
+        if (e.statusCode == 422) {
+          // Enveloppe refusée en bloc (contrat, section 8) : ne pas la
+          // renvoyer telle quelle. Les entrées passent en « refusé » pour que
+          // l'utilisateur les voie, les réessaie ou les abandonne.
+          await db.transaction(() async {
+            for (final row in batch) {
+              await _onRejected(
+                  row,
+                  PushResult(
+                      changeId: row.changeId,
+                      status: PushStatus.rejected,
+                      error: 'Lot refusé par le serveur (422) : ${e.detail}'));
+            }
+          });
+          report.rejected += batch.length;
+          continue;
         }
         // Lot refusé en bloc (5xx, 4xx inattendu) : nouvel essai plus tard.
         await _deferAll(batch, 'HTTP ${e.statusCode}: ${e.detail}');

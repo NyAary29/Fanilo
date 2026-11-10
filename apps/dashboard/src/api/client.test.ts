@@ -39,6 +39,31 @@ describe('ApiClient', () => {
     expect(window.sessionStorage.getItem(REFRESH_TOKEN_KEY)).toBe('R1');
   });
 
+  it('après un rechargement (refresh token seul), rafraîchit avant la requête sans provoquer de 401', async () => {
+    window.sessionStorage.setItem(REFRESH_TOKEN_KEY, 'R0');
+    const fetchMock = vi.fn<FetchLike>(async (url, init) => {
+      if (url.endsWith('/auth/refresh')) {
+        return jsonResponse(200, { access_token: 'A2', token_type: 'bearer', expires_in: 900, refresh_token: 'R2', refresh_expires_in: 3600 });
+      }
+      const auth = new Headers(init?.headers).get('Authorization');
+      return auth === 'Bearer A2' ? jsonResponse(200, { ok: true }) : jsonResponse(401, { detail: 'non' });
+    });
+    const { client } = setup(fetchMock);
+    await expect(client.get('/auth/me')).resolves.toEqual({ ok: true });
+    expect(fetchMock.mock.calls.map(([u]) => u)).toEqual([`${BASE}/auth/refresh`, `${BASE}/auth/me`]);
+  });
+
+  it('envoie un FormData sans Content-Type JSON (audio multipart)', async () => {
+    const fetchMock = vi.fn<FetchLike>(async () => jsonResponse(200, {}));
+    const { client } = setup(fetchMock);
+    const form = new FormData();
+    form.append('module', 'reny');
+    await client.post('/interactions/ask', form);
+    const [, init] = fetchMock.mock.calls[0]!;
+    expect(init?.body).toBe(form);
+    expect(new Headers(init?.headers).get('Content-Type')).toBeNull();
+  });
+
   it('sur 401, rafraîchit une seule fois (rotation) puis rejoue la requête', async () => {
     const server = createMockServer();
     const { client, tokenStore } = setup(server.fetch);

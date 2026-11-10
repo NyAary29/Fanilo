@@ -34,7 +34,8 @@ def fake_transformers(monkeypatch):
         if data == b"bad":
             raise ValueError("ffmpeg error")
         # 1 octet = 1 échantillon, pour piloter la durée depuis le test.
-        return [0.0] * len(data)
+        # Signal non silencieux (le silence est court-circuité par le backend).
+        return [0.1] * len(data)
 
     transformers = types.ModuleType("transformers")
     transformers.pipeline = pipeline

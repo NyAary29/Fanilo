@@ -17,7 +17,12 @@ import { InteractionsPage } from './pages/InteractionsPage';
 import { LoginPage } from './pages/LoginPage';
 import { ReferralDetailPage } from './pages/ReferralDetailPage';
 import { ReferralsPage } from './pages/ReferralsPage';
+import { GuidePage } from './pages/GuidePage';
+import { OrientationsPage } from './pages/OrientationsPage';
+import { PatientsPage } from './pages/PatientsPage';
+import { SimulatorPage } from './pages/SimulatorPage';
 import { SitesPage } from './pages/SitesPage';
+import { StatsPage } from './pages/StatsPage';
 import { UsersPage } from './pages/UsersPage';
 
 /**
@@ -44,6 +49,11 @@ export const routes: RouteObject[] = [
       { path: '/utilisateurs', element: <RequireRole roles={SECTION_ROLES.users}><UsersPage /></RequireRole> },
       { path: '/sites', element: <RequireRole roles={SECTION_ROLES.sites}><SitesPage /></RequireRole> },
       { path: '/questions', element: <RequireRole roles={SECTION_ROLES.interactions}><InteractionsPage /></RequireRole> },
+      { path: '/aide', element: <GuidePage /> },
+      { path: '/suivi', element: <RequireRole roles={SECTION_ROLES.orientations}><OrientationsPage /></RequireRole> },
+      { path: '/patientes', element: <RequireRole roles={SECTION_ROLES.patients}><PatientsPage /></RequireRole> },
+      { path: '/simulateur', element: <RequireRole roles={SECTION_ROLES.simulator}><SimulatorPage /></RequireRole> },
+      { path: '/statistiques', element: <RequireRole roles={SECTION_ROLES.stats}><StatsPage /></RequireRole> },
       { path: '/audit', element: <RequireRole roles={SECTION_ROLES.audit}><AuditPage /></RequireRole> },
       { path: '*', element: <NotFoundPage /> },
     ],

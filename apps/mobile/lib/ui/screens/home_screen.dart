@@ -3,128 +3,316 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../data/demo/demo_seeder.dart';
+import '../../domain/follow_up.dart';
 import '../labels.dart';
+import '../patient_overview.dart';
 import '../providers.dart';
+import '../theme.dart';
 import '../widgets/common.dart';
+import '../widgets/logo.dart';
+import '../widgets/patient_card.dart';
 import 'alerts_screen.dart';
-import 'beneficiaries_screen.dart';
 import 'beneficiary_detail_screen.dart';
 import 'conflicts_screen.dart';
 import 'login_screen.dart';
 import 'referrals_screen.dart';
 import 'registration_screen.dart';
 import 'signs_screen.dart';
+import 'visits_screen.dart';
 
+void openScreen(BuildContext context, Widget screen) =>
+    Navigator.of(context).push(MaterialPageRoute(builder: (_) => screen));
+
+/// Écran principal de l'agent connecté : trois onglets en bas
+/// (Accueil · Mes visites · Alerter) et la mention permanente.
 class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
 
-  void _open(BuildContext context, Widget screen) =>
-      Navigator.of(context).push(MaterialPageRoute(builder: (_) => screen));
-
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // Démarre la synchronisation automatique tant que l'accueil est monté.
+    // Démarre la synchronisation automatique tant que l'écran est monté.
     ref.watch(syncSchedulerProvider);
+    // Conseils de visite : copie locale rafraîchie après chaque synchro.
+    ref.listen(lastSyncAtProvider, (_, next) {
+      if (next.valueOrNull != null) {
+        ref.read(referenceRepositoryProvider).refreshContents();
+      }
+    });
     final l = context.l10n;
-    final auth = ref.watch(authProvider);
-    final conflicts = ref.watch(conflictsProvider).valueOrNull?.length ?? 0;
-    final openAlerts = ref.watch(openAlertsProvider).valueOrNull?.length ?? 0;
+    final tab = ref.watch(homeTabProvider);
+    final toFollow =
+        ref
+            .watch(patientOverviewsProvider)
+            .where((p) => p.status == FollowUpStatus.toFollow)
+            .length;
 
-    return FaniloScaffold(
-      title: l.homeTitle,
-      actions: [
-        PopupMenuButton<String>(
-          key: const Key('home-menu'),
-          onSelected: (v) async {
-            if (v == 'logout') await _logout(context, ref);
-            if (v == 'demo' && context.mounted) {
-              await DemoSeeder(ref.read(databaseProvider))
-                  .seed(siteId: auth.user?.siteId);
-              if (context.mounted) showSnack(context, l.demoDataLoaded);
-            }
-          },
-          itemBuilder: (_) => [
-            if (kDebugMode) PopupMenuItem(value: 'demo', child: Text(l.demoData)),
-            PopupMenuItem(value: 'logout', child: Text(l.logout)),
-          ],
-        ),
-      ],
-      body: ListView(
-        padding: const EdgeInsets.all(12),
+    return Scaffold(
+      body: IndexedStack(
+        index: tab,
+        children: const [HomeTab(), VisitsTab(), SignsScreen(embedded: true)],
+      ),
+      bottomNavigationBar: Column(
+        mainAxisSize: MainAxisSize.min,
         children: [
-          if (auth.needsReauth)
-            Card(
-              color: Theme.of(context).colorScheme.errorContainer,
-              child: ListTile(
-                leading: const Icon(Icons.lock_clock),
-                title: Text(l.reauthBanner),
-                trailing: TextButton(
-                  onPressed: () =>
-                      _open(context, const LoginScreen(isReauth: true)),
-                  child: Text(l.reauthButton),
-                ),
+          const DisclaimerFooter(safeArea: false),
+          NavigationBar(
+            key: const Key('main-nav'),
+            selectedIndex: tab,
+            onDestinationSelected: (i) => ref.read(homeTabProvider.notifier).state = i,
+            destinations: [
+              NavigationDestination(
+                key: const Key('nav-home'),
+                icon: const Icon(Icons.home_outlined),
+                selectedIcon: const Icon(Icons.home_rounded),
+                label: l.navHome,
               ),
-            ),
-          const SyncCard(),
-          const SizedBox(height: 8),
-          GridView.count(
-            crossAxisCount: 2,
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            childAspectRatio: 1.35,
-            mainAxisSpacing: 4,
-            crossAxisSpacing: 4,
-            children: [
-              BigTile(
-                  icon: Icons.person_add_alt_1,
-                  label: l.menuRegister,
-                  onTap: () => _open(context, const RegistrationScreen())),
-              BigTile(
-                  icon: Icons.people,
-                  label: l.menuBeneficiaries,
-                  onTap: () => _open(context, const BeneficiariesScreen())),
-              BigTile(
-                  icon: Icons.health_and_safety,
-                  label: l.menuSigns,
-                  onTap: () => _open(context, const SignsScreen())),
-              BigTile(
-                  icon: Icons.notifications_active,
-                  label: l.menuAlerts,
-                  badge: openAlerts > 0 ? '$openAlerts' : null,
-                  onTap: () => _open(context, const AlertsScreen())),
-              BigTile(
-                  icon: Icons.local_hospital,
-                  label: l.menuReferrals,
-                  onTap: () => _open(context, const ReferralsScreen())),
-              BigTile(
-                  icon: Icons.sync_problem,
-                  label: l.menuConflicts,
-                  badge: conflicts > 0 ? '$conflicts' : null,
-                  onTap: () => _open(context, const ConflictsScreen())),
+              NavigationDestination(
+                key: const Key('nav-visits'),
+                icon: Badge(
+                  isLabelVisible: toFollow > 0,
+                  backgroundColor: FaniloColors.follow,
+                  label: Text('$toFollow'),
+                  child: const Icon(Icons.event_note_outlined),
+                ),
+                selectedIcon: const Icon(Icons.event_note),
+                label: l.navVisits,
+              ),
+              NavigationDestination(
+                key: const Key('nav-alert'),
+                icon: const Icon(Icons.campaign_outlined, color: FaniloColors.alert),
+                selectedIcon: const Icon(Icons.campaign, color: FaniloColors.alert),
+                label: l.navAlert,
+              ),
             ],
           ),
-          const SizedBox(height: 8),
-          Card(
-            child: ListTile(
-              leading: const Icon(Icons.notifications),
-              title: Text(l.openAlerts(openAlerts)),
-              onTap: () => _open(context, const AlertsScreen()),
-            ),
-          ),
-          const UpcomingAncCard(),
         ],
       ),
     );
   }
+}
 
-  Future<void> _logout(BuildContext context, WidgetRef ref) async {
+/// Onglet « Accueil » : salutation, synchro, grandes actions, patientes.
+class HomeTab extends ConsumerStatefulWidget {
+  const HomeTab({super.key});
+
+  @override
+  ConsumerState<HomeTab> createState() => _HomeTabState();
+}
+
+class _HomeTabState extends ConsumerState<HomeTab> {
+  String _query = '';
+
+  @override
+  Widget build(BuildContext context) {
+    final l = context.l10n;
+    final auth = ref.watch(authProvider);
+    final conflicts =
+        (ref.watch(conflictsProvider).valueOrNull?.length ?? 0) +
+        (ref.watch(rejectedProvider).valueOrNull?.length ?? 0);
+    final openAlerts = ref.watch(openAlertsProvider).valueOrNull?.length ?? 0;
+    final patients = ref.watch(patientOverviewsProvider);
+    final toFollow = patients.where((p) => p.status == FollowUpStatus.toFollow).length;
+    final q = _query.trim().toLowerCase();
+    final filtered =
+        q.isEmpty
+            ? patients
+            : patients
+                .where(
+                  (p) =>
+                      (p.name?.toLowerCase().contains(q) ?? false) ||
+                      (p.beneficiary.code?.toLowerCase().contains(q) ?? false),
+                )
+                .toList();
+
+    return Scaffold(
+      body: SafeArea(
+        bottom: false,
+        child: ListView(
+          key: const Key('home-list'),
+          padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+          children: [
+            Row(
+              children: [const FaniloLogo(size: 40), const Spacer(), _HomeMenu(onLogout: _logout)],
+            ),
+            const SizedBox(height: 16),
+            Text(
+              l.greeting(auth.user?.login ?? ''),
+              style: Theme.of(
+                context,
+              ).textTheme.headlineSmall?.copyWith(color: FaniloColors.forestDark),
+            ),
+            Text(l.greetingSub, style: const TextStyle(fontSize: 16, color: FaniloColors.inkSoft)),
+            const SizedBox(height: 12),
+            if (auth.needsReauth)
+              NoticeCard(
+                tone: NoticeTone.alert,
+                icon: Icons.lock_clock,
+                text: l.reauthBanner,
+                action: FilledButton.icon(
+                  onPressed: () => openScreen(context, const LoginScreen(isReauth: true)),
+                  icon: const Icon(Icons.login),
+                  label: Text(l.reauthButton),
+                ),
+              ),
+            const SyncCard(),
+            const SizedBox(height: 8),
+            IntrinsicHeight(
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Expanded(
+                    child: ActionCard(
+                      key: const Key('action-new-patient'),
+                      icon: Icons.person_add_alt_1,
+                      label: l.actionNewPatient,
+                      subtitle: l.actionNewPatientSub,
+                      onTap: () => openScreen(context, const RegistrationScreen()),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: ActionCard(
+                      key: const Key('action-today-visit'),
+                      icon: Icons.fact_check_outlined,
+                      label: l.actionTodayVisit,
+                      subtitle: l.toSeeCount(toFollow),
+                      background: FaniloColors.mintStrong,
+                      foreground: FaniloColors.forestDark,
+                      onTap: () => ref.read(homeTabProvider.notifier).state = 1,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 8),
+            Row(
+              children: [
+                Expanded(
+                  child: ShortcutTile(
+                    key: const Key('shortcut-alerts'),
+                    icon: Icons.notifications_active_outlined,
+                    label: l.menuAlerts,
+                    badge: openAlerts,
+                    color: FaniloColors.alert,
+                    onTap: () => openScreen(context, const AlertsScreen()),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: ShortcutTile(
+                    key: const Key('shortcut-referrals'),
+                    icon: Icons.local_hospital_outlined,
+                    label: l.menuReferrals,
+                    onTap: () => openScreen(context, const ReferralsScreen()),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: ShortcutTile(
+                    key: const Key('shortcut-conflicts'),
+                    icon: Icons.sync_problem_outlined,
+                    label: l.menuConflicts,
+                    badge: conflicts,
+                    color: conflicts > 0 ? FaniloColors.follow : FaniloColors.forest,
+                    onTap: () => openScreen(context, const ConflictsScreen()),
+                  ),
+                ),
+              ],
+            ),
+            SectionHeader(
+              l.myPatients,
+              icon: Icons.groups_2_outlined,
+              trailing: Text(
+                '${patients.length}',
+                style: const TextStyle(
+                  fontSize: 17,
+                  fontWeight: FontWeight.w800,
+                  color: FaniloColors.inkSoft,
+                ),
+              ),
+            ),
+            TextField(
+              key: const Key('patient-search'),
+              decoration: InputDecoration(
+                prefixIcon: const Icon(Icons.search),
+                hintText: l.searchPatient,
+              ),
+              onChanged: (v) => setState(() => _query = v),
+            ),
+            const SizedBox(height: 6),
+            if (filtered.isEmpty)
+              EmptyState(
+                patients.isEmpty ? l.noBeneficiaries : l.noSearchResult,
+                icon: Icons.person_search_outlined,
+              ),
+            for (final p in filtered)
+              PatientCard(
+                patient: p,
+                onTap: () => openScreen(context, BeneficiaryDetailScreen(beneficiaryId: p.id)),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<void> _logout() async {
     final l = context.l10n;
     final pending = ref.read(pendingCountProvider).valueOrNull ?? 0;
     final ok = await confirmDialog(
-        context, pending > 0 ? l.logoutConfirmPending(pending) : l.logoutConfirm);
+      context,
+      pending > 0 ? l.logoutConfirmPending(pending) : l.logoutConfirm,
+    );
     if (!ok) return;
+    ref.read(homeTabProvider.notifier).state = 0;
     await ref.read(databaseProvider).wipe();
     await ref.read(authProvider.notifier).logout();
+  }
+}
+
+class _HomeMenu extends ConsumerWidget {
+  const _HomeMenu({required this.onLogout});
+  final Future<void> Function() onLogout;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l = context.l10n;
+    PopupMenuItem<String> item(String value, IconData icon, String text) => PopupMenuItem(
+      value: value,
+      child: Row(
+        children: [
+          Icon(icon, color: FaniloColors.forest),
+          const SizedBox(width: 12),
+          Flexible(child: Text(text)),
+        ],
+      ),
+    );
+    return PopupMenuButton<String>(
+      key: const Key('home-menu'),
+      icon: const Icon(Icons.more_vert, size: 28, color: FaniloColors.forest),
+      onSelected: (v) async {
+        switch (v) {
+          case 'logout':
+            await onLogout();
+          case 'referrals':
+            openScreen(context, const ReferralsScreen());
+          case 'conflicts':
+            openScreen(context, const ConflictsScreen());
+          case 'demo':
+            await DemoSeeder(
+              ref.read(databaseProvider),
+            ).seed(siteId: ref.read(authProvider).user?.siteId);
+            if (context.mounted) showSnack(context, l.demoDataLoaded);
+        }
+      },
+      itemBuilder:
+          (_) => [
+            item('referrals', Icons.local_hospital_outlined, l.menuReferrals),
+            item('conflicts', Icons.sync_problem_outlined, l.menuConflicts),
+            if (kDebugMode) item('demo', Icons.science_outlined, l.demoData),
+            item('logout', Icons.logout, l.logout),
+          ],
+    );
   }
 }
 
@@ -142,112 +330,131 @@ class SyncCard extends ConsumerWidget {
     final rejected = ref.watch(rejectedProvider).valueOrNull?.length ?? 0;
     final lastAt = ref.watch(lastSyncAtProvider).valueOrNull;
     final error = l.syncError(ref.watch(lastSyncErrorProvider).valueOrNull);
-    final scheme = Theme.of(context).colorScheme;
+    final today = ref.watch(todayProvider);
 
-    return Card(
+    final upToDate = pending == 0 && lastAt != null && rejected == 0 && error == null;
+    final (icon, color, bg) =
+        pending > 0 || rejected > 0
+            ? (Icons.cloud_upload_rounded, FaniloColors.follow, FaniloColors.followSoft)
+            : upToDate
+            ? (Icons.check_circle_rounded, FaniloColors.ok, FaniloColors.okSoft)
+            : (Icons.cloud_off_rounded, FaniloColors.inkSoft, FaniloColors.mint);
+
+    return SoftCard(
       key: const Key('sync-card'),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(children: [
-              Icon(online ? Icons.wifi : Icons.wifi_off,
-                  color: online ? Colors.green.shade700 : scheme.error),
-              const SizedBox(width: 8),
-              Text(online ? l.online : l.offline,
-                  style: const TextStyle(
-                      fontSize: 18, fontWeight: FontWeight.bold)),
-              const Spacer(),
-              Icon(pending > 0 ? Icons.cloud_upload : Icons.cloud_done,
-                  color: pending > 0 ? Colors.orange.shade800 : Colors.green.shade700),
-            ]),
-            const SizedBox(height: 8),
-            Text(l.syncPending(pending),
-                key: const Key('pending-count'),
-                style: const TextStyle(fontSize: 16)),
-            Text(lastAt == null ? l.syncNever : l.syncLast(formatDateTime(lastAt))),
-            if (error != null)
-              Padding(
-                padding: const EdgeInsets.only(top: 4),
-                child: Text(error, style: TextStyle(color: scheme.error)),
+      padding: const EdgeInsets.fromLTRB(14, 14, 14, 10),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                width: 48,
+                height: 48,
+                decoration: BoxDecoration(color: bg, shape: BoxShape.circle),
+                child: Icon(icon, color: color, size: 30),
               ),
-            if (rejected > 0)
-              Padding(
-                padding: const EdgeInsets.only(top: 4),
-                child: Text(l.rejectedCount(rejected),
-                    style: TextStyle(
-                        color: scheme.error, fontWeight: FontWeight.bold)),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      upToDate ? l.syncUpToDate : l.syncPending(pending),
+                      key: const Key('pending-count'),
+                      style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w800),
+                    ),
+                    Text(
+                      lastAt == null ? l.syncNever : l.syncLast(formatSyncTime(lastAt, today)),
+                      style: const TextStyle(fontSize: 14.5, color: FaniloColors.inkSoft),
+                    ),
+                  ],
+                ),
               ),
-            const SizedBox(height: 12),
-            SizedBox(
-              width: double.infinity,
-              child: FilledButton.icon(
-                key: const Key('sync-button'),
-                onPressed: running
-                    ? null
-                    : () async {
-                        final r = await ref
-                            .read(syncServiceProvider)
-                            .sync(force: true);
-                        if (!context.mounted) return;
-                        showSnack(context,
-                            l.syncError(r.error) ?? l.syncDone);
-                      },
-                icon: running
-                    ? const SizedBox(
-                        width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))
-                    : const Icon(Icons.sync),
-                label: Text(running ? l.syncRunning : l.syncNow),
+            ],
+          ),
+          if (error != null)
+            Padding(
+              padding: const EdgeInsets.only(top: 6),
+              child: Text(
+                error,
+                style: const TextStyle(color: FaniloColors.alertInk, fontSize: 14.5),
               ),
             ),
-          ],
-        ),
+          if (rejected > 0)
+            Padding(
+              padding: const EdgeInsets.only(top: 4),
+              child: Text(
+                l.rejectedCount(rejected),
+                style: const TextStyle(color: FaniloColors.alertInk, fontWeight: FontWeight.w800),
+              ),
+            ),
+          const SizedBox(height: 8),
+          Wrap(
+            alignment: WrapAlignment.spaceBetween,
+            crossAxisAlignment: WrapCrossAlignment.center,
+            spacing: 8,
+            children: [
+              _OnlinePill(online: online),
+              TextButton.icon(
+                key: const Key('sync-button'),
+                style: TextButton.styleFrom(minimumSize: const Size(48, kTouch)),
+                onPressed:
+                    running
+                        ? null
+                        : () async {
+                          final r = await ref.read(syncServiceProvider).sync(force: true);
+                          ref.read(referenceRepositoryProvider).refreshContents(force: true);
+                          if (!context.mounted) return;
+                          showSnack(context, l.syncError(r.error) ?? l.syncDone);
+                        },
+                icon:
+                    running
+                        ? const SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                        : const Icon(Icons.sync),
+                label: Text(running ? l.syncRunning : l.syncNow),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }
 }
 
-class UpcomingAncCard extends ConsumerWidget {
-  const UpcomingAncCard({super.key});
+class _OnlinePill extends StatelessWidget {
+  const _OnlinePill({required this.online});
+  final bool online;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     final l = context.l10n;
-    final visits = ref.watch(upcomingAncProvider).valueOrNull ?? const [];
-    final today = DateTime.now().toIso8601String().substring(0, 10);
-    return Card(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      decoration: BoxDecoration(
+        color: online ? FaniloColors.okSoft : FaniloColors.alertSoft,
+        borderRadius: BorderRadius.circular(999),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
         children: [
-          ListTile(
-            leading: const Icon(Icons.event),
-            title: Text(l.upcomingAnc,
-                style: const TextStyle(fontWeight: FontWeight.bold)),
+          Icon(
+            online ? Icons.wifi : Icons.wifi_off,
+            size: 18,
+            color: online ? FaniloColors.ok : FaniloColors.alertInk,
           ),
-          if (visits.isEmpty)
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-              child: Text(l.noUpcomingAnc),
+          const SizedBox(width: 6),
+          Text(
+            online ? l.online : l.offline,
+            style: TextStyle(
+              fontWeight: FontWeight.w800,
+              color: online ? FaniloColors.forestDark : FaniloColors.alertInk,
             ),
-          for (final v in visits)
-            ListTile(
-              title: Text(l.ancVisit(v.sequence, formatDate(v.scheduledDate))),
-              subtitle: v.scheduledDate.compareTo(today) < 0
-                  ? Text(l.overdue,
-                      style: TextStyle(color: Theme.of(context).colorScheme.error))
-                  : Text(l.ancStatus(v.status)),
-              trailing: const Icon(Icons.chevron_right),
-              onTap: () async {
-                final bId = await ref
-                    .read(localRepositoryProvider)
-                    .beneficiaryIdForPregnancy(v.pregnancyId);
-                if (bId != null && context.mounted) {
-                  Navigator.of(context).push(MaterialPageRoute(
-                      builder: (_) => BeneficiaryDetailScreen(beneficiaryId: bId)));
-                }
-              },
-            ),
+          ),
         ],
       ),
     );

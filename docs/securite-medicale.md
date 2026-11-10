@@ -45,6 +45,31 @@ Garanties techniques du moteur de règles :
 - l'évaluation est pure et déterministe, et chaque décision porte la version du jeu
   de règles, l'indicateur `is_demo` et une trace explicable, à journaliser.
 
+### 2 bis. Questions informatives (F-06) et TANORA (F-15)
+
+Une question qui ne mentionne **aucun signe** peut recevoir une réponse à partir d'un
+contenu approuvé, via une configuration versionnée distincte des règles
+(`services/api/config/information*.yaml`, pilotée par `FANILO_INFORMATION_CONFIG_PATH`) :
+
+- l'IA ne fait que **proposer une intention** (ex. `ask_anc_schedule`) ; la
+  configuration associe une intention couverte à un **code de contenu** ;
+- la réponse n'est donnée que si **aucun signe n'est détecté, aucune règle n'est
+  déclenchée ni candidate, aucun code inconnu**, que la confiance atteint
+  `min_intent_confidence` et que le contenu est **publié** ; sinon, fallback vers le
+  conseiller. Un signe détecté, même avec une confiance basse, l'emporte toujours ;
+- `counselor_confirmation_modules` liste les modules dont **toute** réponse part en
+  revue chez un conseiller (`review_status = pending`) : `tanora` dans la
+  configuration de démonstration, en attendant le protocole de conseil retenu ;
+- cette configuration suit le même cycle de statuts que les règles (`demo` refusé
+  hors mode démo) et relève du **responsable clinique** ;
+- **risque résiduel** : un signe formulé avec des mots que le classifieur ne connaît
+  pas peut recevoir une réponse informative. Les contenus informatifs doivent donc
+  rester des messages d'orientation qui rappellent la conduite en cas d'urgence, et
+  l'analyse des faux négatifs (§7.2 du cahier des charges) doit couvrir ce cas.
+
+Les menus vocaux (touche → contenu, `GET /reference/menus`) sont déclarés dans le même
+fichier et ne proposent que des contenus publiés.
+
 ## 3. Cycle de vie des jeux de règles et des référentiels
 
 ```
@@ -80,6 +105,7 @@ draft ──► in_review ──► validated ──► retired
 | Règles : sévérités, orientations, délais de réponse attendus | Équipe clinique avec l'équipe technique | **Responsable clinique** | Idem |
 | Contenus diffusés (textes, audios, traductions malgache/français) | Équipe contenus | **Responsable clinique** | Registre des contenus par `message_code` **[À COMPLÉTER PAR LE COMITÉ]** |
 | Protocoles d'orientation (AC, CSB, structure de référence) | Équipe clinique, partenaires sanitaires | **Responsable clinique** | Référence du protocole (`source`) |
+| Association intention → contenu, menus vocaux, seuil `min_intent_confidence`, modules soumis à confirmation | Équipe clinique avec l'équipe technique | **Responsable clinique** | `validated_by`, `validated_at` dans `information*.yaml` |
 | Seuil de confiance de la détection (`min_detection_confidence`) | Équipe technique (mesures) | Responsable clinique et responsable technique | Version du jeu de règles |
 | Code du moteur et des intégrations | Équipe technique | Revue de code par un pair | Revue de la demande de fusion |
 

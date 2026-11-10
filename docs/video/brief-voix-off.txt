@@ -1,0 +1,67 @@
+Bonjour,
+
+Merci de prêter ta voix à la vidéo de présentation de FANILO, un assistant vocal de santé
+maternelle et adolescente en malgache (Havanana Impact × Creatic).
+
+Je t'envoie la vidéo de démonstration (fanilo-demo-mg.mp4, 2 min 41, sous-titres en
+malgache). Ta voix off est en ANGLAIS, lue par-dessus.
+
+CONSIGNES
+- Ton : chaleureux, calme, confiant. Comme si tu racontais l'histoire d'une vraie personne,
+  pas une publicité.
+- Rythme : posé. Chaque texte doit tenir dans la durée indiquée ; mieux vaut finir 1 ou
+  2 secondes avant.
+- Enregistrement : pièce silencieuse, sans écho, téléphone ou micro à ~20 cm de la bouche.
+- Un fichier par scène, nommé scene01.mp3, scene02.mp3… scene10.mp3
+  (mp3, m4a ou wav, peu importe). La scène 11 n'a pas de voix.
+- Garde 1 seconde de silence au début et à la fin de chaque fichier.
+- Prononciation : FANILO = « fa-NI-lou » ; Hanta = « HANN-ta » ;
+  Voahirana = « vwa-HI-ra-na » ; Lova = « LOU-va ».
+
+TEXTE À LIRE (anglais)
+
+Scene 01 — 0:00 to 0:07 — 7 seconds max
+In Madagascar, many women and girls have no easy way to get reliable health
+information in their own language. FANILO changes that.
+
+Scene 02 — 0:07 to 0:28 — 21 seconds max
+Hanta is sixteen. She has a question she doesn't dare to ask out loud.
+With FANILO, she needs no account and no name. She asks in Malagasy, by voice
+or in writing, and gets an answer drawn only from messages approved by
+health professionals.
+
+Scene 03 — 0:28 to 0:43 — 15 seconds max
+When the question needs a human, it goes to a counselor, who classifies it
+and writes what Hanta should do.
+
+Scene 04 — 0:43 to 0:57 — 14 seconds max
+The reply comes back to Hanta's phone. Still anonymous. Still private.
+
+Scene 05 — 0:57 to 1:18 — 21 seconds max
+In the village, Lova, a community health worker, registers Voahirana.
+Consent comes first, and the app works even without network.
+
+Scene 06 — 1:18 to 1:38 — 20 seconds max
+Her pregnancy is recorded. Her antenatal visits are scheduled, and reminders
+are planned automatically.
+
+Scene 07 — 1:38 to 1:57 — 19 seconds max
+During a visit, Lova notices a danger sign. One tap, and the health centre is alerted.
+
+Scene 08 — 1:57 to 2:12 — 15 seconds max
+The alert goes to a named person, with a response deadline and a backup.
+Nothing is promised until a health professional confirms.
+
+Scene 09 — 2:12 to 2:30 — 18 seconds max
+Health centres follow pregnancies, missed visits, alerts and referrals,
+with anonymised data only.
+
+Scene 10 — 2:30 to 2:36 — 6 seconds max
+FANILO never diagnoses. AI proposes, health professionals decide.
+
+Scene 11 — 2:36 to 2:41 — pas de voix (carton de fin)
+
+Astuce : lance la vidéo et lis chaque texte pendant la scène correspondante pour
+vérifier qu'il tient dans le temps.
+
+Merci beaucoup !

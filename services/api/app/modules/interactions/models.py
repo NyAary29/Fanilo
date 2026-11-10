@@ -41,6 +41,22 @@ class Severity(StrEnum):
     CRITICAL = "critical"
 
 
+class Triage(StrEnum):
+    """Classement par le conseiller."""
+
+    URGENT = "urgent"
+    FOLLOW_UP = "follow_up"  # à suivre
+    INFO = "info"  # simple information
+
+
+class FollowUpStatus(StrEnum):
+    """Suivi par le centre de santé vers lequel la personne est orientée."""
+
+    EXPECTED = "expected"  # attendue au centre
+    CAME = "came"  # venue
+    NO_SHOW = "no_show"  # pas venue
+
+
 class ReviewStatus(StrEnum):
     PENDING = "pending"
     REVIEWED = "reviewed"
@@ -65,9 +81,14 @@ class Interaction(Base):
     site_id: Mapped[uuid.UUID | None] = mapped_column(
         Uuid, ForeignKey("sites.id"), nullable=True, index=True
     )
-    asked_by_user_id: Mapped[uuid.UUID] = mapped_column(
-        Uuid, ForeignKey("users.id"), nullable=False
+    # Nul pour une question anonyme (application publique « Femmes & Adolescentes »).
+    asked_by_user_id: Mapped[uuid.UUID | None] = mapped_column(
+        Uuid, ForeignKey("users.id"), nullable=True
     )
+    # Canal : « agent » (comptes FANILO) ou « public_app » (anonyme).
+    channel: Mapped[str] = mapped_column(String(16), nullable=False, default="agent")
+    # Empreinte SHA-256 du jeton de suivi remis à l'utilisatrice anonyme (jamais le jeton).
+    follow_up_token_hash: Mapped[str | None] = mapped_column(String(64), nullable=True)
     input_kind: Mapped[InputKind] = mapped_column(
         str_enum(InputKind, "interaction_input_kind", length=16), nullable=False
     )
@@ -76,6 +97,8 @@ class Interaction(Base):
     transcript_needs_review: Mapped[bool] = mapped_column(Boolean, nullable=False)
     # Codes SIGN_... proposés (IA) ou saisis (AC) ; confiance nulle = saisie déterministe.
     sign_codes: Mapped[list[str]] = mapped_column(JSON, nullable=False)
+    # Intention proposée par le classifieur (statistiques thématiques, F-16).
+    intent: Mapped[str | None] = mapped_column(String(64), nullable=True, index=True)
     detection_confidence: Mapped[float | None] = mapped_column(Float, nullable=True)
     ai_model: Mapped[str | None] = mapped_column(String(128), nullable=True)
     outcome: Mapped[Outcome] = mapped_column(
@@ -101,3 +124,20 @@ class Interaction(Base):
     )
     reviewed_at: Mapped[datetime | None] = mapped_column(UTCDateTime, nullable=True)
     review_note: Mapped[str | None] = mapped_column(Text, nullable=True)
+    # Centre de santé vers lequel le conseiller oriente la personne (facultatif).
+    orientation_site_id: Mapped[uuid.UUID | None] = mapped_column(
+        Uuid, ForeignKey("sites.id"), nullable=True, index=True
+    )
+    triage: Mapped[Triage | None] = mapped_column(
+        str_enum(Triage, "interaction_triage", length=16), nullable=True
+    )
+    # Code court à montrer au centre (anonyme) ; présent si un suivi est attendu.
+    follow_up_code: Mapped[str | None] = mapped_column(String(8), nullable=True, index=True)
+    follow_up_status: Mapped[FollowUpStatus | None] = mapped_column(
+        str_enum(FollowUpStatus, "interaction_follow_up_status", length=16), nullable=True
+    )
+    follow_up_at: Mapped[datetime | None] = mapped_column(UTCDateTime, nullable=True)
+    follow_up_by_user_id: Mapped[uuid.UUID | None] = mapped_column(
+        Uuid, ForeignKey("users.id"), nullable=True
+    )
+    follow_up_note: Mapped[str | None] = mapped_column(Text, nullable=True)

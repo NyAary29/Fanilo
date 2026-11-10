@@ -1,3 +1,4 @@
+import 'dart:ffi';
 import 'dart:io';
 import 'dart:math';
 
@@ -70,20 +71,36 @@ void assertCipherAvailable(Database db) {
   }
 }
 
-/// Configure le chargement de la bibliothèque SQLCipher sur Android.
-/// Sur iOS, `sqlcipher_flutter_libs` lie SQLCipher statiquement.
-void _overrideSqliteWithSqlCipher() {
+/// Nom de la bibliothèque SQLCipher compilée par `sqlcipher_flutter_libs`
+/// pour Linux (copiée dans `bundle/lib/` et déjà chargée par l'exécutable).
+const linuxSqlCipherLibrary = 'libsqlcipher_flutter_libs_plugin.so';
+
+/// Configure le chargement de la bibliothèque SQLCipher.
+///
+/// - Android : `libsqlcipher.so` fournie par `sqlcipher_flutter_libs`.
+/// - Linux (poste de développement) : SQLCipher compilé par le plugin, lié
+///   statiquement à OpenSSL. Sans cette surcharge, `package:sqlite3`
+///   chargerait le `libsqlite3.so` du système, non chiffré, et l'ouverture
+///   serait refusée par [assertCipherAvailable].
+/// - iOS : `sqlcipher_flutter_libs` lie SQLCipher statiquement.
+void overrideSqliteWithSqlCipher() {
   open.overrideFor(OperatingSystem.android, openCipherOnAndroid);
+  open.overrideFor(
+      OperatingSystem.linux, () => DynamicLibrary.open(linuxSqlCipherLibrary));
 }
 
 /// Ouvre la base chiffrée de l'application dans un isolat d'arrière-plan.
 ///
-/// Non couvert par les tests automatisés (nécessite un appareil) : voir
-/// README, section « Chiffrement ».
-Future<QueryExecutor> openEncryptedExecutor(SecureStore secureStore) async {
+/// Couvert sur Linux par `integration_test/e2e_test.dart` (SQLCipher réel) ;
+/// sur Android et iOS, à vérifier sur appareil : voir README, « Chiffrement ».
+///
+/// [file] permet aux tests d'intégration d'utiliser un fichier temporaire
+/// (toujours chiffré).
+Future<QueryExecutor> openEncryptedExecutor(SecureStore secureStore,
+    {File? file}) async {
   final key = await DatabaseKeyStore(secureStore).getOrCreateKey();
-  final dir = await getApplicationSupportDirectory();
-  final file = File(p.join(dir.path, 'fanilo.sqlite'));
+  file ??= File(p.join(
+      (await getApplicationSupportDirectory()).path, 'fanilo.sqlite'));
 
   if (Platform.isAndroid) {
     await applyWorkaroundToOpenSqlCipherOnOldAndroidVersions();
@@ -91,7 +108,7 @@ Future<QueryExecutor> openEncryptedExecutor(SecureStore secureStore) async {
 
   return NativeDatabase.createInBackground(
     file,
-    isolateSetup: _overrideSqliteWithSqlCipher,
+    isolateSetup: overrideSqliteWithSqlCipher,
     setup: (db) => applyCipherKey(db, key),
   );
 }

@@ -19,6 +19,8 @@ API_DIR = Path(__file__).resolve().parents[2]
 DEFAULT_ANC_SCHEDULE_PATH = API_DIR / "config" / "anc_schedule.demo.yaml"
 DEFAULT_CONTENTS_DEMO_PATH = API_DIR / "config" / "contents.demo.yaml"
 DEFAULT_CONSENT_INFORMATION_PATH = API_DIR / "config" / "consent_information.demo.yaml"
+DEFAULT_INFORMATION_CONFIG_PATH = API_DIR / "config" / "information.demo.yaml"
+DEFAULT_PUBLIC_INFORMATION_PATH = API_DIR / "config" / "public_information.demo.yaml"
 # Jeu de règles et référentiel de DÉMONSTRATION de services/rules (dépôt).
 _DEMO_RULESETS_DIR = API_DIR.parent / "rules" / "rulesets" / "demo"
 DEFAULT_RULESET_PATH = _DEMO_RULESETS_DIR / "reny_danger_signs.demo.yaml"
@@ -105,6 +107,25 @@ class Settings(BaseSettings):
 
     # Information présentée lors du consentement (fichier versionné).
     consent_information_path: Path = DEFAULT_CONSENT_INFORMATION_PATH
+
+    # Réponses informatives (intention -> contenu) et menus vocaux (F-06, F-15).
+    information_config_path: Path = DEFAULT_INFORMATION_CONFIG_PATH
+
+    # Statistiques thématiques (F-16) : toute cellule de moins de N interactions
+    # est masquée (secret statistique).
+    stats_min_cell_size: int = Field(default=5, ge=1, le=100)
+
+    # Application publique anonyme « Femmes & Adolescentes » (/public).
+    public_api_enabled: bool = True
+    # Information présentée dans l'application anonyme (fichier versionné).
+    public_information_path: Path = DEFAULT_PUBLIC_INFORMATION_PATH
+    # Contenu servi à la place du message de transfert quand la question vient de
+    # l'application anonyme (aucun rappel possible).
+    public_transfer_message_code: str = Field(
+        default="MSG_DEMO_PUBLIC_TRANSFER", pattern=r"^MSG_[A-Z0-9_]+$"
+    )
+    # Questions par heure et par adresse IP (en mémoire, par instance).
+    public_ask_per_hour: int = Field(default=30, ge=1, le=10_000)
 
     @model_validator(mode="before")
     @classmethod

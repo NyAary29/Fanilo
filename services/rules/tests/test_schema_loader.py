@@ -276,4 +276,4 @@ def test_rules_for_module_sorted() -> None:
     ruleset = load_ruleset(DEMO_RULESET, allow_demo=True)
     ids = [r.id for r in ruleset.rules_for(Module.RENY)]
     assert ids == sorted(ids)
-    assert ruleset.rules_for(Module.TANORA) == ()
+    assert [r.id for r in ruleset.rules_for(Module.TANORA)] == ["DEMO-TANORA-001"]

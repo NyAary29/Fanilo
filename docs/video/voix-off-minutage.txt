@@ -1,0 +1,49 @@
+FANILO — VOIX OFF : MINUTAGE DE fanilo-demo.mp4 (2 min 41)
+==========================================================
+Un fichier audio par scène (scene01.mp3 … scene11.mp3), à lire calmement.
+La durée indiquée est le temps MAXIMUM disponible : mieux vaut finir un peu avant.
+Texte en anglais (identique au sens des sous-titres). À adapter si la voix off est
+en malgache ou en français.
+
+01  0:00 – 0:07   (7 s)   Carton titre
+    "In Madagascar, many women and girls have no easy way to get reliable health
+     information in their own language. FANILO changes that."
+
+02  0:07 – 0:28   (21 s)  App femmes : Hanta écrit sa question
+    "Hanta is sixteen. She has a question she doesn't dare to ask out loud.
+     With FANILO, she needs no account and no name. She asks in Malagasy, by voice
+     or in writing, and gets an answer drawn only from messages approved by
+     health professionals."
+
+03  0:28 – 0:43   (15 s)  Dashboard : la conseillère répond
+    "When the question needs a human, it goes to a counselor, who classifies it
+     and writes what Hanta should do."
+
+04  0:43 – 0:57   (14 s)  App femmes : la réponse arrive
+    "The reply comes back to Hanta's phone. Still anonymous. Still private."
+
+05  0:57 – 1:18   (21 s)  App agent : enregistrement de Voahirana
+    "In the village, Lova, a community health worker, registers Voahirana.
+     Consent comes first, and the app works even without network."
+
+06  1:18 – 1:38   (20 s)  App agent : grossesse et calendrier CPN
+    "Her pregnancy is recorded. Her antenatal visits are scheduled, and reminders
+     are planned automatically."
+
+07  1:38 – 1:57   (20 s)  App agent : signe de danger
+    "During a visit, Lova notices a danger sign. One tap, and the health centre is alerted."
+
+08  1:57 – 2:12   (15 s)  Dashboard : le chef du CSB reçoit et acquitte l'alerte
+    "The alert goes to a named person, with a response deadline and a backup.
+     Nothing is promised until a health professional confirms."
+
+09  2:12 – 2:30   (18 s)  Dashboard : indicateurs
+    "Health centres follow pregnancies, missed visits, alerts and referrals,
+     with anonymised data only."
+
+10  2:30 – 2:36   (6 s)   Carton « AI proposes. Health professionals decide. »
+    "FANILO never diagnoses. AI proposes, health professionals decide."
+
+11  2:36 – 2:41   (5 s)   Carton de fin (Havanana Impact × Creatic) — silence ou musique
+
+Ensuite : la partie face caméra (voir scenario-video.txt, partie 2).

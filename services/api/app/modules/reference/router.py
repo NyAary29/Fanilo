@@ -8,6 +8,9 @@ from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 
 from app.modules.beneficiaries.models import ConsentScope
+from app.modules.contents.models import ContentLanguage
+from app.modules.contents.service import resolve_published
+from app.modules.information.config import served_information_config
 from app.modules.interactions.rules_runtime import RulesRuntime, get_rules_runtime
 from app.modules.reference.consent_information import (
     ConsentInformationError,
@@ -100,3 +103,59 @@ def consent_information(
         ) from None
     items = served_items(document, allow_demo=ctx.settings.allow_demo_content)
     return ConsentInformationResponse(items=[ConsentInformationOut(**i) for i in items])
+
+
+class MenuItemOut(BaseModel):
+    key: int
+    code: str
+    title: str
+    body: str
+    audio_url: str | None
+    status: str
+
+
+class MenuResponse(BaseModel):
+    config_id: str
+    version: str
+    is_demo: bool
+    module: str
+    items: list[MenuItemOut]
+
+
+@router.get(
+    "/menus",
+    response_model=MenuResponse,
+    summary="Menu vocal (IVR/USSD/simulateur) d'un module : touche -> contenu publié",
+)
+def menu(
+    module: Module,
+    language: ContentLanguage = ContentLanguage.MG,
+    ctx: ActorContext = Depends(get_actor_context),  # noqa: B008
+) -> MenuResponse:
+    config = served_information_config(
+        ctx.settings.information_config_path, allow_demo=ctx.settings.allow_demo_content
+    )
+    if config is None:
+        raise HTTPException(status_code=503, detail="Menu vocal indisponible.")
+    items = []
+    # Une entrée dont le contenu n'est pas publié n'est jamais proposée.
+    for entry in config.menus.get(str(module), ()):
+        content = resolve_published(ctx.session, ctx.settings, entry.message_code, language)
+        if content is not None:
+            items.append(
+                MenuItemOut(
+                    key=entry.key,
+                    code=content.code,
+                    title=content.title,
+                    body=content.body,
+                    audio_url=content.audio_url,
+                    status=str(content.status),
+                )
+            )
+    return MenuResponse(
+        config_id=config.config_id,
+        version=config.version,
+        is_demo=config.is_demo or any(i.status != "validated" for i in items),
+        module=str(module),
+        items=sorted(items, key=lambda i: i.key),
+    )

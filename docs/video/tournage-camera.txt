@@ -1,0 +1,170 @@
+FANILO — PLAN DE TOURNAGE CAMÉRA (vidéo naturelle, sans capture d'écran ni voix IA)
+=====================================================================================
+Durée visée : 3 à 4 min. Tout est filmé à la caméra (ou un bon smartphone), avec de vraies
+personnes qui utilisent FANILO devant l'objectif et expliquent avec LEURS mots.
+Langue parlée : ANGLAIS (naturel, avec vos mots) ; sous-titres malagasy ajoutés au montage.
+Fin : carton « FANILO — ATFM ».
+
+Personnages (rôles joués par l'équipe ou des volontaires — données FICTIVES) :
+- Hanta, adolescente (app « Femmes & Adolescentes »)
+- Voahirana, femme enceinte
+- Lova, agente communautaire (app agent)
+- Une conseillère (ordinateur, dashboard)
+- Le chef du CSB (ordinateur ou tablette, dashboard)
+- 1 ou 2 porte-parole de l'équipe (face caméra : début et fin)
+
+
+COMMENT FILMER LE TÉLÉPHONE : voir la section à la fin du fichier.
+
+RÈGLES DE TOURNAGE (à lire avant)
+---------------------------------
+Écrans filmés à la caméra :
+- Luminosité du téléphone au MAXIMUM, mode « Ne pas déranger » activé.
+- Pas de lumière derrière l'écran ; éviter les reflets (incliner légèrement le téléphone).
+- Pour chaque geste dans l'app, faire DEUX prises :
+  1) plan « par-dessus l'épaule » (on voit la personne ET l'écran),
+  2) gros plan sur l'écran (caméra à 30-40 cm, sur pied ou bien stable).
+- Gestes LENTS, laisser chaque écran visible 3 secondes avant de toucher.
+Son :
+- Micro-cravate ou téléphone posé près de la personne qui parle ; pièce calme.
+- Phrases courtes, naturelles. Ne pas lire : dire avec ses mots.
+Image :
+- Format paysage (horizontal) 16:9, 1080p minimum, 30 ou 25 i/s.
+- Lumière naturelle de face ou de côté (près d'une fenêtre).
+- Laisser 2 secondes avant et après chaque phrase (facilite le montage).
+Éthique :
+- Toutes les données dans l'app sont FICTIVES. Le bandeau « DEMO » peut apparaître.
+- Autorisation écrite (droit à l'image) de chaque personne filmée ; pour une mineure,
+  autorisation des parents — ou faire jouer Hanta par une adulte.
+
+
+SCÈNE 1 — Ouverture, face caméra (≈ 25 s)
+  Lieu : extérieur (cour d'un CSB, village) ou bureau lumineux.
+  Plan : porte-parole cadré poitrine, regard caméra.
+  À dire (idée, avec vos mots) :
+    SAY (EN) : "In Madagascar, many women and girls can't get reliable health
+               information in their own language. That's why we built FANILO."
+
+SCÈNE 2 — Hanta pose sa question (≈ 35 s)
+  Lieu : chambre, cour, banc — un endroit intime.
+  Plans : (a) large : Hanta assise avec son téléphone ; (b) par-dessus l'épaule ;
+          (c) gros plan écran.
+  Gestes dans l'app FEMMES : accueil « Salama ! » → touche TANORA → tape (ou dit au micro)
+    « Mbola tsy tonga ny fadimbolako ary manahy aho » → envoyer → lire la réponse.
+  À dire par Hanta (en regardant l'écran puis la caméra) :
+    SAY (EN) : "No account, no name. I just ask."
+
+SCÈNE 3 — La conseillère répond (≈ 30 s)
+  Lieu : bureau, ordinateur portable.
+  Plans : (a) conseillère face à l'ordinateur ; (b) gros plan écran sur « Questions des
+          femmes » ; (c) ses mains qui tapent.
+  Gestes dans le DASHBOARD (compte « conseiller ») : Questions des femmes → la question de
+    Hanta → classer « Simple information » → écrire la réponse en malgache → Envoyer.
+  À dire :
+    SAY (EN) : "When a question needs a human, we counselors answer. We never know her name."
+
+SCÈNE 4 — La réponse arrive (≈ 15 s)
+  Lieu : retour chez Hanta.
+  Plans : gros plan écran : « Nahazo valiny ianao » → Jereo → la réponse ; puis son sourire.
+  (Pas de dialogue, ou Hanta : "I got an answer!")
+
+SCÈNE 5 — Visite à domicile : Lova enregistre Voahirana (≈ 40 s)
+  Lieu : maison ou cour au village.
+  Plans : (a) large : Lova arrive, salue Voahirana ; (b) Lova explique et Voahirana
+          acquiesce (consentement) ; (c) gros plan écran.
+  Gestes dans l'app AGENT (compte ac.a1) : Nouvelle patiente → cocher RENY et Rappels,
+    Orale → « J'ai présenté l'information » → Continuer → nom, village, année → Enregistrer
+    → Déclarer une grossesse → date des dernières règles → Enregistrer → le calendrier CPN.
+  À dire par Lova :
+    SAY (EN) : "I always ask for her consent first. And the app works even without network."
+    SAY (EN) : "Here are the dates of her antenatal visits."
+
+SCÈNE 6 — Un signe de danger (≈ 30 s)
+  Même lieu.
+  Plans : Lova grave, regarde Voahirana ; gros plan écran.
+  Gestes : fiche de Voahirana → Visite du jour → « J'ai vu la patiente » → Signes de
+    danger : Oui → cocher le signe → Envoyer → « Alerte transmise ».
+  À dire :
+    SAY (EN) : "If there is a danger sign, one tap and the health centre is alerted."
+
+SCÈNE 7 — Au CSB, l'alerte est reçue (≈ 30 s)
+  Lieu : CSB (ou bureau), chef du CSB devant ordinateur/tablette.
+  Plans : (a) notification (cloche rouge) en gros plan ; (b) il ouvre l'alerte, clique
+          « Acquitter » ; (c) il prend son téléphone / se lève (action concrète).
+  À dire :
+    SAY (EN) : "The alert arrives right away. I know who has to act."
+  Bonus (10 s) : gros plan sur le tableau de bord (graphique, chiffres).
+
+SCÈNE 8 — Clôture, face caméra (≈ 40 s)
+  Même porte-parole que la scène 1 (ou un 2e).
+  À dire (avec vos mots) :
+    - La solution : une voix en malagasy, anonyme pour les jeunes, suivi par les agents
+      même sans réseau, alertes vers le CSB ; « l'IA propose, les soignants décident ».
+    - L'avenir : pilote à Bongolava et Antananarivo (3 CSB, 25 agents, 250–300 femmes),
+      outils vocaux malagasy en open source. (Présenter comme des OBJECTIFS.)
+    SAY (EN) : "AI proposes. Health professionals decide."
+
+CARTON DE FIN (ajouté au montage) : « FANILO — ATFM »
+
+
+ORDRE DE TOURNAGE CONSEILLÉ (le même jour)
+-----------------------------------------
+1. Scènes face caméra (1 et 8) — le matin, bonne lumière.
+2. Scène 2 (Hanta pose la question) puis IMMÉDIATEMENT scène 3 (conseillère répond),
+   puis scène 4 (réponse sur le téléphone) : la réponse arrive en ~15 s.
+3. Scènes 5 et 6 (Lova et Voahirana) puis IMMÉDIATEMENT scène 7 (CSB reçoit l'alerte).
+   Matériel : 1 téléphone avec l'app Femmes, 1 téléphone (ou le même) avec l'app agent,
+   1 ordinateur ouvert sur le dashboard, connectés au serveur FANILO.
+
+
+APRÈS LE TOURNAGE — À ENVOYER POUR LE MONTAGE
+---------------------------------------------
+- Tous les fichiers vidéo (même les prises ratées), nommés si possible par scène.
+- Les noms et fonctions des personnes face caméra.
+- Une musique libre de droits (facultatif).
+Le montage ajoute : coupe, sous-titres anglais, titres, carton « FANILO — ATFM ».
+
+
+COMMENT FILMER LE TÉLÉPHONE (écran lisible à la caméra)
+=======================================================
+Trois plans, à filmer pour chaque geste important :
+
+1. PLAN « PAR-DESSUS L'ÉPAULE » (montre la personne ET le téléphone)
+   - Caméra derrière la personne, un peu au-dessus de son épaule, à ~1 m.
+   - Elle tient le téléphone devant elle, légèrement incliné vers la caméra.
+   - Mise au point sur l'écran (touchez l'écran du téléphone-caméra pour la fixer).
+
+2. PLAN « DU DESSUS » (le plus lisible : on voit le doigt toucher l'écran)
+   - Téléphone POSÉ À PLAT sur une table (fond uni : nappe, bois, tissu).
+   - Caméra juste au-dessus, objectif parallèle à l'écran, à 30–40 cm.
+   - Matériel : pied avec bras horizontal, ou bricolage :
+       • une étagère en verre / planche posée sur deux piles de livres, caméra dessus ;
+       • ou une personne debout, coudes appuyés, qui tient la caméra bien droite.
+   - Cadrer le téléphone entier avec un peu de marge ; garder le cadre FIXE.
+
+3. GROS PLAN « EN MAIN » (émotion : main + écran + visage flou derrière)
+   - Caméra à 40–50 cm, face à l'écran, la personne tient le téléphone naturellement.
+
+Réglages qui changent tout :
+   - Téléphone filmé : luminosité 100 %, mode Ne pas déranger, mode avion désactivé
+     (il faut le réseau/le serveur), fond d'écran sobre, batterie chargée.
+   - Lumière : douce et de CÔTÉ (fenêtre sur le côté, jamais derrière l'écran ni
+     au-dessus pile : sinon reflet blanc). Éteindre le plafonnier si reflet.
+   - Caméra (ou smartphone qui filme) : 1080p, 25 i/s ; si possible mode Pro avec
+     obturation 1/50 s (évite les bandes qui défilent sur l'écran à Madagascar, 50 Hz).
+     Sinon : appuyer longuement sur l'écran du téléphone-caméra pour VERROUILLER
+     mise au point et exposition (« AE/AF verrouillé »), puis baisser un peu
+     l'exposition pour que l'écran ne soit pas « brûlé ».
+   - Nettoyer l'écran (traces de doigts visibles à la caméra).
+   - Gestes LENTS ; laisser chaque écran 3 secondes ; ne pas cacher l'écran avec la main
+     (toucher avec l'index, main sur le côté).
+   - Si un écran est mal lisible, ce n'est pas grave : au montage, j'ajoute un titre court
+     (ex. « Alert sent to the health centre ») et les sous-titres.
+
+Ordinateur (dashboard) :
+   - Même principe : caméra à côté de la personne, écran en 3/4 ; puis gros plan de face
+     sur l'écran (zoom du navigateur à 125 % avec Ctrl + « + » pour que ce soit lisible).
+   - Baisser la luminosité de l'écran d'ordinateur si l'image est trop blanche.
+
+Test avant de tourner (2 minutes) : filmer 10 secondes de chaque plan, regarder sur un
+écran : si on lit « Salama ! » et les boutons, c'est bon.

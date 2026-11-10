@@ -14,9 +14,10 @@ describe('permissions (ergonomiques)', () => {
   });
 
   it('navigation par rôle', () => {
-    expect(sectionsFor(me('admin'))).toEqual(['dashboard', 'contents', 'users', 'sites']);
-    expect(sectionsFor(me('data_officer'))).toEqual(['dashboard', 'audit']);
-    expect(sectionsFor(me('clinical_advisor'))).toEqual(['alerts', 'referrals', 'interactions']);
+    expect(sectionsFor(me('admin'))).toEqual(['dashboard', 'stats', 'contents', 'users', 'sites']);
+    expect(sectionsFor(me('data_officer'))).toEqual(['dashboard', 'stats', 'audit']);
+    expect(sectionsFor(me('clinical_advisor'))).toEqual(['interactions', 'orientations', 'patients', 'alerts', 'referrals', 'simulator'])
+    expect(sectionsFor(me('community_agent'))).toEqual(['patients', 'simulator']);
     expect(sectionsFor(me('technical'))).toEqual([]);
     for (const role of ROLES) {
       expect(sectionsFor(me(role)).includes('audit')).toBe(role === 'data_officer');

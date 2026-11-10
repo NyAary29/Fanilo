@@ -50,8 +50,8 @@
 
 ## Limites connues (architecture)
 
-- Migrations jamais exécutées sur un vrai PostgreSQL à ce stade (testées sur SQLite et en SQL généré hors ligne).
+- Migrations exécutées sur PostgreSQL 17 (local et CI : montée, `alembic check`, descente, remontée).
 - Limitation des tentatives de login en mémoire : insuffisante en multi-instance (Redis ou proxy à prévoir).
-- Canaux IVR/SMS/USSD : seul un adaptateur `log` existe. L'intégration RapidPro dépend des accords avec les opérateurs.
-- Chiffrement SQLCipher du mobile non vérifié sur un appareil réel.
+- Canaux IVR/SMS/USSD : seul un adaptateur `log` existe ; le canal vocal est simulé dans le dashboard (menu à touches, question écrite ou orale). L'intégration RapidPro dépend des accords avec les opérateurs.
+- Chiffrement SQLCipher du mobile vérifié sur Linux (fichier illisible sans clé) ; pas encore vérifié sur un appareil Android.
 - Aucun modèle ASR activé par défaut. Aucune performance n'est revendiquée avant évaluation sur un corpus réel.

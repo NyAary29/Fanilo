@@ -82,6 +82,8 @@ void main() {
   });
 
   group('Chiffrement (vérifiable sans appareil)', () {
+    setUpAll(useSystemSqliteForTests);
+
     test('clé 256 bits générée une fois puis réutilisée', () async {
       final store = InMemorySecureStore();
       final k1 = await DatabaseKeyStore(store).getOrCreateKey();

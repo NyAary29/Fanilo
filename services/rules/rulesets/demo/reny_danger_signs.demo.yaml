@@ -70,3 +70,14 @@ rules:
     severity: routine
     action: refer_community_agent
     message_code: MSG_DEMO_ROUTINE
+
+  # Module TANORA (F-15) : règle FICTIVE d'orientation vers un conseiller.
+  - id: DEMO-TANORA-001
+    version: 0.1.0
+    module: tanora
+    conditions:
+      match: any
+      signs: [SIGN_DEMO_06]
+    severity: routine
+    action: transfer_counselor
+    message_code: MSG_DEMO_TANORA_COUNSELOR

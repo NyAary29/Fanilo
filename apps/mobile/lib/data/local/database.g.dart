@@ -4907,6 +4907,892 @@ class AlertsCompanion extends UpdateCompanion<AlertRow> {
   }
 }
 
+class $SitesTable extends Sites with TableInfo<$SitesTable, SiteRow> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $SitesTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _nameMeta = const VerificationMeta('name');
+  @override
+  late final GeneratedColumn<String> name = GeneratedColumn<String>(
+    'name',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _kindMeta = const VerificationMeta('kind');
+  @override
+  late final GeneratedColumn<String> kind = GeneratedColumn<String>(
+    'kind',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _codeMeta = const VerificationMeta('code');
+  @override
+  late final GeneratedColumn<String> code = GeneratedColumn<String>(
+    'code',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _districtMeta = const VerificationMeta(
+    'district',
+  );
+  @override
+  late final GeneratedColumn<String> district = GeneratedColumn<String>(
+    'district',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _regionMeta = const VerificationMeta('region');
+  @override
+  late final GeneratedColumn<String> region = GeneratedColumn<String>(
+    'region',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _parentSiteIdMeta = const VerificationMeta(
+    'parentSiteId',
+  );
+  @override
+  late final GeneratedColumn<String> parentSiteId = GeneratedColumn<String>(
+    'parent_site_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _isActiveMeta = const VerificationMeta(
+    'isActive',
+  );
+  @override
+  late final GeneratedColumn<bool> isActive = GeneratedColumn<bool>(
+    'is_active',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("is_active" IN (0, 1))',
+    ),
+    defaultValue: const Constant(true),
+  );
+  static const VerificationMeta _versionMeta = const VerificationMeta(
+    'version',
+  );
+  @override
+  late final GeneratedColumn<int> version = GeneratedColumn<int>(
+    'version',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _deletedAtMeta = const VerificationMeta(
+    'deletedAt',
+  );
+  @override
+  late final GeneratedColumn<String> deletedAt = GeneratedColumn<String>(
+    'deleted_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    name,
+    kind,
+    code,
+    district,
+    region,
+    parentSiteId,
+    isActive,
+    version,
+    deletedAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'sites';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<SiteRow> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('name')) {
+      context.handle(
+        _nameMeta,
+        name.isAcceptableOrUnknown(data['name']!, _nameMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_nameMeta);
+    }
+    if (data.containsKey('kind')) {
+      context.handle(
+        _kindMeta,
+        kind.isAcceptableOrUnknown(data['kind']!, _kindMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_kindMeta);
+    }
+    if (data.containsKey('code')) {
+      context.handle(
+        _codeMeta,
+        code.isAcceptableOrUnknown(data['code']!, _codeMeta),
+      );
+    }
+    if (data.containsKey('district')) {
+      context.handle(
+        _districtMeta,
+        district.isAcceptableOrUnknown(data['district']!, _districtMeta),
+      );
+    }
+    if (data.containsKey('region')) {
+      context.handle(
+        _regionMeta,
+        region.isAcceptableOrUnknown(data['region']!, _regionMeta),
+      );
+    }
+    if (data.containsKey('parent_site_id')) {
+      context.handle(
+        _parentSiteIdMeta,
+        parentSiteId.isAcceptableOrUnknown(
+          data['parent_site_id']!,
+          _parentSiteIdMeta,
+        ),
+      );
+    }
+    if (data.containsKey('is_active')) {
+      context.handle(
+        _isActiveMeta,
+        isActive.isAcceptableOrUnknown(data['is_active']!, _isActiveMeta),
+      );
+    }
+    if (data.containsKey('version')) {
+      context.handle(
+        _versionMeta,
+        version.isAcceptableOrUnknown(data['version']!, _versionMeta),
+      );
+    }
+    if (data.containsKey('deleted_at')) {
+      context.handle(
+        _deletedAtMeta,
+        deletedAt.isAcceptableOrUnknown(data['deleted_at']!, _deletedAtMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  SiteRow map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return SiteRow(
+      id:
+          attachedDatabase.typeMapping.read(
+            DriftSqlType.string,
+            data['${effectivePrefix}id'],
+          )!,
+      name:
+          attachedDatabase.typeMapping.read(
+            DriftSqlType.string,
+            data['${effectivePrefix}name'],
+          )!,
+      kind:
+          attachedDatabase.typeMapping.read(
+            DriftSqlType.string,
+            data['${effectivePrefix}kind'],
+          )!,
+      code: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}code'],
+      ),
+      district: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}district'],
+      ),
+      region: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}region'],
+      ),
+      parentSiteId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}parent_site_id'],
+      ),
+      isActive:
+          attachedDatabase.typeMapping.read(
+            DriftSqlType.bool,
+            data['${effectivePrefix}is_active'],
+          )!,
+      version:
+          attachedDatabase.typeMapping.read(
+            DriftSqlType.int,
+            data['${effectivePrefix}version'],
+          )!,
+      deletedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}deleted_at'],
+      ),
+    );
+  }
+
+  @override
+  $SitesTable createAlias(String alias) {
+    return $SitesTable(attachedDatabase, alias);
+  }
+}
+
+class SiteRow extends DataClass implements Insertable<SiteRow> {
+  final String id;
+  final String name;
+
+  /// `csb`, `reference_facility` ou `community_zone`.
+  final String kind;
+  final String? code;
+  final String? district;
+  final String? region;
+  final String? parentSiteId;
+  final bool isActive;
+  final int version;
+  final String? deletedAt;
+  const SiteRow({
+    required this.id,
+    required this.name,
+    required this.kind,
+    this.code,
+    this.district,
+    this.region,
+    this.parentSiteId,
+    required this.isActive,
+    required this.version,
+    this.deletedAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['name'] = Variable<String>(name);
+    map['kind'] = Variable<String>(kind);
+    if (!nullToAbsent || code != null) {
+      map['code'] = Variable<String>(code);
+    }
+    if (!nullToAbsent || district != null) {
+      map['district'] = Variable<String>(district);
+    }
+    if (!nullToAbsent || region != null) {
+      map['region'] = Variable<String>(region);
+    }
+    if (!nullToAbsent || parentSiteId != null) {
+      map['parent_site_id'] = Variable<String>(parentSiteId);
+    }
+    map['is_active'] = Variable<bool>(isActive);
+    map['version'] = Variable<int>(version);
+    if (!nullToAbsent || deletedAt != null) {
+      map['deleted_at'] = Variable<String>(deletedAt);
+    }
+    return map;
+  }
+
+  SitesCompanion toCompanion(bool nullToAbsent) {
+    return SitesCompanion(
+      id: Value(id),
+      name: Value(name),
+      kind: Value(kind),
+      code: code == null && nullToAbsent ? const Value.absent() : Value(code),
+      district:
+          district == null && nullToAbsent
+              ? const Value.absent()
+              : Value(district),
+      region:
+          region == null && nullToAbsent ? const Value.absent() : Value(region),
+      parentSiteId:
+          parentSiteId == null && nullToAbsent
+              ? const Value.absent()
+              : Value(parentSiteId),
+      isActive: Value(isActive),
+      version: Value(version),
+      deletedAt:
+          deletedAt == null && nullToAbsent
+              ? const Value.absent()
+              : Value(deletedAt),
+    );
+  }
+
+  factory SiteRow.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return SiteRow(
+      id: serializer.fromJson<String>(json['id']),
+      name: serializer.fromJson<String>(json['name']),
+      kind: serializer.fromJson<String>(json['kind']),
+      code: serializer.fromJson<String?>(json['code']),
+      district: serializer.fromJson<String?>(json['district']),
+      region: serializer.fromJson<String?>(json['region']),
+      parentSiteId: serializer.fromJson<String?>(json['parentSiteId']),
+      isActive: serializer.fromJson<bool>(json['isActive']),
+      version: serializer.fromJson<int>(json['version']),
+      deletedAt: serializer.fromJson<String?>(json['deletedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'name': serializer.toJson<String>(name),
+      'kind': serializer.toJson<String>(kind),
+      'code': serializer.toJson<String?>(code),
+      'district': serializer.toJson<String?>(district),
+      'region': serializer.toJson<String?>(region),
+      'parentSiteId': serializer.toJson<String?>(parentSiteId),
+      'isActive': serializer.toJson<bool>(isActive),
+      'version': serializer.toJson<int>(version),
+      'deletedAt': serializer.toJson<String?>(deletedAt),
+    };
+  }
+
+  SiteRow copyWith({
+    String? id,
+    String? name,
+    String? kind,
+    Value<String?> code = const Value.absent(),
+    Value<String?> district = const Value.absent(),
+    Value<String?> region = const Value.absent(),
+    Value<String?> parentSiteId = const Value.absent(),
+    bool? isActive,
+    int? version,
+    Value<String?> deletedAt = const Value.absent(),
+  }) => SiteRow(
+    id: id ?? this.id,
+    name: name ?? this.name,
+    kind: kind ?? this.kind,
+    code: code.present ? code.value : this.code,
+    district: district.present ? district.value : this.district,
+    region: region.present ? region.value : this.region,
+    parentSiteId: parentSiteId.present ? parentSiteId.value : this.parentSiteId,
+    isActive: isActive ?? this.isActive,
+    version: version ?? this.version,
+    deletedAt: deletedAt.present ? deletedAt.value : this.deletedAt,
+  );
+  SiteRow copyWithCompanion(SitesCompanion data) {
+    return SiteRow(
+      id: data.id.present ? data.id.value : this.id,
+      name: data.name.present ? data.name.value : this.name,
+      kind: data.kind.present ? data.kind.value : this.kind,
+      code: data.code.present ? data.code.value : this.code,
+      district: data.district.present ? data.district.value : this.district,
+      region: data.region.present ? data.region.value : this.region,
+      parentSiteId:
+          data.parentSiteId.present
+              ? data.parentSiteId.value
+              : this.parentSiteId,
+      isActive: data.isActive.present ? data.isActive.value : this.isActive,
+      version: data.version.present ? data.version.value : this.version,
+      deletedAt: data.deletedAt.present ? data.deletedAt.value : this.deletedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('SiteRow(')
+          ..write('id: $id, ')
+          ..write('name: $name, ')
+          ..write('kind: $kind, ')
+          ..write('code: $code, ')
+          ..write('district: $district, ')
+          ..write('region: $region, ')
+          ..write('parentSiteId: $parentSiteId, ')
+          ..write('isActive: $isActive, ')
+          ..write('version: $version, ')
+          ..write('deletedAt: $deletedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    name,
+    kind,
+    code,
+    district,
+    region,
+    parentSiteId,
+    isActive,
+    version,
+    deletedAt,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is SiteRow &&
+          other.id == this.id &&
+          other.name == this.name &&
+          other.kind == this.kind &&
+          other.code == this.code &&
+          other.district == this.district &&
+          other.region == this.region &&
+          other.parentSiteId == this.parentSiteId &&
+          other.isActive == this.isActive &&
+          other.version == this.version &&
+          other.deletedAt == this.deletedAt);
+}
+
+class SitesCompanion extends UpdateCompanion<SiteRow> {
+  final Value<String> id;
+  final Value<String> name;
+  final Value<String> kind;
+  final Value<String?> code;
+  final Value<String?> district;
+  final Value<String?> region;
+  final Value<String?> parentSiteId;
+  final Value<bool> isActive;
+  final Value<int> version;
+  final Value<String?> deletedAt;
+  final Value<int> rowid;
+  const SitesCompanion({
+    this.id = const Value.absent(),
+    this.name = const Value.absent(),
+    this.kind = const Value.absent(),
+    this.code = const Value.absent(),
+    this.district = const Value.absent(),
+    this.region = const Value.absent(),
+    this.parentSiteId = const Value.absent(),
+    this.isActive = const Value.absent(),
+    this.version = const Value.absent(),
+    this.deletedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  SitesCompanion.insert({
+    required String id,
+    required String name,
+    required String kind,
+    this.code = const Value.absent(),
+    this.district = const Value.absent(),
+    this.region = const Value.absent(),
+    this.parentSiteId = const Value.absent(),
+    this.isActive = const Value.absent(),
+    this.version = const Value.absent(),
+    this.deletedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       name = Value(name),
+       kind = Value(kind);
+  static Insertable<SiteRow> custom({
+    Expression<String>? id,
+    Expression<String>? name,
+    Expression<String>? kind,
+    Expression<String>? code,
+    Expression<String>? district,
+    Expression<String>? region,
+    Expression<String>? parentSiteId,
+    Expression<bool>? isActive,
+    Expression<int>? version,
+    Expression<String>? deletedAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (name != null) 'name': name,
+      if (kind != null) 'kind': kind,
+      if (code != null) 'code': code,
+      if (district != null) 'district': district,
+      if (region != null) 'region': region,
+      if (parentSiteId != null) 'parent_site_id': parentSiteId,
+      if (isActive != null) 'is_active': isActive,
+      if (version != null) 'version': version,
+      if (deletedAt != null) 'deleted_at': deletedAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  SitesCompanion copyWith({
+    Value<String>? id,
+    Value<String>? name,
+    Value<String>? kind,
+    Value<String?>? code,
+    Value<String?>? district,
+    Value<String?>? region,
+    Value<String?>? parentSiteId,
+    Value<bool>? isActive,
+    Value<int>? version,
+    Value<String?>? deletedAt,
+    Value<int>? rowid,
+  }) {
+    return SitesCompanion(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      kind: kind ?? this.kind,
+      code: code ?? this.code,
+      district: district ?? this.district,
+      region: region ?? this.region,
+      parentSiteId: parentSiteId ?? this.parentSiteId,
+      isActive: isActive ?? this.isActive,
+      version: version ?? this.version,
+      deletedAt: deletedAt ?? this.deletedAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (name.present) {
+      map['name'] = Variable<String>(name.value);
+    }
+    if (kind.present) {
+      map['kind'] = Variable<String>(kind.value);
+    }
+    if (code.present) {
+      map['code'] = Variable<String>(code.value);
+    }
+    if (district.present) {
+      map['district'] = Variable<String>(district.value);
+    }
+    if (region.present) {
+      map['region'] = Variable<String>(region.value);
+    }
+    if (parentSiteId.present) {
+      map['parent_site_id'] = Variable<String>(parentSiteId.value);
+    }
+    if (isActive.present) {
+      map['is_active'] = Variable<bool>(isActive.value);
+    }
+    if (version.present) {
+      map['version'] = Variable<int>(version.value);
+    }
+    if (deletedAt.present) {
+      map['deleted_at'] = Variable<String>(deletedAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('SitesCompanion(')
+          ..write('id: $id, ')
+          ..write('name: $name, ')
+          ..write('kind: $kind, ')
+          ..write('code: $code, ')
+          ..write('district: $district, ')
+          ..write('region: $region, ')
+          ..write('parentSiteId: $parentSiteId, ')
+          ..write('isActive: $isActive, ')
+          ..write('version: $version, ')
+          ..write('deletedAt: $deletedAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $ReferenceCacheTable extends ReferenceCache
+    with TableInfo<$ReferenceCacheTable, ReferenceCacheRow> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $ReferenceCacheTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _keyMeta = const VerificationMeta('key');
+  @override
+  late final GeneratedColumn<String> key = GeneratedColumn<String>(
+    'key',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _jsonMeta = const VerificationMeta('json');
+  @override
+  late final GeneratedColumn<String> json = GeneratedColumn<String>(
+    'json',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _fetchedAtMeta = const VerificationMeta(
+    'fetchedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> fetchedAt = GeneratedColumn<DateTime>(
+    'fetched_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [key, json, fetchedAt];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'reference_cache';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<ReferenceCacheRow> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('key')) {
+      context.handle(
+        _keyMeta,
+        key.isAcceptableOrUnknown(data['key']!, _keyMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_keyMeta);
+    }
+    if (data.containsKey('json')) {
+      context.handle(
+        _jsonMeta,
+        json.isAcceptableOrUnknown(data['json']!, _jsonMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_jsonMeta);
+    }
+    if (data.containsKey('fetched_at')) {
+      context.handle(
+        _fetchedAtMeta,
+        fetchedAt.isAcceptableOrUnknown(data['fetched_at']!, _fetchedAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_fetchedAtMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {key};
+  @override
+  ReferenceCacheRow map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return ReferenceCacheRow(
+      key:
+          attachedDatabase.typeMapping.read(
+            DriftSqlType.string,
+            data['${effectivePrefix}key'],
+          )!,
+      json:
+          attachedDatabase.typeMapping.read(
+            DriftSqlType.string,
+            data['${effectivePrefix}json'],
+          )!,
+      fetchedAt:
+          attachedDatabase.typeMapping.read(
+            DriftSqlType.dateTime,
+            data['${effectivePrefix}fetched_at'],
+          )!,
+    );
+  }
+
+  @override
+  $ReferenceCacheTable createAlias(String alias) {
+    return $ReferenceCacheTable(attachedDatabase, alias);
+  }
+}
+
+class ReferenceCacheRow extends DataClass
+    implements Insertable<ReferenceCacheRow> {
+  /// Ex. `sign-codes:reny`, `consent-information`.
+  final String key;
+  final String json;
+  final DateTime fetchedAt;
+  const ReferenceCacheRow({
+    required this.key,
+    required this.json,
+    required this.fetchedAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['key'] = Variable<String>(key);
+    map['json'] = Variable<String>(json);
+    map['fetched_at'] = Variable<DateTime>(fetchedAt);
+    return map;
+  }
+
+  ReferenceCacheCompanion toCompanion(bool nullToAbsent) {
+    return ReferenceCacheCompanion(
+      key: Value(key),
+      json: Value(json),
+      fetchedAt: Value(fetchedAt),
+    );
+  }
+
+  factory ReferenceCacheRow.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return ReferenceCacheRow(
+      key: serializer.fromJson<String>(json['key']),
+      json: serializer.fromJson<String>(json['json']),
+      fetchedAt: serializer.fromJson<DateTime>(json['fetchedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'key': serializer.toJson<String>(key),
+      'json': serializer.toJson<String>(json),
+      'fetchedAt': serializer.toJson<DateTime>(fetchedAt),
+    };
+  }
+
+  ReferenceCacheRow copyWith({
+    String? key,
+    String? json,
+    DateTime? fetchedAt,
+  }) => ReferenceCacheRow(
+    key: key ?? this.key,
+    json: json ?? this.json,
+    fetchedAt: fetchedAt ?? this.fetchedAt,
+  );
+  ReferenceCacheRow copyWithCompanion(ReferenceCacheCompanion data) {
+    return ReferenceCacheRow(
+      key: data.key.present ? data.key.value : this.key,
+      json: data.json.present ? data.json.value : this.json,
+      fetchedAt: data.fetchedAt.present ? data.fetchedAt.value : this.fetchedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ReferenceCacheRow(')
+          ..write('key: $key, ')
+          ..write('json: $json, ')
+          ..write('fetchedAt: $fetchedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(key, json, fetchedAt);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is ReferenceCacheRow &&
+          other.key == this.key &&
+          other.json == this.json &&
+          other.fetchedAt == this.fetchedAt);
+}
+
+class ReferenceCacheCompanion extends UpdateCompanion<ReferenceCacheRow> {
+  final Value<String> key;
+  final Value<String> json;
+  final Value<DateTime> fetchedAt;
+  final Value<int> rowid;
+  const ReferenceCacheCompanion({
+    this.key = const Value.absent(),
+    this.json = const Value.absent(),
+    this.fetchedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  ReferenceCacheCompanion.insert({
+    required String key,
+    required String json,
+    required DateTime fetchedAt,
+    this.rowid = const Value.absent(),
+  }) : key = Value(key),
+       json = Value(json),
+       fetchedAt = Value(fetchedAt);
+  static Insertable<ReferenceCacheRow> custom({
+    Expression<String>? key,
+    Expression<String>? json,
+    Expression<DateTime>? fetchedAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (key != null) 'key': key,
+      if (json != null) 'json': json,
+      if (fetchedAt != null) 'fetched_at': fetchedAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  ReferenceCacheCompanion copyWith({
+    Value<String>? key,
+    Value<String>? json,
+    Value<DateTime>? fetchedAt,
+    Value<int>? rowid,
+  }) {
+    return ReferenceCacheCompanion(
+      key: key ?? this.key,
+      json: json ?? this.json,
+      fetchedAt: fetchedAt ?? this.fetchedAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (key.present) {
+      map['key'] = Variable<String>(key.value);
+    }
+    if (json.present) {
+      map['json'] = Variable<String>(json.value);
+    }
+    if (fetchedAt.present) {
+      map['fetched_at'] = Variable<DateTime>(fetchedAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ReferenceCacheCompanion(')
+          ..write('key: $key, ')
+          ..write('json: $json, ')
+          ..write('fetchedAt: $fetchedAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 class $OutboxTable extends Outbox with TableInfo<$OutboxTable, OutboxRow> {
   @override
   final GeneratedDatabase attachedDatabase;
@@ -6585,6 +7471,8 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $AncVisitsTable ancVisits = $AncVisitsTable(this);
   late final $ReferralsTable referrals = $ReferralsTable(this);
   late final $AlertsTable alerts = $AlertsTable(this);
+  late final $SitesTable sites = $SitesTable(this);
+  late final $ReferenceCacheTable referenceCache = $ReferenceCacheTable(this);
   late final $OutboxTable outbox = $OutboxTable(this);
   late final $SyncConflictsTable syncConflicts = $SyncConflictsTable(this);
   late final $SyncStateTable syncState = $SyncStateTable(this);
@@ -6600,6 +7488,8 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     ancVisits,
     referrals,
     alerts,
+    sites,
+    referenceCache,
     outbox,
     syncConflicts,
     syncState,
@@ -8954,6 +9844,482 @@ typedef $$AlertsTableProcessedTableManager =
       AlertRow,
       PrefetchHooks Function()
     >;
+typedef $$SitesTableCreateCompanionBuilder =
+    SitesCompanion Function({
+      required String id,
+      required String name,
+      required String kind,
+      Value<String?> code,
+      Value<String?> district,
+      Value<String?> region,
+      Value<String?> parentSiteId,
+      Value<bool> isActive,
+      Value<int> version,
+      Value<String?> deletedAt,
+      Value<int> rowid,
+    });
+typedef $$SitesTableUpdateCompanionBuilder =
+    SitesCompanion Function({
+      Value<String> id,
+      Value<String> name,
+      Value<String> kind,
+      Value<String?> code,
+      Value<String?> district,
+      Value<String?> region,
+      Value<String?> parentSiteId,
+      Value<bool> isActive,
+      Value<int> version,
+      Value<String?> deletedAt,
+      Value<int> rowid,
+    });
+
+class $$SitesTableFilterComposer extends Composer<_$AppDatabase, $SitesTable> {
+  $$SitesTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get kind => $composableBuilder(
+    column: $table.kind,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get code => $composableBuilder(
+    column: $table.code,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get district => $composableBuilder(
+    column: $table.district,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get region => $composableBuilder(
+    column: $table.region,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get parentSiteId => $composableBuilder(
+    column: $table.parentSiteId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get isActive => $composableBuilder(
+    column: $table.isActive,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get version => $composableBuilder(
+    column: $table.version,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get deletedAt => $composableBuilder(
+    column: $table.deletedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$SitesTableOrderingComposer
+    extends Composer<_$AppDatabase, $SitesTable> {
+  $$SitesTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get kind => $composableBuilder(
+    column: $table.kind,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get code => $composableBuilder(
+    column: $table.code,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get district => $composableBuilder(
+    column: $table.district,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get region => $composableBuilder(
+    column: $table.region,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get parentSiteId => $composableBuilder(
+    column: $table.parentSiteId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get isActive => $composableBuilder(
+    column: $table.isActive,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get version => $composableBuilder(
+    column: $table.version,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get deletedAt => $composableBuilder(
+    column: $table.deletedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$SitesTableAnnotationComposer
+    extends Composer<_$AppDatabase, $SitesTable> {
+  $$SitesTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get name =>
+      $composableBuilder(column: $table.name, builder: (column) => column);
+
+  GeneratedColumn<String> get kind =>
+      $composableBuilder(column: $table.kind, builder: (column) => column);
+
+  GeneratedColumn<String> get code =>
+      $composableBuilder(column: $table.code, builder: (column) => column);
+
+  GeneratedColumn<String> get district =>
+      $composableBuilder(column: $table.district, builder: (column) => column);
+
+  GeneratedColumn<String> get region =>
+      $composableBuilder(column: $table.region, builder: (column) => column);
+
+  GeneratedColumn<String> get parentSiteId => $composableBuilder(
+    column: $table.parentSiteId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<bool> get isActive =>
+      $composableBuilder(column: $table.isActive, builder: (column) => column);
+
+  GeneratedColumn<int> get version =>
+      $composableBuilder(column: $table.version, builder: (column) => column);
+
+  GeneratedColumn<String> get deletedAt =>
+      $composableBuilder(column: $table.deletedAt, builder: (column) => column);
+}
+
+class $$SitesTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $SitesTable,
+          SiteRow,
+          $$SitesTableFilterComposer,
+          $$SitesTableOrderingComposer,
+          $$SitesTableAnnotationComposer,
+          $$SitesTableCreateCompanionBuilder,
+          $$SitesTableUpdateCompanionBuilder,
+          (SiteRow, BaseReferences<_$AppDatabase, $SitesTable, SiteRow>),
+          SiteRow,
+          PrefetchHooks Function()
+        > {
+  $$SitesTableTableManager(_$AppDatabase db, $SitesTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer:
+              () => $$SitesTableFilterComposer($db: db, $table: table),
+          createOrderingComposer:
+              () => $$SitesTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer:
+              () => $$SitesTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> name = const Value.absent(),
+                Value<String> kind = const Value.absent(),
+                Value<String?> code = const Value.absent(),
+                Value<String?> district = const Value.absent(),
+                Value<String?> region = const Value.absent(),
+                Value<String?> parentSiteId = const Value.absent(),
+                Value<bool> isActive = const Value.absent(),
+                Value<int> version = const Value.absent(),
+                Value<String?> deletedAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => SitesCompanion(
+                id: id,
+                name: name,
+                kind: kind,
+                code: code,
+                district: district,
+                region: region,
+                parentSiteId: parentSiteId,
+                isActive: isActive,
+                version: version,
+                deletedAt: deletedAt,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required String name,
+                required String kind,
+                Value<String?> code = const Value.absent(),
+                Value<String?> district = const Value.absent(),
+                Value<String?> region = const Value.absent(),
+                Value<String?> parentSiteId = const Value.absent(),
+                Value<bool> isActive = const Value.absent(),
+                Value<int> version = const Value.absent(),
+                Value<String?> deletedAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => SitesCompanion.insert(
+                id: id,
+                name: name,
+                kind: kind,
+                code: code,
+                district: district,
+                region: region,
+                parentSiteId: parentSiteId,
+                isActive: isActive,
+                version: version,
+                deletedAt: deletedAt,
+                rowid: rowid,
+              ),
+          withReferenceMapper:
+              (p0) =>
+                  p0
+                      .map(
+                        (e) => (
+                          e.readTable(table),
+                          BaseReferences(db, table, e),
+                        ),
+                      )
+                      .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$SitesTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $SitesTable,
+      SiteRow,
+      $$SitesTableFilterComposer,
+      $$SitesTableOrderingComposer,
+      $$SitesTableAnnotationComposer,
+      $$SitesTableCreateCompanionBuilder,
+      $$SitesTableUpdateCompanionBuilder,
+      (SiteRow, BaseReferences<_$AppDatabase, $SitesTable, SiteRow>),
+      SiteRow,
+      PrefetchHooks Function()
+    >;
+typedef $$ReferenceCacheTableCreateCompanionBuilder =
+    ReferenceCacheCompanion Function({
+      required String key,
+      required String json,
+      required DateTime fetchedAt,
+      Value<int> rowid,
+    });
+typedef $$ReferenceCacheTableUpdateCompanionBuilder =
+    ReferenceCacheCompanion Function({
+      Value<String> key,
+      Value<String> json,
+      Value<DateTime> fetchedAt,
+      Value<int> rowid,
+    });
+
+class $$ReferenceCacheTableFilterComposer
+    extends Composer<_$AppDatabase, $ReferenceCacheTable> {
+  $$ReferenceCacheTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get key => $composableBuilder(
+    column: $table.key,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get json => $composableBuilder(
+    column: $table.json,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get fetchedAt => $composableBuilder(
+    column: $table.fetchedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$ReferenceCacheTableOrderingComposer
+    extends Composer<_$AppDatabase, $ReferenceCacheTable> {
+  $$ReferenceCacheTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get key => $composableBuilder(
+    column: $table.key,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get json => $composableBuilder(
+    column: $table.json,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get fetchedAt => $composableBuilder(
+    column: $table.fetchedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$ReferenceCacheTableAnnotationComposer
+    extends Composer<_$AppDatabase, $ReferenceCacheTable> {
+  $$ReferenceCacheTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get key =>
+      $composableBuilder(column: $table.key, builder: (column) => column);
+
+  GeneratedColumn<String> get json =>
+      $composableBuilder(column: $table.json, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get fetchedAt =>
+      $composableBuilder(column: $table.fetchedAt, builder: (column) => column);
+}
+
+class $$ReferenceCacheTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $ReferenceCacheTable,
+          ReferenceCacheRow,
+          $$ReferenceCacheTableFilterComposer,
+          $$ReferenceCacheTableOrderingComposer,
+          $$ReferenceCacheTableAnnotationComposer,
+          $$ReferenceCacheTableCreateCompanionBuilder,
+          $$ReferenceCacheTableUpdateCompanionBuilder,
+          (
+            ReferenceCacheRow,
+            BaseReferences<
+              _$AppDatabase,
+              $ReferenceCacheTable,
+              ReferenceCacheRow
+            >,
+          ),
+          ReferenceCacheRow,
+          PrefetchHooks Function()
+        > {
+  $$ReferenceCacheTableTableManager(
+    _$AppDatabase db,
+    $ReferenceCacheTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer:
+              () => $$ReferenceCacheTableFilterComposer($db: db, $table: table),
+          createOrderingComposer:
+              () =>
+                  $$ReferenceCacheTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer:
+              () => $$ReferenceCacheTableAnnotationComposer(
+                $db: db,
+                $table: table,
+              ),
+          updateCompanionCallback:
+              ({
+                Value<String> key = const Value.absent(),
+                Value<String> json = const Value.absent(),
+                Value<DateTime> fetchedAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => ReferenceCacheCompanion(
+                key: key,
+                json: json,
+                fetchedAt: fetchedAt,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String key,
+                required String json,
+                required DateTime fetchedAt,
+                Value<int> rowid = const Value.absent(),
+              }) => ReferenceCacheCompanion.insert(
+                key: key,
+                json: json,
+                fetchedAt: fetchedAt,
+                rowid: rowid,
+              ),
+          withReferenceMapper:
+              (p0) =>
+                  p0
+                      .map(
+                        (e) => (
+                          e.readTable(table),
+                          BaseReferences(db, table, e),
+                        ),
+                      )
+                      .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$ReferenceCacheTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $ReferenceCacheTable,
+      ReferenceCacheRow,
+      $$ReferenceCacheTableFilterComposer,
+      $$ReferenceCacheTableOrderingComposer,
+      $$ReferenceCacheTableAnnotationComposer,
+      $$ReferenceCacheTableCreateCompanionBuilder,
+      $$ReferenceCacheTableUpdateCompanionBuilder,
+      (
+        ReferenceCacheRow,
+        BaseReferences<_$AppDatabase, $ReferenceCacheTable, ReferenceCacheRow>,
+      ),
+      ReferenceCacheRow,
+      PrefetchHooks Function()
+    >;
 typedef $$OutboxTableCreateCompanionBuilder =
     OutboxCompanion Function({
       required String changeId,
@@ -9806,6 +11172,10 @@ class $AppDatabaseManager {
       $$ReferralsTableTableManager(_db, _db.referrals);
   $$AlertsTableTableManager get alerts =>
       $$AlertsTableTableManager(_db, _db.alerts);
+  $$SitesTableTableManager get sites =>
+      $$SitesTableTableManager(_db, _db.sites);
+  $$ReferenceCacheTableTableManager get referenceCache =>
+      $$ReferenceCacheTableTableManager(_db, _db.referenceCache);
   $$OutboxTableTableManager get outbox =>
       $$OutboxTableTableManager(_db, _db.outbox);
   $$SyncConflictsTableTableManager get syncConflicts =>

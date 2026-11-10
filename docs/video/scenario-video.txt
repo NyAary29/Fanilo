@@ -1,0 +1,32 @@
+PARTIE 2 — FACE CAMÉRA (filmée par l'équipe)
+--------------------------------------------
+Conseils : cadrage épaule, lumière de face, 1 ou 2 personnes, phrases courtes.
+Afficher le nom + la fonction en bas de l'écran (je l'ajoute au montage).
+Durée ~1 min 15. Texte proposé en anglais (à dire avec vos mots, pas lu mot à mot).
+
+1. LE PROBLÈME (~25 s)
+   "In Madagascar, too many women start antenatal care late, and many miss their
+    postnatal follow-up. Reliable health information is rarely available in spoken
+    Malagasy, many women read with difficulty, and in rural areas a phone is often
+    shared. When a danger sign appears, precious time is lost before reaching care."
+   [Si vous citez un chiffre, il doit être sourcé : le cahier des charges l'exige.]
+
+2. NOTRE SOLUTION (~25 s)
+   "FANILO is a voice assistant in Malagasy. Women and girls ask their questions by
+    voice, anonymously, and get answers validated by health professionals. Community
+    health workers follow pregnancies offline, and a danger sign sends an alert to
+    the health centre. AI helps, but it never decides alone."
+
+3. L'AVENIR ET L'IMPACT (~25 s)
+   "We are preparing a pilot in Bongolava and Antananarivo, with three health centres,
+    twenty-five community health workers and about 250 to 300 women. Our goals:
+    more women starting antenatal care early, referrals that really reach the health
+    centre, and open-source voice tools for the Malagasy language that others can reuse.
+    With Havanana Impact and Creatic — health for everyone, by voice."
+
+   (Objectifs = cibles du pilote, à présenter comme des objectifs, pas des résultats.)
+
+CARTON DE FIN (5 s, ajouté au montage)
+  « FANILO — Havanana Impact × Creatic »
+  Sous-titre : AI proposes. Health professionals decide.
+

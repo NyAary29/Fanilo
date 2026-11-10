@@ -21,6 +21,8 @@ abstract final class SyncStateKeys {
   AncVisits,
   Referrals,
   Alerts,
+  Sites,
+  ReferenceCache,
   Outbox,
   SyncConflicts,
   SyncState,
@@ -29,7 +31,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase(super.e);
 
   @override
-  int get schemaVersion => 1;
+  int get schemaVersion => 2;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -41,6 +43,18 @@ class AppDatabase extends _$AppDatabase {
               'CREATE INDEX idx_outbox_entity_id ON outbox (entity, id)');
           await customStatement(
               'CREATE INDEX idx_anc_visits_pregnancy ON anc_visits (pregnancy_id)');
+        },
+        onUpgrade: (m, from, to) async {
+          if (from < 2) {
+            await m.createTable(sites);
+            await m.createTable(referenceCache);
+            // Les sites étaient ignorés par les versions précédentes : on
+            // repart d'un curseur vide pour les recevoir (le pull est
+            // idempotent et n'écrase pas les modifications en attente).
+            await (delete(syncState)
+                  ..where((t) => t.key.equals(SyncStateKeys.cursor)))
+                .go();
+          }
         },
         beforeOpen: (details) async {
           await customStatement('PRAGMA foreign_keys = ON');
@@ -71,6 +85,12 @@ class AppDatabase extends _$AppDatabase {
     await writeState(SyncStateKeys.outboxSeq, '$next');
     return next;
   }
+
+  /// Oublie le curseur : le prochain pull recharge tout l'état serveur du
+  /// périmètre (utilisé après l'abandon d'une modification refusée).
+  Future<void> resetCursor() => (delete(syncState)
+        ..where((t) => t.key.equals(SyncStateKeys.cursor)))
+      .go();
 
   /// Efface toutes les données locales (déconnexion).
   Future<void> wipe() => transaction(() async {

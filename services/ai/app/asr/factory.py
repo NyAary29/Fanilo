@@ -11,6 +11,21 @@ def build_asr_backend(settings: Settings) -> AsrBackend:
     """Échoue explicitement si un backend Transformers est demandé sans l'extra [asr]."""
     if settings.asr_backend is AsrBackendName.NONE:
         return NoneBackend()
+    if settings.asr_backend is AsrBackendName.OPENAI:
+        from app.asr.openai_backend import OpenAiAsrBackend
+        from app.openai_client import build_openai_client
+
+        fallback = None
+        if settings.openai_asr_fallback not in (AsrBackendName.NONE, AsrBackendName.OPENAI):
+            try:
+                fallback = build_asr_backend(
+                    settings.model_copy(update={"asr_backend": settings.openai_asr_fallback})
+                )
+            except RuntimeError:  # extra [asr] absent : pas de secours local
+                fallback = None
+        return OpenAiAsrBackend(
+            build_openai_client(settings), settings.openai_asr_model, fallback=fallback
+        )
 
     # Import local : le module ne tire torch/transformers qu'à l'instanciation.
     from app.asr.transformers_backend import (

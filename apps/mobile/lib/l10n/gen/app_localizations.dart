@@ -61,7 +61,8 @@ import 'app_localizations_fr.dart';
 /// be consistent with the languages listed in the AppLocalizations.supportedLocales
 /// property.
 abstract class AppLocalizations {
-  AppLocalizations(String locale) : localeName = intl.Intl.canonicalizedLocale(locale.toString());
+  AppLocalizations(String locale)
+    : localeName = intl.Intl.canonicalizedLocale(locale.toString());
 
   final String localeName;
 
@@ -69,7 +70,8 @@ abstract class AppLocalizations {
     return Localizations.of<AppLocalizations>(context, AppLocalizations)!;
   }
 
-  static const LocalizationsDelegate<AppLocalizations> delegate = _AppLocalizationsDelegate();
+  static const LocalizationsDelegate<AppLocalizations> delegate =
+      _AppLocalizationsDelegate();
 
   /// A list of this localizations delegate along with the default localizations
   /// delegates.
@@ -81,17 +83,16 @@ abstract class AppLocalizations {
   /// Additional delegates can be added by appending to this list in
   /// MaterialApp. This list does not have to be used at all if a custom list
   /// of delegates is preferred or required.
-  static const List<LocalizationsDelegate<dynamic>> localizationsDelegates = <LocalizationsDelegate<dynamic>>[
-    delegate,
-    GlobalMaterialLocalizations.delegate,
-    GlobalCupertinoLocalizations.delegate,
-    GlobalWidgetsLocalizations.delegate,
-  ];
+  static const List<LocalizationsDelegate<dynamic>> localizationsDelegates =
+      <LocalizationsDelegate<dynamic>>[
+        delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+      ];
 
   /// A list of this localizations delegate's supported locales.
-  static const List<Locale> supportedLocales = <Locale>[
-    Locale('fr')
-  ];
+  static const List<Locale> supportedLocales = <Locale>[Locale('fr')];
 
   /// No description provided for @appTitle.
   ///
@@ -315,24 +316,6 @@ abstract class AppLocalizations {
   /// **'{count, plural, =0{Aucune alerte ouverte} =1{1 alerte ouverte} other{{count} alertes ouvertes}}'**
   String openAlerts(int count);
 
-  /// No description provided for @menuBeneficiaries.
-  ///
-  /// In fr, this message translates to:
-  /// **'Bénéficiaires'**
-  String get menuBeneficiaries;
-
-  /// No description provided for @menuRegister.
-  ///
-  /// In fr, this message translates to:
-  /// **'Enregistrer'**
-  String get menuRegister;
-
-  /// No description provided for @menuSigns.
-  ///
-  /// In fr, this message translates to:
-  /// **'Signaler des signes'**
-  String get menuSigns;
-
   /// No description provided for @menuReferrals.
   ///
   /// In fr, this message translates to:
@@ -381,16 +364,10 @@ abstract class AppLocalizations {
   /// **'Se reconnecter'**
   String get reauthButton;
 
-  /// No description provided for @beneficiariesTitle.
-  ///
-  /// In fr, this message translates to:
-  /// **'Bénéficiaires'**
-  String get beneficiariesTitle;
-
   /// No description provided for @noBeneficiaries.
   ///
   /// In fr, this message translates to:
-  /// **'Aucun bénéficiaire.'**
+  /// **'Aucune patiente. Touchez « Nouvelle patiente ».'**
   String get noBeneficiaries;
 
   /// No description provided for @codePending.
@@ -399,28 +376,22 @@ abstract class AppLocalizations {
   /// **'Code en attente'**
   String get codePending;
 
-  /// No description provided for @searchHint.
-  ///
-  /// In fr, this message translates to:
-  /// **'Rechercher un nom ou un code'**
-  String get searchHint;
-
   /// No description provided for @registerTitle.
   ///
   /// In fr, this message translates to:
-  /// **'Enregistrement'**
+  /// **'Nouvelle patiente'**
   String get registerTitle;
 
   /// No description provided for @stepConsent.
   ///
   /// In fr, this message translates to:
-  /// **'1. Consentement'**
+  /// **'Consentement'**
   String get stepConsent;
 
   /// No description provided for @stepIdentity.
   ///
   /// In fr, this message translates to:
-  /// **'2. Identité'**
+  /// **'Identité'**
   String get stepIdentity;
 
   /// No description provided for @consentIntro.
@@ -482,6 +453,30 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Version de l\'information présentée'**
   String get infoVersion;
+
+  /// No description provided for @infoVersionOf.
+  ///
+  /// In fr, this message translates to:
+  /// **'Information version {version}'**
+  String infoVersionOf(String version);
+
+  /// No description provided for @consentInfoMissing.
+  ///
+  /// In fr, this message translates to:
+  /// **'Information de consentement non disponible. Connectez-vous au réseau et synchronisez une première fois.'**
+  String get consentInfoMissing;
+
+  /// No description provided for @consentInfoDemo.
+  ///
+  /// In fr, this message translates to:
+  /// **'DÉMO — information de consentement non validée'**
+  String get consentInfoDemo;
+
+  /// No description provided for @consentScopeUnavailable.
+  ///
+  /// In fr, this message translates to:
+  /// **'Information non disponible pour cette portée.'**
+  String get consentScopeUnavailable;
 
   /// No description provided for @infoPresented.
   ///
@@ -564,7 +559,7 @@ abstract class AppLocalizations {
   /// No description provided for @registered.
   ///
   /// In fr, this message translates to:
-  /// **'Bénéficiaire enregistré.'**
+  /// **'Patiente enregistrée.'**
   String get registered;
 
   /// No description provided for @nameRequired.
@@ -723,6 +718,54 @@ abstract class AppLocalizations {
   /// **'CPN {n} — {date}'**
   String ancVisit(int n, String date);
 
+  /// No description provided for @ancNeedsLmp.
+  ///
+  /// In fr, this message translates to:
+  /// **'Pas de calendrier CPN : le serveur le calcule à partir de la date des dernières règles (ou du terme prévu). Renseignez-la avec « Dates de la grossesse ».'**
+  String get ancNeedsLmp;
+
+  /// No description provided for @editPregnancyDates.
+  ///
+  /// In fr, this message translates to:
+  /// **'Dates de la grossesse'**
+  String get editPregnancyDates;
+
+  /// No description provided for @dueDate.
+  ///
+  /// In fr, this message translates to:
+  /// **'Date prévue d\'accouchement (facultatif, si connue)'**
+  String get dueDate;
+
+  /// No description provided for @clearDate.
+  ///
+  /// In fr, this message translates to:
+  /// **'Effacer la date'**
+  String get clearDate;
+
+  /// No description provided for @datesSaved.
+  ///
+  /// In fr, this message translates to:
+  /// **'Dates enregistrées. Le calendrier viendra du serveur.'**
+  String get datesSaved;
+
+  /// No description provided for @datesLmpInFuture.
+  ///
+  /// In fr, this message translates to:
+  /// **'La date des dernières règles ne peut pas être dans le futur.'**
+  String get datesLmpInFuture;
+
+  /// No description provided for @datesLmpTooOld.
+  ///
+  /// In fr, this message translates to:
+  /// **'Date des dernières règles trop ancienne.'**
+  String get datesLmpTooOld;
+
+  /// No description provided for @datesDueBeforeLmp.
+  ///
+  /// In fr, this message translates to:
+  /// **'La date prévue doit suivre les dernières règles.'**
+  String get datesDueBeforeLmp;
+
   /// No description provided for @ancPlanned.
   ///
   /// In fr, this message translates to:
@@ -825,6 +868,78 @@ abstract class AppLocalizations {
   /// **'Aucune action possible.'**
   String get noTransition;
 
+  /// No description provided for @referralNew.
+  ///
+  /// In fr, this message translates to:
+  /// **'Nouvelle référence'**
+  String get referralNew;
+
+  /// No description provided for @referralRefer.
+  ///
+  /// In fr, this message translates to:
+  /// **'Référer'**
+  String get referralRefer;
+
+  /// No description provided for @referralBeneficiary.
+  ///
+  /// In fr, this message translates to:
+  /// **'Patiente'**
+  String get referralBeneficiary;
+
+  /// No description provided for @referralToSite.
+  ///
+  /// In fr, this message translates to:
+  /// **'Site destinataire'**
+  String get referralToSite;
+
+  /// No description provided for @referralReason.
+  ///
+  /// In fr, this message translates to:
+  /// **'Motif (facultatif)'**
+  String get referralReason;
+
+  /// No description provided for @referralNoSites.
+  ///
+  /// In fr, this message translates to:
+  /// **'Liste des sites indisponible. Synchronisez une première fois.'**
+  String get referralNoSites;
+
+  /// No description provided for @referralCreated.
+  ///
+  /// In fr, this message translates to:
+  /// **'Référence enregistrée.'**
+  String get referralCreated;
+
+  /// No description provided for @referralSelectBoth.
+  ///
+  /// In fr, this message translates to:
+  /// **'Choisissez la bénéficiaire et le site destinataire.'**
+  String get referralSelectBoth;
+
+  /// No description provided for @referralTo.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vers : {site}'**
+  String referralTo(String site);
+
+  /// No description provided for @siteKindCsb.
+  ///
+  /// In fr, this message translates to:
+  /// **'CSB'**
+  String get siteKindCsb;
+
+  /// No description provided for @siteKindReference.
+  ///
+  /// In fr, this message translates to:
+  /// **'Structure de référence'**
+  String get siteKindReference;
+
+  /// No description provided for @siteKindCommunity.
+  ///
+  /// In fr, this message translates to:
+  /// **'Zone communautaire'**
+  String get siteKindCommunity;
+
   /// No description provided for @alertsTitle.
   ///
   /// In fr, this message translates to:
@@ -873,30 +988,6 @@ abstract class AppLocalizations {
   /// **'Annulée'**
   String get alertCancelled;
 
-  /// No description provided for @severityCritical.
-  ///
-  /// In fr, this message translates to:
-  /// **'Critique'**
-  String get severityCritical;
-
-  /// No description provided for @severityUrgent.
-  ///
-  /// In fr, this message translates to:
-  /// **'Urgente'**
-  String get severityUrgent;
-
-  /// No description provided for @severityRoutine.
-  ///
-  /// In fr, this message translates to:
-  /// **'Routine'**
-  String get severityRoutine;
-
-  /// No description provided for @alertDue.
-  ///
-  /// In fr, this message translates to:
-  /// **'Échéance : {date}'**
-  String alertDue(String date);
-
   /// No description provided for @demoTag.
   ///
   /// In fr, this message translates to:
@@ -906,19 +997,19 @@ abstract class AppLocalizations {
   /// No description provided for @signsTitle.
   ///
   /// In fr, this message translates to:
-  /// **'Signaler des signes'**
+  /// **'Signes de danger'**
   String get signsTitle;
 
   /// No description provided for @signsIntro.
   ///
   /// In fr, this message translates to:
-  /// **'Cochez les signes observés.'**
+  /// **'Cochez les signes observés'**
   String get signsIntro;
 
   /// No description provided for @signsBeneficiary.
   ///
   /// In fr, this message translates to:
-  /// **'Bénéficiaire (facultatif)'**
+  /// **'Patiente (facultatif)'**
   String get signsBeneficiary;
 
   /// No description provided for @noneSelected.
@@ -930,7 +1021,7 @@ abstract class AppLocalizations {
   /// No description provided for @signsSend.
   ///
   /// In fr, this message translates to:
-  /// **'Envoyer'**
+  /// **'Envoyer le signalement'**
   String get signsSend;
 
   /// No description provided for @signsSelectOne.
@@ -968,6 +1059,24 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Transmis au conseiller'**
   String get actionReferAdvisor;
+
+  /// No description provided for @signsCatalogMissing.
+  ///
+  /// In fr, this message translates to:
+  /// **'Liste des signes non disponible. Connectez-vous au réseau et synchronisez. En cas d\'urgence, contactez directement le CSB selon la procédure locale.'**
+  String get signsCatalogMissing;
+
+  /// No description provided for @actionReferCommunityAgent.
+  ///
+  /// In fr, this message translates to:
+  /// **'Orienter vers l\'agent communautaire'**
+  String get actionReferCommunityAgent;
+
+  /// No description provided for @actionReferFacility.
+  ///
+  /// In fr, this message translates to:
+  /// **'Orienter vers la structure de référence'**
+  String get actionReferFacility;
 
   /// No description provided for @actionOther.
   ///
@@ -1059,6 +1168,24 @@ abstract class AppLocalizations {
   /// **'Abandonner'**
   String get discard;
 
+  /// No description provided for @discardedReload.
+  ///
+  /// In fr, this message translates to:
+  /// **'Modification abandonnée. Rechargement depuis le serveur.'**
+  String get discardedReload;
+
+  /// No description provided for @discardedLocal.
+  ///
+  /// In fr, this message translates to:
+  /// **'Modification abandonnée. Donnée supprimée du téléphone (jamais enregistrée sur le serveur).'**
+  String get discardedLocal;
+
+  /// No description provided for @entitySite.
+  ///
+  /// In fr, this message translates to:
+  /// **'Site'**
+  String get entitySite;
+
   /// No description provided for @entityBeneficiary.
   ///
   /// In fr, this message translates to:
@@ -1100,9 +1227,442 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Alerte'**
   String get entityAlert;
+
+  /// No description provided for @appTagline.
+  ///
+  /// In fr, this message translates to:
+  /// **'Suivi terrain'**
+  String get appTagline;
+
+  /// No description provided for @loginWelcome.
+  ///
+  /// In fr, this message translates to:
+  /// **'Application de l\'agent communautaire'**
+  String get loginWelcome;
+
+  /// No description provided for @navHome.
+  ///
+  /// In fr, this message translates to:
+  /// **'Accueil'**
+  String get navHome;
+
+  /// No description provided for @navVisits.
+  ///
+  /// In fr, this message translates to:
+  /// **'Mes visites'**
+  String get navVisits;
+
+  /// No description provided for @navAlert.
+  ///
+  /// In fr, this message translates to:
+  /// **'Alerter'**
+  String get navAlert;
+
+  /// No description provided for @greeting.
+  ///
+  /// In fr, this message translates to:
+  /// **'Bonjour, {name}'**
+  String greeting(String name);
+
+  /// No description provided for @greetingSub.
+  ///
+  /// In fr, this message translates to:
+  /// **'Voici vos patientes et vos visites.'**
+  String get greetingSub;
+
+  /// No description provided for @syncUpToDate.
+  ///
+  /// In fr, this message translates to:
+  /// **'Données à jour'**
+  String get syncUpToDate;
+
+  /// No description provided for @actionNewPatient.
+  ///
+  /// In fr, this message translates to:
+  /// **'Nouvelle patiente'**
+  String get actionNewPatient;
+
+  /// No description provided for @actionNewPatientSub.
+  ///
+  /// In fr, this message translates to:
+  /// **'Consentement d\'abord'**
+  String get actionNewPatientSub;
+
+  /// No description provided for @actionTodayVisit.
+  ///
+  /// In fr, this message translates to:
+  /// **'Visite du jour'**
+  String get actionTodayVisit;
+
+  /// No description provided for @toSeeCount.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =0{Rien d\'urgent} =1{1 patiente à suivre} other{{count} patientes à suivre}}'**
+  String toSeeCount(int count);
+
+  /// No description provided for @myPatients.
+  ///
+  /// In fr, this message translates to:
+  /// **'Mes patientes'**
+  String get myPatients;
+
+  /// No description provided for @searchPatient.
+  ///
+  /// In fr, this message translates to:
+  /// **'Rechercher une patiente…'**
+  String get searchPatient;
+
+  /// No description provided for @noSearchResult.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucune patiente trouvée.'**
+  String get noSearchResult;
+
+  /// No description provided for @statusUpToDate.
+  ///
+  /// In fr, this message translates to:
+  /// **'À jour'**
+  String get statusUpToDate;
+
+  /// No description provided for @statusToFollow.
+  ///
+  /// In fr, this message translates to:
+  /// **'À suivre'**
+  String get statusToFollow;
+
+  /// No description provided for @pregnancyMonths.
+  ///
+  /// In fr, this message translates to:
+  /// **'{n, plural, =0{Grossesse · moins d\'1 mois} =1{Grossesse · 1 mois} other{Grossesse · {n} mois}}'**
+  String pregnancyMonths(int n);
+
+  /// No description provided for @pregnancyNoDate.
+  ///
+  /// In fr, this message translates to:
+  /// **'Grossesse en cours'**
+  String get pregnancyNoDate;
+
+  /// No description provided for @noPregnancyShort.
+  ///
+  /// In fr, this message translates to:
+  /// **'Pas de grossesse déclarée'**
+  String get noPregnancyShort;
+
+  /// No description provided for @reasonOpenAlert.
+  ///
+  /// In fr, this message translates to:
+  /// **'Alerte en attente d\'accusé de réception'**
+  String get reasonOpenAlert;
+
+  /// No description provided for @reasonOverdue.
+  ///
+  /// In fr, this message translates to:
+  /// **'CPN {n} en retard ({date})'**
+  String reasonOverdue(int n, String date);
+
+  /// No description provided for @reasonMissed.
+  ///
+  /// In fr, this message translates to:
+  /// **'CPN manquée'**
+  String get reasonMissed;
+
+  /// No description provided for @whenToday.
+  ///
+  /// In fr, this message translates to:
+  /// **'aujourd\'hui'**
+  String get whenToday;
+
+  /// No description provided for @whenTomorrow.
+  ///
+  /// In fr, this message translates to:
+  /// **'demain'**
+  String get whenTomorrow;
+
+  /// No description provided for @whenInDays.
+  ///
+  /// In fr, this message translates to:
+  /// **'{d, plural, =1{dans 1 jour} other{dans {d} jours}}'**
+  String whenInDays(int d);
+
+  /// No description provided for @whenLate.
+  ///
+  /// In fr, this message translates to:
+  /// **'{d, plural, =1{en retard d\'1 jour} other{en retard de {d} jours}}'**
+  String whenLate(int d);
+
+  /// No description provided for @nextAnc.
+  ///
+  /// In fr, this message translates to:
+  /// **'CPN {n} : {when} ({date})'**
+  String nextAnc(int n, String when, String date);
+
+  /// No description provided for @nextReminder.
+  ///
+  /// In fr, this message translates to:
+  /// **'Prochain rappel'**
+  String get nextReminder;
+
+  /// No description provided for @ancOverdueTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'CPN en retard'**
+  String get ancOverdueTitle;
+
+  /// No description provided for @visitsTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Mes visites'**
+  String get visitsTitle;
+
+  /// No description provided for @visitsToday.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aujourd\'hui · {date}'**
+  String visitsToday(String date);
+
+  /// No description provided for @visitsPriority.
+  ///
+  /// In fr, this message translates to:
+  /// **'À voir en priorité'**
+  String get visitsPriority;
+
+  /// No description provided for @visitsThisWeek.
+  ///
+  /// In fr, this message translates to:
+  /// **'CPN dans les 7 jours'**
+  String get visitsThisWeek;
+
+  /// No description provided for @visitsOthers.
+  ///
+  /// In fr, this message translates to:
+  /// **'Autres patientes'**
+  String get visitsOthers;
+
+  /// No description provided for @visitsNone.
+  ///
+  /// In fr, this message translates to:
+  /// **'Rien d\'urgent aujourd\'hui.'**
+  String get visitsNone;
+
+  /// No description provided for @startVisit.
+  ///
+  /// In fr, this message translates to:
+  /// **'Commencer la visite'**
+  String get startVisit;
+
+  /// No description provided for @visitTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Visite du jour'**
+  String get visitTitle;
+
+  /// No description provided for @visitStep1.
+  ///
+  /// In fr, this message translates to:
+  /// **'Enregistrement de la visite'**
+  String get visitStep1;
+
+  /// No description provided for @visitConsentConfirm.
+  ///
+  /// In fr, this message translates to:
+  /// **'J\'ai vu la patiente. Elle est d\'accord pour la visite.'**
+  String get visitConsentConfirm;
+
+  /// No description provided for @visitNoConsent.
+  ///
+  /// In fr, this message translates to:
+  /// **'Pas de consentement RENY actif. Recueillez l\'accord avant toute saisie.'**
+  String get visitNoConsent;
+
+  /// No description provided for @visitStep2.
+  ///
+  /// In fr, this message translates to:
+  /// **'Signes de danger ?'**
+  String get visitStep2;
+
+  /// No description provided for @yes.
+  ///
+  /// In fr, this message translates to:
+  /// **'Oui'**
+  String get yes;
+
+  /// No description provided for @no.
+  ///
+  /// In fr, this message translates to:
+  /// **'Non'**
+  String get no;
+
+  /// No description provided for @visitSignsYesHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Signalez les signes. Hors ligne : appelez le CSB.'**
+  String get visitSignsYesHint;
+
+  /// No description provided for @visitSignsReported.
+  ///
+  /// In fr, this message translates to:
+  /// **'Signalement envoyé.'**
+  String get visitSignsReported;
+
+  /// No description provided for @visitStep3.
+  ///
+  /// In fr, this message translates to:
+  /// **'Conseils donnés'**
+  String get visitStep3;
+
+  /// No description provided for @visitAdviceHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Cochez les conseils donnés.'**
+  String get visitAdviceHint;
+
+  /// No description provided for @visitAdviceNone.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucun conseil sur ce téléphone. Étape facultative.'**
+  String get visitAdviceNone;
+
+  /// No description provided for @visitStep4.
+  ///
+  /// In fr, this message translates to:
+  /// **'Planification du prochain RDV'**
+  String get visitStep4;
+
+  /// No description provided for @visitAncDueQuestion.
+  ///
+  /// In fr, this message translates to:
+  /// **'Cette CPN a-t-elle eu lieu ?'**
+  String get visitAncDueQuestion;
+
+  /// No description provided for @noPregnancyVisit.
+  ///
+  /// In fr, this message translates to:
+  /// **'Pas de grossesse en cours : pas de calendrier CPN.'**
+  String get noPregnancyVisit;
+
+  /// No description provided for @visitSave.
+  ///
+  /// In fr, this message translates to:
+  /// **'Enregistrer la visite'**
+  String get visitSave;
+
+  /// No description provided for @visitAlertCsb.
+  ///
+  /// In fr, this message translates to:
+  /// **'Alerter le CSB si nécessaire'**
+  String get visitAlertCsb;
+
+  /// No description provided for @visitIncomplete.
+  ///
+  /// In fr, this message translates to:
+  /// **'Terminez les étapes 1 et 2.'**
+  String get visitIncomplete;
+
+  /// No description provided for @visitSaved.
+  ///
+  /// In fr, this message translates to:
+  /// **'Visite terminée. Les CPN cochées partent à la synchro.'**
+  String get visitSaved;
+
+  /// No description provided for @visitLocalNote.
+  ///
+  /// In fr, this message translates to:
+  /// **'Étapes 1 à 3 : liste locale, non envoyée au serveur.'**
+  String get visitLocalNote;
+
+  /// No description provided for @patientTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Patiente'**
+  String get patientTitle;
+
+  /// No description provided for @ageYears.
+  ///
+  /// In fr, this message translates to:
+  /// **'{n} ans'**
+  String ageYears(int n);
+
+  /// No description provided for @tabFollowUp.
+  ///
+  /// In fr, this message translates to:
+  /// **'Suivi'**
+  String get tabFollowUp;
+
+  /// No description provided for @tabAlerts.
+  ///
+  /// In fr, this message translates to:
+  /// **'Alertes'**
+  String get tabAlerts;
+
+  /// No description provided for @tabHistory.
+  ///
+  /// In fr, this message translates to:
+  /// **'Historique'**
+  String get tabHistory;
+
+  /// No description provided for @alertBannerTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Alerte importante'**
+  String get alertBannerTitle;
+
+  /// No description provided for @alertBannerText.
+  ///
+  /// In fr, this message translates to:
+  /// **'Signe de danger signalé.'**
+  String get alertBannerText;
+
+  /// No description provided for @alertAwaitingAck.
+  ///
+  /// In fr, this message translates to:
+  /// **'En attente d\'accusé de réception.'**
+  String get alertAwaitingAck;
+
+  /// No description provided for @viewAlert.
+  ///
+  /// In fr, this message translates to:
+  /// **'Voir l\'alerte'**
+  String get viewAlert;
+
+  /// No description provided for @noAlertsForPatient.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucune alerte pour cette patiente.'**
+  String get noAlertsForPatient;
+
+  /// No description provided for @alertCreatedAt.
+  ///
+  /// In fr, this message translates to:
+  /// **'Signalée le {date}'**
+  String alertCreatedAt(String date);
+
+  /// No description provided for @alertAckAt.
+  ///
+  /// In fr, this message translates to:
+  /// **'Accusé de réception le {date}'**
+  String alertAckAt(String date);
+
+  /// No description provided for @signsLead.
+  ///
+  /// In fr, this message translates to:
+  /// **'Cochez les signes. Envoyez. Suivez l\'orientation.'**
+  String get signsLead;
+
+  /// No description provided for @signsWho.
+  ///
+  /// In fr, this message translates to:
+  /// **'Pour quelle patiente ?'**
+  String get signsWho;
+
+  /// No description provided for @signsOnline.
+  ///
+  /// In fr, this message translates to:
+  /// **'En ligne : envoi possible.'**
+  String get signsOnline;
 }
 
-class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {
+class _AppLocalizationsDelegate
+    extends LocalizationsDelegate<AppLocalizations> {
   const _AppLocalizationsDelegate();
 
   @override
@@ -1111,24 +1671,24 @@ class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> 
   }
 
   @override
-  bool isSupported(Locale locale) => <String>['fr'].contains(locale.languageCode);
+  bool isSupported(Locale locale) =>
+      <String>['fr'].contains(locale.languageCode);
 
   @override
   bool shouldReload(_AppLocalizationsDelegate old) => false;
 }
 
 AppLocalizations lookupAppLocalizations(Locale locale) {
-
-
   // Lookup logic when only language code is specified.
   switch (locale.languageCode) {
-    case 'fr': return AppLocalizationsFr();
+    case 'fr':
+      return AppLocalizationsFr();
   }
 
   throw FlutterError(
     'AppLocalizations.delegate failed to load unsupported locale "$locale". This is likely '
     'an issue with the localizations generation tool. Please file an issue '
     'on GitHub with a reproducible sample app and the gen-l10n configuration '
-    'that was used.'
+    'that was used.',
   );
 }

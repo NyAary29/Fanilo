@@ -11,7 +11,6 @@
   "next": "Continuer",
   "back": "Retour",
   "save": "Enregistrer",
-
   "loginTitle": "Connexion",
   "loginField": "Identifiant",
   "passwordField": "Mot de passe",
@@ -20,15 +19,26 @@
   "loginErrorOffline": "Pas de connexion. La première connexion demande le réseau.",
   "loginErrorDifferentUser": "Un autre compte est ouvert sur ce téléphone. Déconnectez-le d'abord.",
   "loginErrorGeneric": "Connexion impossible. Réessayez.",
-
   "homeTitle": "Accueil",
   "syncNow": "Synchroniser",
   "syncRunning": "Synchronisation…",
   "syncLast": "Dernière synchro : {when}",
-  "@syncLast": {"placeholders": {"when": {"type": "String"}}},
+  "@syncLast": {
+    "placeholders": {
+      "when": {
+        "type": "String"
+      }
+    }
+  },
   "syncNever": "Jamais synchronisé",
   "syncPending": "{count, plural, =0{Rien en attente} =1{1 modification en attente} other{{count} modifications en attente}}",
-  "@syncPending": {"placeholders": {"count": {"type": "int"}}},
+  "@syncPending": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "syncErrorOffline": "Hors ligne. Les données restent sur le téléphone.",
   "syncErrorSession": "Reconnectez-vous pour synchroniser.",
   "syncErrorServer": "Serveur indisponible. Nouvel essai plus tard.",
@@ -36,35 +46,52 @@
   "online": "En ligne",
   "offline": "Hors ligne",
   "rejectedCount": "{count, plural, =1{1 envoi refusé, à vérifier} other{{count} envois refusés, à vérifier}}",
-  "@rejectedCount": {"placeholders": {"count": {"type": "int"}}},
+  "@rejectedCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "conflictsCount": "{count, plural, =1{1 conflit à revoir} other{{count} conflits à revoir}}",
-  "@conflictsCount": {"placeholders": {"count": {"type": "int"}}},
+  "@conflictsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "upcomingAnc": "CPN à venir (7 jours)",
   "noUpcomingAnc": "Aucune CPN prévue.",
   "overdue": "En retard",
   "openAlerts": "{count, plural, =0{Aucune alerte ouverte} =1{1 alerte ouverte} other{{count} alertes ouvertes}}",
-  "@openAlerts": {"placeholders": {"count": {"type": "int"}}},
-  "menuBeneficiaries": "Bénéficiaires",
-  "menuRegister": "Enregistrer",
-  "menuSigns": "Signaler des signes",
+  "@openAlerts": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "menuReferrals": "Références",
   "menuAlerts": "Alertes",
   "menuConflicts": "Conflits",
   "logout": "Se déconnecter",
   "logoutConfirmPending": "{count, plural, =1{1 modification n'est pas encore envoyée et sera perdue.} other{{count} modifications ne sont pas encore envoyées et seront perdues.}} Se déconnecter ?",
-  "@logoutConfirmPending": {"placeholders": {"count": {"type": "int"}}},
+  "@logoutConfirmPending": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "logoutConfirm": "Les données de ce téléphone seront effacées. Se déconnecter ?",
   "reauthBanner": "Session expirée. Reconnectez-vous pour synchroniser.",
   "reauthButton": "Se reconnecter",
-
-  "beneficiariesTitle": "Bénéficiaires",
-  "noBeneficiaries": "Aucun bénéficiaire.",
+  "noBeneficiaries": "Aucune patiente. Touchez « Nouvelle patiente ».",
   "codePending": "Code en attente",
-  "searchHint": "Rechercher un nom ou un code",
-
-  "registerTitle": "Enregistrement",
-  "stepConsent": "1. Consentement",
-  "stepIdentity": "2. Identité",
+  "registerTitle": "Nouvelle patiente",
+  "stepConsent": "Consentement",
+  "stepIdentity": "Identité",
   "consentIntro": "Présentez l'information. Recueillez l'accord avant toute saisie.",
   "consentScopes": "Portée du consentement",
   "scopeReny": "Suivi de grossesse (RENY)",
@@ -75,6 +102,17 @@
   "methodOral": "Orale",
   "methodWritten": "Écrite",
   "infoVersion": "Version de l'information présentée",
+  "infoVersionOf": "Information version {version}",
+  "@infoVersionOf": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "consentInfoMissing": "Information de consentement non disponible. Connectez-vous au réseau et synchronisez une première fois.",
+  "consentInfoDemo": "DÉMO — information de consentement non validée",
+  "consentScopeUnavailable": "Information non disponible pour cette portée.",
   "infoPresented": "J'ai présenté l'information. La personne est d'accord.",
   "consentIncomplete": "Consentement obligatoire avant de continuer.",
   "identityConfidential": "Identité (confidentielle)",
@@ -88,10 +126,9 @@
   "channelIvr": "Message vocal",
   "channelAcVisit": "Visite de l'AC",
   "channelNone": "Aucun",
-  "registered": "Bénéficiaire enregistré.",
+  "registered": "Patiente enregistrée.",
   "nameRequired": "Le nom est obligatoire.",
   "invalidBirthYear": "Année invalide.",
-
   "beneficiaryTitle": "Bénéficiaire",
   "consentsTitle": "Consentements",
   "consentActive": "Actif",
@@ -99,7 +136,6 @@
   "withdraw": "Retirer",
   "withdrawConfirm": "Retirer ce consentement ? Les rappels liés seront arrêtés.",
   "pendingSync": "En attente d'envoi",
-
   "pregnancyTitle": "Grossesse",
   "noPregnancy": "Aucune grossesse déclarée.",
   "declarePregnancy": "Déclarer une grossesse",
@@ -117,14 +153,30 @@
   "ancCalendar": "Calendrier CPN",
   "ancWaiting": "Le calendrier arrivera après la synchronisation.",
   "ancVisit": "CPN {n} — {date}",
-  "@ancVisit": {"placeholders": {"n": {"type": "int"}, "date": {"type": "String"}}},
+  "@ancVisit": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "ancNeedsLmp": "Pas de calendrier CPN : le serveur le calcule à partir de la date des dernières règles (ou du terme prévu). Renseignez-la avec « Dates de la grossesse ».",
+  "editPregnancyDates": "Dates de la grossesse",
+  "dueDate": "Date prévue d'accouchement (facultatif, si connue)",
+  "clearDate": "Effacer la date",
+  "datesSaved": "Dates enregistrées. Le calendrier viendra du serveur.",
+  "datesLmpInFuture": "La date des dernières règles ne peut pas être dans le futur.",
+  "datesLmpTooOld": "Date des dernières règles trop ancienne.",
+  "datesDueBeforeLmp": "La date prévue doit suivre les dernières règles.",
   "ancPlanned": "Prévue",
   "ancDone": "Réalisée",
   "ancMissed": "Manquée",
   "ancCancelled": "Annulée",
   "markDone": "Réalisée",
   "markMissed": "Manquée",
-
   "referralsTitle": "Références",
   "noReferrals": "Aucune référence.",
   "referralProposed": "Proposée",
@@ -136,7 +188,25 @@
   "reasonRequired": "Motif (obligatoire)",
   "outcomeNote": "Note (facultatif)",
   "noTransition": "Aucune action possible.",
-
+  "referralNew": "Nouvelle référence",
+  "referralRefer": "Référer",
+  "referralBeneficiary": "Patiente",
+  "referralToSite": "Site destinataire",
+  "referralReason": "Motif (facultatif)",
+  "referralNoSites": "Liste des sites indisponible. Synchronisez une première fois.",
+  "referralCreated": "Référence enregistrée.",
+  "referralSelectBoth": "Choisissez la bénéficiaire et le site destinataire.",
+  "referralTo": "Vers : {site}",
+  "@referralTo": {
+    "placeholders": {
+      "site": {
+        "type": "String"
+      }
+    }
+  },
+  "siteKindCsb": "CSB",
+  "siteKindReference": "Structure de référence",
+  "siteKindCommunity": "Zone communautaire",
   "alertsTitle": "Alertes",
   "noAlerts": "Aucune alerte.",
   "alertsReadOnly": "Lecture seule. Mise à jour à chaque synchronisation.",
@@ -145,31 +215,40 @@
   "alertResolved": "Résolue",
   "alertEscalated": "Escaladée",
   "alertCancelled": "Annulée",
-  "severityCritical": "Critique",
-  "severityUrgent": "Urgente",
-  "severityRoutine": "Routine",
-  "alertDue": "Échéance : {date}",
-  "@alertDue": {"placeholders": {"date": {"type": "String"}}},
+  "@alertDue": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
   "demoTag": "DÉMO",
-
-  "signsTitle": "Signaler des signes",
-  "signsIntro": "Cochez les signes observés.",
-  "signsBeneficiary": "Bénéficiaire (facultatif)",
+  "signsTitle": "Signes de danger",
+  "signsIntro": "Cochez les signes observés",
+  "signsBeneficiary": "Patiente (facultatif)",
   "noneSelected": "Aucun",
-  "signsSend": "Envoyer",
+  "signsSend": "Envoyer le signalement",
   "signsSelectOne": "Cochez au moins un signe.",
   "signsOffline": "Pas de connexion. Contactez directement le CSB selon la procédure locale.",
   "signsError": "Envoi impossible. Contactez directement le CSB selon la procédure locale.",
   "signsResultTitle": "Orientation",
   "actionReferCsb": "Orienter vers le CSB",
   "actionReferAdvisor": "Transmis au conseiller",
+  "signsCatalogMissing": "Liste des signes non disponible. Connectez-vous au réseau et synchronisez. En cas d'urgence, contactez directement le CSB selon la procédure locale.",
+  "actionReferCommunityAgent": "Orienter vers l'agent communautaire",
+  "actionReferFacility": "Orienter vers la structure de référence",
   "actionOther": "Orientation : {code}",
-  "@actionOther": {"placeholders": {"code": {"type": "String"}}},
+  "@actionOther": {
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
+  },
   "alertCreated": "Alerte transmise. En attente d'accusé de réception.",
   "fallbackOutcome": "Transmis au conseiller pour avis.",
   "demoContent": "Contenu de démonstration",
   "newReport": "Nouveau signalement",
-
   "conflictsTitle": "Conflits de synchronisation",
   "noConflicts": "Aucun conflit.",
   "conflictExplain": "La version du serveur a été gardée. Votre modification est conservée ici.",
@@ -180,11 +259,172 @@
   "rejectedTitle": "Envois refusés",
   "retry": "Réessayer",
   "discard": "Abandonner",
+  "discardedReload": "Modification abandonnée. Rechargement depuis le serveur.",
+  "discardedLocal": "Modification abandonnée. Donnée supprimée du téléphone (jamais enregistrée sur le serveur).",
+  "entitySite": "Site",
   "entityBeneficiary": "Bénéficiaire",
   "entityIdentity": "Identité",
   "entityConsent": "Consentement",
   "entityPregnancy": "Grossesse",
   "entityAncVisit": "CPN",
   "entityReferral": "Référence",
-  "entityAlert": "Alerte"
+  "entityAlert": "Alerte",
+  "appTagline": "Suivi terrain",
+  "loginWelcome": "Application de l'agent communautaire",
+  "navHome": "Accueil",
+  "navVisits": "Mes visites",
+  "navAlert": "Alerter",
+  "greeting": "Bonjour, {name}",
+  "@greeting": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "greetingSub": "Voici vos patientes et vos visites.",
+  "syncUpToDate": "Données à jour",
+  "actionNewPatient": "Nouvelle patiente",
+  "actionNewPatientSub": "Consentement d'abord",
+  "actionTodayVisit": "Visite du jour",
+  "toSeeCount": "{count, plural, =0{Rien d'urgent} =1{1 patiente à suivre} other{{count} patientes à suivre}}",
+  "@toSeeCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "myPatients": "Mes patientes",
+  "searchPatient": "Rechercher une patiente…",
+  "noSearchResult": "Aucune patiente trouvée.",
+  "statusUpToDate": "À jour",
+  "statusToFollow": "À suivre",
+  "pregnancyMonths": "{n, plural, =0{Grossesse · moins d'1 mois} =1{Grossesse · 1 mois} other{Grossesse · {n} mois}}",
+  "@pregnancyMonths": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "pregnancyNoDate": "Grossesse en cours",
+  "noPregnancyShort": "Pas de grossesse déclarée",
+  "reasonOpenAlert": "Alerte en attente d'accusé de réception",
+  "reasonOverdue": "CPN {n} en retard ({date})",
+  "@reasonOverdue": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "reasonMissed": "CPN manquée",
+  "whenToday": "aujourd'hui",
+  "whenTomorrow": "demain",
+  "whenInDays": "{d, plural, =1{dans 1 jour} other{dans {d} jours}}",
+  "@whenInDays": {
+    "placeholders": {
+      "d": {
+        "type": "int"
+      }
+    }
+  },
+  "whenLate": "{d, plural, =1{en retard d'1 jour} other{en retard de {d} jours}}",
+  "@whenLate": {
+    "placeholders": {
+      "d": {
+        "type": "int"
+      }
+    }
+  },
+  "nextAnc": "CPN {n} : {when} ({date})",
+  "@nextAnc": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      },
+      "when": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "nextReminder": "Prochain rappel",
+  "ancOverdueTitle": "CPN en retard",
+  "visitsTitle": "Mes visites",
+  "visitsToday": "Aujourd'hui · {date}",
+  "@visitsToday": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "visitsPriority": "À voir en priorité",
+  "visitsThisWeek": "CPN dans les 7 jours",
+  "visitsOthers": "Autres patientes",
+  "visitsNone": "Rien d'urgent aujourd'hui.",
+  "startVisit": "Commencer la visite",
+  "visitTitle": "Visite du jour",
+  "visitStep1": "Enregistrement de la visite",
+  "visitConsentConfirm": "J'ai vu la patiente. Elle est d'accord pour la visite.",
+  "visitNoConsent": "Pas de consentement RENY actif. Recueillez l'accord avant toute saisie.",
+  "visitStep2": "Signes de danger ?",
+  "yes": "Oui",
+  "no": "Non",
+  "visitSignsYesHint": "Signalez les signes. Hors ligne : appelez le CSB.",
+  "visitSignsReported": "Signalement envoyé.",
+  "visitStep3": "Conseils donnés",
+  "visitAdviceHint": "Cochez les conseils donnés.",
+  "visitAdviceNone": "Aucun conseil sur ce téléphone. Étape facultative.",
+  "visitStep4": "Planification du prochain RDV",
+  "visitAncDueQuestion": "Cette CPN a-t-elle eu lieu ?",
+  "noPregnancyVisit": "Pas de grossesse en cours : pas de calendrier CPN.",
+  "visitSave": "Enregistrer la visite",
+  "visitAlertCsb": "Alerter le CSB si nécessaire",
+  "visitIncomplete": "Terminez les étapes 1 et 2.",
+  "visitSaved": "Visite terminée. Les CPN cochées partent à la synchro.",
+  "visitLocalNote": "Étapes 1 à 3 : liste locale, non envoyée au serveur.",
+  "patientTitle": "Patiente",
+  "ageYears": "{n} ans",
+  "@ageYears": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "tabFollowUp": "Suivi",
+  "tabAlerts": "Alertes",
+  "tabHistory": "Historique",
+  "alertBannerTitle": "Alerte importante",
+  "alertBannerText": "Signe de danger signalé.",
+  "alertAwaitingAck": "En attente d'accusé de réception.",
+  "viewAlert": "Voir l'alerte",
+  "noAlertsForPatient": "Aucune alerte pour cette patiente.",
+  "alertCreatedAt": "Signalée le {date}",
+  "@alertCreatedAt": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "alertAckAt": "Accusé de réception le {date}",
+  "@alertAckAt": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "signsLead": "Cochez les signes. Envoyez. Suivez l'orientation.",
+  "signsWho": "Pour quelle patiente ?",
+  "signsOnline": "En ligne : envoi possible."
 }

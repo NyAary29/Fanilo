@@ -5,6 +5,7 @@ import type { FetchLike } from './api/client';
 import { readConfig } from './api/config';
 import { createTokenStore } from './api/tokenStore';
 import { App } from './App';
+import '@fontsource-variable/nunito';
 import './styles/tokens.css';
 import './styles/global.css';
 

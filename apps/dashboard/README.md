@@ -6,6 +6,18 @@ contrat [`docs/api-contrat.md`](../../docs/api-contrat.md), qui reste la référ
 
 > FANILO ne remplace pas un professionnel de santé. Ce rappel figure en pied de page sur tous les écrans.
 
+## Design
+
+Le design suit la maquette « écosystème FANILO » : barre latérale vert forêt avec icônes
+([lucide-react](https://lucide.dev)), fond crème, cartes de chiffres colorées, police Nunito
+embarquée (`@fontsource-variable/nunito`, aucun appel à un CDN : utilisable hors Internet).
+Jetons dans `src/styles/tokens.css`. Les deux couleurs du graphique d'activité ont été
+vérifiées (daltonisme, contraste) ; l'identité des courbes ne dépend jamais de la seule couleur
+(ligne pleine/pointillée, marqueurs rond/carré, étiquettes directes, vue tableau).
+
+En local, `scripts/dev.sh` active `VITE_DEMO_ACCOUNTS=true` : l'écran de connexion propose
+alors des boutons « Chef CSB », « Agent communautaire »… qui remplissent le formulaire.
+
 ## Stack
 
 React 19, TypeScript strict, Vite 8, React Router 7, TanStack Query 5. Le style repose sur des
@@ -18,7 +30,7 @@ Les tests utilisent Vitest, Testing Library et jsdom, et le lint ESLint avec typ
 cd apps/dashboard
 npm install
 cp .env.example .env.local   # puis ajuster VITE_API_URL
-npm run dev                  # http://localhost:5173
+npm run dev                  # http://localhost:5173 (scripts/dev.sh utilise le port 5174)
 ```
 
 Node 22 ou plus récent est requis (le projet est testé avec Node 24 et npm 11).
@@ -57,7 +69,8 @@ Les comptes fictifs ont tous le mot de passe `demo` :
 | `responsable`, `responsable2` | `clinical_lead` | tout sauf utilisateurs, sites et audit ; validation des contenus |
 | `admin` | `admin` | tableau de bord, contenus, utilisateurs, sites |
 | `donnees` | `data_officer` | tableau de bord, journal d'audit |
-| `technique`, `agent` | `technical`, `community_agent` | aucun écran (message d'accueil) |
+| `agent` | `community_agent` | simulateur vocal |
+| `technique` | `technical` | aucun écran (message d'accueil) |
 
 Toutes les données (noms « Personne fictive N », sites « CSB Démo », etc.) sont inventées.
 Le jeu de données est recréé à chaque chargement de page : un rechargement invalide donc la
@@ -86,6 +99,9 @@ Les écrans sont les suivants :
 | `/questions` | Questions à revoir (`/interactions`) | `clinical_advisor`, `clinical_lead` |
 | `/contenus` | Contenus : brouillons, soumission, validation, retrait | `clinical_lead`, `admin` |
 | `/utilisateurs`, `/sites` | Gestion des comptes et des sites | `admin` |
+| `/patientes` | Espace agent : liste de travail (à suivre / à jour, recherche), détail, prochain rappel, alerte ouverte (`/followup/patients`, lectures d'identité auditées) | `community_agent`, `csb_head`, `clinical_advisor`, `clinical_lead` |
+| `/simulateur` | Simulateur vocal : menu à touches (`/reference/menus`), question écrite ou orale (micro, multipart), signes (`/reference/sign-codes`) ; vraie chaîne `/interactions/ask` | `community_agent`, `csb_head`, `clinical_advisor`, `clinical_lead` |
+| `/statistiques` | Statistiques thématiques agrégées (`/dashboard/topics`, petites cellules masquées) ; export DHIS2 pour `data_officer` | `csb_head`, `clinical_lead`, `admin`, `data_officer` |
 | `/audit` | Journal d'audit | `data_officer` |
 
 ## Sécurité
@@ -146,9 +162,7 @@ dont `is_demo` vaut vrai. Les contenus au statut `demo` portent un badge équiva
 
 ## Limites et hypothèses
 
-- **`GET /interactions`** : le contrat ne décrit ni le schéma renvoyé ni le corps de
-  `POST /interactions/{id}/review`. Le type `Interaction` (`src/api/types.ts`) est une
-  **hypothèse** calquée sur la réponse de `/interactions/ask`, et la revue envoie `{note}`.
+- **`GET /interactions`** : le type `Interaction` suit désormais le schéma réel de l'API (intention, signes, contenu servi affichés pour la revue).
 - **Filtres `status`** : ils sont envoyés à `GET /contents` et `GET /referrals` alors que le
   contrat ne les liste que pour `GET /alerts`.
 - **Audit** : le format de `from` et `to` n'est pas précisé ; le dashboard envoie un datetime
@@ -165,5 +179,8 @@ dont `is_demo` vaut vrai. Les contenus au statut `demo` portent un badge équiva
 - Les identifiants d'utilisateurs (destinataire, auteur…) s'affichent sous forme abrégée :
   `GET /users` est réservé à `admin` et `data_officer`, donc un chef CSB ne peut pas résoudre
   les identifiants en noms de compte.
-- Le dashboard n'a pas été testé contre le backend réel (il était en cours d'écriture) ni en
-  navigateur réel : il est validé par la compilation, le lint et les tests jsdom sur l'adaptateur mock.
+- Vérifié en navigateur réel (Chrome headless, Playwright) contre le backend local et
+  PostgreSQL, pour chaque rôle : tous les écrans chargent sans erreur HTTP ni erreur JS,
+  simulateur (menu, texte, micro simulé, signes → alerte) et export DHIS2 compris.
+  Corrigé à cette occasion : `limit=500` refusé par `/sites` (max 200), requête `/auth/me`
+  envoyée sans jeton après un rechargement (le client rafraîchit désormais d'abord).

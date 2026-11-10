@@ -106,6 +106,21 @@ class PushResult {
   final Map<String, dynamic>? serverData;
   final String? error;
 
+  /// `error` vaut `{code, message}` (contrat, section 8) : on affiche le
+  /// message, suivi du code entre parenthèses.
+  static String? _errorText(Object? err) {
+    if (err == null) return null;
+    if (err is Map) {
+      final message = err['message']?.toString();
+      final code = err['code']?.toString();
+      if (message != null && message.isNotEmpty) {
+        return code == null ? message : '$message ($code)';
+      }
+      if (code != null) return code;
+    }
+    return err.toString();
+  }
+
   factory PushResult.fromJson(Map<String, dynamic> json) {
     final s = json['status'];
     final status = switch (s) {
@@ -120,7 +135,7 @@ class PushResult {
       status: status,
       serverVersion: (json['server_version'] as num?)?.toInt(),
       serverData: (json['server_data'] as Map?)?.cast<String, dynamic>(),
-      error: err == null ? null : (err is String ? err : err.toString()),
+      error: _errorText(err),
     );
   }
 }

@@ -57,10 +57,12 @@ class AppLocalizationsFr extends AppLocalizations {
   String get loginErrorCredentials => 'Identifiant ou mot de passe incorrect.';
 
   @override
-  String get loginErrorOffline => 'Pas de connexion. La première connexion demande le réseau.';
+  String get loginErrorOffline =>
+      'Pas de connexion. La première connexion demande le réseau.';
 
   @override
-  String get loginErrorDifferentUser => 'Un autre compte est ouvert sur ce téléphone. Déconnectez-le d\'abord.';
+  String get loginErrorDifferentUser =>
+      'Un autre compte est ouvert sur ce téléphone. Déconnectez-le d\'abord.';
 
   @override
   String get loginErrorGeneric => 'Connexion impossible. Réessayez.';
@@ -95,7 +97,8 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
-  String get syncErrorOffline => 'Hors ligne. Les données restent sur le téléphone.';
+  String get syncErrorOffline =>
+      'Hors ligne. Les données restent sur le téléphone.';
 
   @override
   String get syncErrorSession => 'Reconnectez-vous pour synchroniser.';
@@ -156,15 +159,6 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
-  String get menuBeneficiaries => 'Bénéficiaires';
-
-  @override
-  String get menuRegister => 'Enregistrer';
-
-  @override
-  String get menuSigns => 'Signaler des signes';
-
-  @override
   String get menuReferrals => 'Références';
 
   @override
@@ -181,44 +175,43 @@ class AppLocalizationsFr extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$count modifications ne sont pas encore envoyées et seront perdues.',
+      other:
+          '$count modifications ne sont pas encore envoyées et seront perdues.',
       one: '1 modification n\'est pas encore envoyée et sera perdue.',
     );
     return '$_temp0 Se déconnecter ?';
   }
 
   @override
-  String get logoutConfirm => 'Les données de ce téléphone seront effacées. Se déconnecter ?';
+  String get logoutConfirm =>
+      'Les données de ce téléphone seront effacées. Se déconnecter ?';
 
   @override
-  String get reauthBanner => 'Session expirée. Reconnectez-vous pour synchroniser.';
+  String get reauthBanner =>
+      'Session expirée. Reconnectez-vous pour synchroniser.';
 
   @override
   String get reauthButton => 'Se reconnecter';
 
   @override
-  String get beneficiariesTitle => 'Bénéficiaires';
-
-  @override
-  String get noBeneficiaries => 'Aucun bénéficiaire.';
+  String get noBeneficiaries =>
+      'Aucune patiente. Touchez « Nouvelle patiente ».';
 
   @override
   String get codePending => 'Code en attente';
 
   @override
-  String get searchHint => 'Rechercher un nom ou un code';
+  String get registerTitle => 'Nouvelle patiente';
 
   @override
-  String get registerTitle => 'Enregistrement';
+  String get stepConsent => 'Consentement';
 
   @override
-  String get stepConsent => '1. Consentement';
+  String get stepIdentity => 'Identité';
 
   @override
-  String get stepIdentity => '2. Identité';
-
-  @override
-  String get consentIntro => 'Présentez l\'information. Recueillez l\'accord avant toute saisie.';
+  String get consentIntro =>
+      'Présentez l\'information. Recueillez l\'accord avant toute saisie.';
 
   @override
   String get consentScopes => 'Portée du consentement';
@@ -248,10 +241,29 @@ class AppLocalizationsFr extends AppLocalizations {
   String get infoVersion => 'Version de l\'information présentée';
 
   @override
-  String get infoPresented => 'J\'ai présenté l\'information. La personne est d\'accord.';
+  String infoVersionOf(String version) {
+    return 'Information version $version';
+  }
 
   @override
-  String get consentIncomplete => 'Consentement obligatoire avant de continuer.';
+  String get consentInfoMissing =>
+      'Information de consentement non disponible. Connectez-vous au réseau et synchronisez une première fois.';
+
+  @override
+  String get consentInfoDemo =>
+      'DÉMO — information de consentement non validée';
+
+  @override
+  String get consentScopeUnavailable =>
+      'Information non disponible pour cette portée.';
+
+  @override
+  String get infoPresented =>
+      'J\'ai présenté l\'information. La personne est d\'accord.';
+
+  @override
+  String get consentIncomplete =>
+      'Consentement obligatoire avant de continuer.';
 
   @override
   String get identityConfidential => 'Identité (confidentielle)';
@@ -287,7 +299,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get channelNone => 'Aucun';
 
   @override
-  String get registered => 'Bénéficiaire enregistré.';
+  String get registered => 'Patiente enregistrée.';
 
   @override
   String get nameRequired => 'Le nom est obligatoire.';
@@ -311,7 +323,8 @@ class AppLocalizationsFr extends AppLocalizations {
   String get withdraw => 'Retirer';
 
   @override
-  String get withdrawConfirm => 'Retirer ce consentement ? Les rappels liés seront arrêtés.';
+  String get withdrawConfirm =>
+      'Retirer ce consentement ? Les rappels liés seront arrêtés.';
 
   @override
   String get pendingSync => 'En attente d\'envoi';
@@ -370,6 +383,34 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
+  String get ancNeedsLmp =>
+      'Pas de calendrier CPN : le serveur le calcule à partir de la date des dernières règles (ou du terme prévu). Renseignez-la avec « Dates de la grossesse ».';
+
+  @override
+  String get editPregnancyDates => 'Dates de la grossesse';
+
+  @override
+  String get dueDate => 'Date prévue d\'accouchement (facultatif, si connue)';
+
+  @override
+  String get clearDate => 'Effacer la date';
+
+  @override
+  String get datesSaved =>
+      'Dates enregistrées. Le calendrier viendra du serveur.';
+
+  @override
+  String get datesLmpInFuture =>
+      'La date des dernières règles ne peut pas être dans le futur.';
+
+  @override
+  String get datesLmpTooOld => 'Date des dernières règles trop ancienne.';
+
+  @override
+  String get datesDueBeforeLmp =>
+      'La date prévue doit suivre les dernières règles.';
+
+  @override
   String get ancPlanned => 'Prévue';
 
   @override
@@ -421,13 +462,54 @@ class AppLocalizationsFr extends AppLocalizations {
   String get noTransition => 'Aucune action possible.';
 
   @override
+  String get referralNew => 'Nouvelle référence';
+
+  @override
+  String get referralRefer => 'Référer';
+
+  @override
+  String get referralBeneficiary => 'Patiente';
+
+  @override
+  String get referralToSite => 'Site destinataire';
+
+  @override
+  String get referralReason => 'Motif (facultatif)';
+
+  @override
+  String get referralNoSites =>
+      'Liste des sites indisponible. Synchronisez une première fois.';
+
+  @override
+  String get referralCreated => 'Référence enregistrée.';
+
+  @override
+  String get referralSelectBoth =>
+      'Choisissez la bénéficiaire et le site destinataire.';
+
+  @override
+  String referralTo(String site) {
+    return 'Vers : $site';
+  }
+
+  @override
+  String get siteKindCsb => 'CSB';
+
+  @override
+  String get siteKindReference => 'Structure de référence';
+
+  @override
+  String get siteKindCommunity => 'Zone communautaire';
+
+  @override
   String get alertsTitle => 'Alertes';
 
   @override
   String get noAlerts => 'Aucune alerte.';
 
   @override
-  String get alertsReadOnly => 'Lecture seule. Mise à jour à chaque synchronisation.';
+  String get alertsReadOnly =>
+      'Lecture seule. Mise à jour à chaque synchronisation.';
 
   @override
   String get alertOpen => 'Ouverte';
@@ -445,45 +527,33 @@ class AppLocalizationsFr extends AppLocalizations {
   String get alertCancelled => 'Annulée';
 
   @override
-  String get severityCritical => 'Critique';
-
-  @override
-  String get severityUrgent => 'Urgente';
-
-  @override
-  String get severityRoutine => 'Routine';
-
-  @override
-  String alertDue(String date) {
-    return 'Échéance : $date';
-  }
-
-  @override
   String get demoTag => 'DÉMO';
 
   @override
-  String get signsTitle => 'Signaler des signes';
+  String get signsTitle => 'Signes de danger';
 
   @override
-  String get signsIntro => 'Cochez les signes observés.';
+  String get signsIntro => 'Cochez les signes observés';
 
   @override
-  String get signsBeneficiary => 'Bénéficiaire (facultatif)';
+  String get signsBeneficiary => 'Patiente (facultatif)';
 
   @override
   String get noneSelected => 'Aucun';
 
   @override
-  String get signsSend => 'Envoyer';
+  String get signsSend => 'Envoyer le signalement';
 
   @override
   String get signsSelectOne => 'Cochez au moins un signe.';
 
   @override
-  String get signsOffline => 'Pas de connexion. Contactez directement le CSB selon la procédure locale.';
+  String get signsOffline =>
+      'Pas de connexion. Contactez directement le CSB selon la procédure locale.';
 
   @override
-  String get signsError => 'Envoi impossible. Contactez directement le CSB selon la procédure locale.';
+  String get signsError =>
+      'Envoi impossible. Contactez directement le CSB selon la procédure locale.';
 
   @override
   String get signsResultTitle => 'Orientation';
@@ -495,12 +565,24 @@ class AppLocalizationsFr extends AppLocalizations {
   String get actionReferAdvisor => 'Transmis au conseiller';
 
   @override
+  String get signsCatalogMissing =>
+      'Liste des signes non disponible. Connectez-vous au réseau et synchronisez. En cas d\'urgence, contactez directement le CSB selon la procédure locale.';
+
+  @override
+  String get actionReferCommunityAgent =>
+      'Orienter vers l\'agent communautaire';
+
+  @override
+  String get actionReferFacility => 'Orienter vers la structure de référence';
+
+  @override
   String actionOther(String code) {
     return 'Orientation : $code';
   }
 
   @override
-  String get alertCreated => 'Alerte transmise. En attente d\'accusé de réception.';
+  String get alertCreated =>
+      'Alerte transmise. En attente d\'accusé de réception.';
 
   @override
   String get fallbackOutcome => 'Transmis au conseiller pour avis.';
@@ -518,7 +600,8 @@ class AppLocalizationsFr extends AppLocalizations {
   String get noConflicts => 'Aucun conflit.';
 
   @override
-  String get conflictExplain => 'La version du serveur a été gardée. Votre modification est conservée ici.';
+  String get conflictExplain =>
+      'La version du serveur a été gardée. Votre modification est conservée ici.';
 
   @override
   String get conflictLocal => 'Votre version';
@@ -542,6 +625,17 @@ class AppLocalizationsFr extends AppLocalizations {
   String get discard => 'Abandonner';
 
   @override
+  String get discardedReload =>
+      'Modification abandonnée. Rechargement depuis le serveur.';
+
+  @override
+  String get discardedLocal =>
+      'Modification abandonnée. Donnée supprimée du téléphone (jamais enregistrée sur le serveur).';
+
+  @override
+  String get entitySite => 'Site';
+
+  @override
   String get entityBeneficiary => 'Bénéficiaire';
 
   @override
@@ -561,4 +655,275 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get entityAlert => 'Alerte';
+
+  @override
+  String get appTagline => 'Suivi terrain';
+
+  @override
+  String get loginWelcome => 'Application de l\'agent communautaire';
+
+  @override
+  String get navHome => 'Accueil';
+
+  @override
+  String get navVisits => 'Mes visites';
+
+  @override
+  String get navAlert => 'Alerter';
+
+  @override
+  String greeting(String name) {
+    return 'Bonjour, $name';
+  }
+
+  @override
+  String get greetingSub => 'Voici vos patientes et vos visites.';
+
+  @override
+  String get syncUpToDate => 'Données à jour';
+
+  @override
+  String get actionNewPatient => 'Nouvelle patiente';
+
+  @override
+  String get actionNewPatientSub => 'Consentement d\'abord';
+
+  @override
+  String get actionTodayVisit => 'Visite du jour';
+
+  @override
+  String toSeeCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count patientes à suivre',
+      one: '1 patiente à suivre',
+      zero: 'Rien d\'urgent',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get myPatients => 'Mes patientes';
+
+  @override
+  String get searchPatient => 'Rechercher une patiente…';
+
+  @override
+  String get noSearchResult => 'Aucune patiente trouvée.';
+
+  @override
+  String get statusUpToDate => 'À jour';
+
+  @override
+  String get statusToFollow => 'À suivre';
+
+  @override
+  String pregnancyMonths(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: 'Grossesse · $n mois',
+      one: 'Grossesse · 1 mois',
+      zero: 'Grossesse · moins d\'1 mois',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get pregnancyNoDate => 'Grossesse en cours';
+
+  @override
+  String get noPregnancyShort => 'Pas de grossesse déclarée';
+
+  @override
+  String get reasonOpenAlert => 'Alerte en attente d\'accusé de réception';
+
+  @override
+  String reasonOverdue(int n, String date) {
+    return 'CPN $n en retard ($date)';
+  }
+
+  @override
+  String get reasonMissed => 'CPN manquée';
+
+  @override
+  String get whenToday => 'aujourd\'hui';
+
+  @override
+  String get whenTomorrow => 'demain';
+
+  @override
+  String whenInDays(int d) {
+    String _temp0 = intl.Intl.pluralLogic(
+      d,
+      locale: localeName,
+      other: 'dans $d jours',
+      one: 'dans 1 jour',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String whenLate(int d) {
+    String _temp0 = intl.Intl.pluralLogic(
+      d,
+      locale: localeName,
+      other: 'en retard de $d jours',
+      one: 'en retard d\'1 jour',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String nextAnc(int n, String when, String date) {
+    return 'CPN $n : $when ($date)';
+  }
+
+  @override
+  String get nextReminder => 'Prochain rappel';
+
+  @override
+  String get ancOverdueTitle => 'CPN en retard';
+
+  @override
+  String get visitsTitle => 'Mes visites';
+
+  @override
+  String visitsToday(String date) {
+    return 'Aujourd\'hui · $date';
+  }
+
+  @override
+  String get visitsPriority => 'À voir en priorité';
+
+  @override
+  String get visitsThisWeek => 'CPN dans les 7 jours';
+
+  @override
+  String get visitsOthers => 'Autres patientes';
+
+  @override
+  String get visitsNone => 'Rien d\'urgent aujourd\'hui.';
+
+  @override
+  String get startVisit => 'Commencer la visite';
+
+  @override
+  String get visitTitle => 'Visite du jour';
+
+  @override
+  String get visitStep1 => 'Enregistrement de la visite';
+
+  @override
+  String get visitConsentConfirm =>
+      'J\'ai vu la patiente. Elle est d\'accord pour la visite.';
+
+  @override
+  String get visitNoConsent =>
+      'Pas de consentement RENY actif. Recueillez l\'accord avant toute saisie.';
+
+  @override
+  String get visitStep2 => 'Signes de danger ?';
+
+  @override
+  String get yes => 'Oui';
+
+  @override
+  String get no => 'Non';
+
+  @override
+  String get visitSignsYesHint =>
+      'Signalez les signes. Hors ligne : appelez le CSB.';
+
+  @override
+  String get visitSignsReported => 'Signalement envoyé.';
+
+  @override
+  String get visitStep3 => 'Conseils donnés';
+
+  @override
+  String get visitAdviceHint => 'Cochez les conseils donnés.';
+
+  @override
+  String get visitAdviceNone =>
+      'Aucun conseil sur ce téléphone. Étape facultative.';
+
+  @override
+  String get visitStep4 => 'Planification du prochain RDV';
+
+  @override
+  String get visitAncDueQuestion => 'Cette CPN a-t-elle eu lieu ?';
+
+  @override
+  String get noPregnancyVisit =>
+      'Pas de grossesse en cours : pas de calendrier CPN.';
+
+  @override
+  String get visitSave => 'Enregistrer la visite';
+
+  @override
+  String get visitAlertCsb => 'Alerter le CSB si nécessaire';
+
+  @override
+  String get visitIncomplete => 'Terminez les étapes 1 et 2.';
+
+  @override
+  String get visitSaved =>
+      'Visite terminée. Les CPN cochées partent à la synchro.';
+
+  @override
+  String get visitLocalNote =>
+      'Étapes 1 à 3 : liste locale, non envoyée au serveur.';
+
+  @override
+  String get patientTitle => 'Patiente';
+
+  @override
+  String ageYears(int n) {
+    return '$n ans';
+  }
+
+  @override
+  String get tabFollowUp => 'Suivi';
+
+  @override
+  String get tabAlerts => 'Alertes';
+
+  @override
+  String get tabHistory => 'Historique';
+
+  @override
+  String get alertBannerTitle => 'Alerte importante';
+
+  @override
+  String get alertBannerText => 'Signe de danger signalé.';
+
+  @override
+  String get alertAwaitingAck => 'En attente d\'accusé de réception.';
+
+  @override
+  String get viewAlert => 'Voir l\'alerte';
+
+  @override
+  String get noAlertsForPatient => 'Aucune alerte pour cette patiente.';
+
+  @override
+  String alertCreatedAt(String date) {
+    return 'Signalée le $date';
+  }
+
+  @override
+  String alertAckAt(String date) {
+    return 'Accusé de réception le $date';
+  }
+
+  @override
+  String get signsLead => 'Cochez les signes. Envoyez. Suivez l\'orientation.';
+
+  @override
+  String get signsWho => 'Pour quelle patiente ?';
+
+  @override
+  String get signsOnline => 'En ligne : envoi possible.';
 }

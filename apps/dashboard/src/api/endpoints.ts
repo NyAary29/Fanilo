@@ -1,9 +1,18 @@
 import type { ApiClient } from './client';
 import type {
+  FollowUpStatus,
+  OrientationItem,
+  OrientationList,
+  Activity,
+  Patient,
   Alert,
   AlertDetail,
   AlertStatus,
   AuditEvent,
+  AskJson,
+  AskModule,
+  AskLanguage,
+  AskResponse,
   AuditFilters,
   Beneficiary,
   BeneficiaryIdentity,
@@ -12,6 +21,7 @@ import type {
   ContentStatus,
   ContentUpdate,
   DashboardSummary,
+  DataValueSet,
   Interaction,
   InteractionReview,
   Page,
@@ -22,10 +32,13 @@ import type {
   Site,
   SiteCreate,
   SiteUpdate,
+  SignCodes,
+  TopicStats,
   User,
   UserCreate,
   UserUpdate,
   Uuid,
+  VoiceMenu,
 } from './types';
 
 const enc = encodeURIComponent;
@@ -57,12 +70,25 @@ export function createEndpoints(client: ApiClient) {
     retireContent: (id: Uuid) => client.post<ContentItem>(`/contents/${enc(id)}/retire`),
 
     // §6 Interactions
-    listInteractions: (params: PageParams = {}) => client.get<Page<Interaction>>('/interactions', { ...params }),
+    listInteractions: (params: PageParams & { review_status?: 'pending' | 'reviewed' | 'not_required' } = {}) => client.get<Page<Interaction>>('/interactions', { ...params }),
     reviewInteraction: (id: Uuid, body: InteractionReview) =>
       client.post<Interaction>(`/interactions/${enc(id)}/review`, body),
+    ask: (body: AskJson) => client.post<AskResponse>('/interactions/ask', body),
+    /** Forme audio : multipart, l'audio est relayé en mémoire et jamais stocké. */
+    askAudio: (audio: Blob, module: AskModule) => {
+      const form = new FormData();
+      form.append('audio', audio, 'question.webm');
+      form.append('module', module);
+      return client.post<AskResponse>('/interactions/ask', form);
+    },
+
+    // §8 bis Référentiels
+    getSignCodes: (module: AskModule) => client.get<SignCodes>('/reference/sign-codes', { module }),
+    getVoiceMenu: (module: AskModule, language: AskLanguage = 'mg') =>
+      client.get<VoiceMenu>('/reference/menus', { module, language }),
 
     // §7 Alertes
-    listAlerts: (params: PageParams & { status?: AlertStatus } = {}) =>
+    listAlerts: (params: PageParams & { status?: AlertStatus; sort?: 'due' | 'recent' } = {}) =>
       client.get<Page<Alert>>('/alerts', { ...params }),
     getAlert: (id: Uuid) => client.get<AlertDetail>(`/alerts/${enc(id)}`),
     acknowledgeAlert: (id: Uuid) => client.post<Alert>(`/alerts/${enc(id)}/acknowledge`),
@@ -74,12 +100,30 @@ export function createEndpoints(client: ApiClient) {
     listReferrals: (params: PageParams & { status?: ReferralStatus } = {}) =>
       client.get<Page<Referral>>('/referrals', { ...params }),
     getReferral: (id: Uuid) => client.get<Referral>(`/referrals/${enc(id)}`),
+    createReferral: (body: { beneficiary_id: Uuid; to_site_id: Uuid; alert_id?: Uuid | null; reason?: string | null }) =>
+      client.post<Referral>('/referrals', body),
     transitionReferral: (id: Uuid, body: ReferralTransition) =>
       client.post<Referral>(`/referrals/${enc(id)}/transition`, body),
 
     // §9 Tableau de bord
     getDashboardSummary: (siteId?: Uuid | null) =>
       client.get<DashboardSummary>('/dashboard/summary', { site_id: siteId ?? undefined }),
+
+    getActivity: (months = 6, siteId?: Uuid | null) =>
+      client.get<Activity>('/dashboard/activity', { months, site_id: siteId ?? undefined }),
+    /** Liste de travail nominative : chaque identité renvoyée est tracée dans l'audit. */
+    listPatients: (q?: string) => client.get<{ items: Patient[]; total: number }>('/followup/patients', { q }),
+    listOrientations: (params: { status?: FollowUpStatus; code?: string } = {}) =>
+      client.get<OrientationList>('/followup/orientations', { ...params }),
+    updateOrientation: (id: Uuid, body: { status: 'came' | 'no_show'; note?: string | null }) =>
+      client.post<OrientationItem>(`/followup/orientations/${enc(id)}`, body),
+    getTopicStats: (days: number, siteId?: Uuid | null) =>
+      client.get<TopicStats>('/dashboard/topics', { days, site_id: siteId ?? undefined }),
+    exportDhis2: (period: string, includeSmallCells = false) =>
+      client.get<DataValueSet>('/interop/dhis2/data-value-set', {
+        period,
+        include_small_cells: includeSmallCells || undefined,
+      }),
 
     // §10 Audit
     listAudit: (filters: AuditFilters = {}) => client.get<Page<AuditEvent>>('/audit', { ...filters }),

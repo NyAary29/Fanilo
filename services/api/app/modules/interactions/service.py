@@ -13,15 +13,22 @@ Chaîne de décision (docs/securite-medicale.md) :
    publié : fallback et transfert au conseiller ;
 4. le contenu servi est le contenu publié du ``message_code`` (langue demandée,
    repli en français). Un contenu absent ne masque jamais une alerte ;
+4 bis. question informative (F-06) : si aucun signe n'est détecté et
+   qu'aucune règle n'est déclenchée, l'intention proposée par l'IA peut être
+   associée à un contenu approuvé par la configuration versionnée
+   (``config/information*.yaml``), au-dessus d'un seuil de confiance ; le
+   contenu doit être publié, sinon fallback ;
 5. une règle ``urgent`` ou ``critical`` crée une alerte ;
-6. l'interaction est journalisée (``review_status = pending`` pour un fallback
-   ou un signe de danger) et auditée. L'audio n'est jamais persisté ; ni
+6. l'interaction est journalisée (``review_status = pending`` pour un fallback,
+   un signe de danger, ou tout module soumis à confirmation d'un conseiller,
+   comme TANORA) et auditée. L'audio n'est jamais persisté ; ni
    l'audio ni le texte ne sont journalisés.
 """
 
 import logging
 import uuid
 from dataclasses import dataclass
+from typing import Any
 
 from fanilo_rules import (
     Action,
@@ -33,8 +40,15 @@ from fanilo_rules import (
 )
 from fanilo_rules import Severity as RuleSeverity
 from sqlalchemy import select
+from sqlalchemy.orm import Session
 
-from app.core.errors import ConsentRequiredError, NotFoundError, StateConflictError
+from app.core.config import Settings
+from app.core.errors import (
+    ConsentRequiredError,
+    InvalidDataError,
+    NotFoundError,
+    StateConflictError,
+)
 from app.db.types import utcnow
 from app.modules.alerts.models import AlertSeverity
 from app.modules.alerts.service import AlertRequest, create_alert
@@ -43,19 +57,23 @@ from app.modules.beneficiaries.models import Beneficiary, ConsentScope
 from app.modules.beneficiaries.service import CARE_ROLES, get_beneficiary
 from app.modules.contents.models import ContentItem, ContentLanguage, ContentStatus
 from app.modules.contents.service import resolve_published
+from app.modules.information.config import InformationConfig, served_information_config
 from app.modules.interactions.ai_client import AiClient, AiServiceError
 from app.modules.interactions.models import (
+    FollowUpStatus,
     InputKind,
     Interaction,
     InteractionModule,
     Outcome,
     ReviewStatus,
     Severity,
+    Triage,
 )
 from app.modules.interactions.rules_runtime import RulesRuntime
 from app.modules.interactions.schemas import AskContent, AskResponse
 from app.modules.reny.models import Pregnancy, PregnancyStatus
 from app.modules.reny.reminders import has_active_consent
+from app.modules.sites.models import Site, SiteKind
 from app.modules.sites.scope import ActorContext
 from app.modules.users.roles import Role
 
@@ -94,6 +112,7 @@ class _Detection:
     transcript: str | None = None
     needs_review: bool = False
     sign_codes: tuple[str, ...] = ()
+    intent: str | None = None
     confidence: float | None = None
     ai_model: str | None = None
     ai_is_demo: bool = False
@@ -145,6 +164,7 @@ def _detect(ai: AiClient, inp: AskInput, engine: RuleEngine | None) -> _Detectio
         detection.failure = f"ai_classify_{exc.reason}"
         return detection
     detection.sign_codes = tuple(classification.sign_codes)
+    detection.intent = classification.intent[:64] or None
     confidence = classification.confidence
     if asr_confidence is not None:
         confidence = min(confidence, asr_confidence)
@@ -197,14 +217,52 @@ def _content_out(item: ContentItem | None) -> AskContent | None:
     )
 
 
-def ask(ctx: ActorContext, rules: RulesRuntime, ai: AiClient, inp: AskInput) -> AskResponse:
-    ctx.ensure_role(ASK_ROLES)
-    session = ctx.session
-    beneficiary = None
-    if inp.beneficiary_id is not None:
-        beneficiary = get_beneficiary(ctx, inp.beneficiary_id)
-        _check_consents(ctx, beneficiary, inp)
+@dataclass
+class _Decision:
+    """Décision commune aux canaux agent et public (aucune écriture en base)."""
 
+    input_kind: InputKind
+    detection: _Detection
+    result: EvaluationResult | None
+    outcome: Outcome
+    actions: list[str]
+    severity: Severity | None
+    content: ContentItem | None
+    message_code: str | None
+    fallback_reasons: list[str]
+    info: InformationConfig | None
+    intent_answered: bool
+    is_demo: bool
+
+    @property
+    def review_required(self) -> bool:
+        return self.outcome in (Outcome.FALLBACK, Outcome.DANGER_SIGN) or (
+            self.info is not None and self.info.requires_counselor(str(self.detection_module))
+        )
+
+    detection_module: str = ""
+
+    def trace(self) -> list[dict[str, Any]]:
+        steps = [t.model_dump() for t in self.result.trace] if self.result is not None else []
+        if self.intent_answered:
+            steps.append(
+                {
+                    "step": "intent_answer",
+                    "detail": f"{self.detection.intent} -> {self.message_code}",
+                }
+            )
+        return steps
+
+
+def _decide(
+    session: Session,
+    settings: Settings,
+    rules: RulesRuntime,
+    ai: AiClient,
+    inp: AskInput,
+    pregnant: bool | None,
+) -> _Decision:
+    """Chaîne de décision (voir l'en-tête du module), sans effet de bord."""
     engine = rules.engine
     input_kind = inp.kind
     detection = _detect(ai, inp, engine)
@@ -224,14 +282,14 @@ def ask(ctx: ActorContext, rules: RulesRuntime, ai: AiClient, inp: AskInput) -> 
                 module=Module(str(inp.module)),
                 detected_signs=frozenset(detection.sign_codes),
                 detection_confidence=detection.confidence,
-                context=EvaluationContext(pregnant=_pregnancy_context(ctx, beneficiary)),
+                context=EvaluationContext(pregnant=pregnant),
             )
         )
 
     fallback_code = (
         engine.ruleset.fallback_message_code
         if engine is not None
-        else ctx.settings.fallback_message_code
+        else settings.fallback_message_code
     )
     severity: Severity | None = None
     if result is None:
@@ -253,10 +311,35 @@ def ask(ctx: ActorContext, rules: RulesRuntime, ai: AiClient, inp: AskInput) -> 
             result.triggered_rules[0].message_code if result.triggered_rules else fallback_code
         )
 
+    # Question informative (F-06) : seulement si AUCUN signe n'a été détecté ni
+    # aucune règle déclenchée ou candidate, et que l'intention est couverte par
+    # la configuration approuvée avec une confiance suffisante (seuil propre à
+    # cette configuration, distinct du seuil de détection des signes).
+    info = served_information_config(
+        settings.information_config_path, allow_demo=settings.allow_demo_content
+    )
+    intent_answered = False
+    answer_code = info.answer_code(detection.intent, str(inp.module)) if info else None
+    if (
+        info is not None
+        and answer_code is not None
+        and result is not None
+        and not result.triggered_rules
+        and not result.candidate_rules
+        and not detection.sign_codes
+        and not result.unknown_signs
+        and detection.confidence is not None
+        and detection.confidence >= info.min_intent_confidence
+    ):
+        answer = resolve_published(session, settings, answer_code, inp.language)
+        if answer is not None:
+            intent_answered = True
+            outcome = Outcome.ANSWER
+            actions = []
+            fallback_reasons = []
+            message_code = answer_code
     content = (
-        resolve_published(session, ctx.settings, message_code, inp.language)
-        if message_code
-        else None
+        resolve_published(session, settings, message_code, inp.language) if message_code else None
     )
     if content is None:
         if message_code:
@@ -268,14 +351,48 @@ def ask(ctx: ActorContext, rules: RulesRuntime, ai: AiClient, inp: AskInput) -> 
         if TRANSFER not in actions:
             actions.append(TRANSFER)
         if fallback_code and fallback_code != message_code:
-            content = resolve_published(session, ctx.settings, fallback_code, inp.language)
+            content = resolve_published(session, settings, fallback_code, inp.language)
     if outcome is Outcome.FALLBACK and TRANSFER not in actions:
         actions.append(TRANSFER)
 
     is_demo = bool(
         (engine is not None and engine.is_demo)
+        or (intent_answered and info is not None and info.is_demo)
         or (content is not None and content.status is ContentStatus.DEMO)
         or detection.ai_is_demo
+    )
+    return _Decision(
+        input_kind=input_kind,
+        detection=detection,
+        result=result,
+        outcome=outcome,
+        actions=actions,
+        severity=severity,
+        content=content,
+        message_code=message_code,
+        fallback_reasons=fallback_reasons,
+        info=info,
+        intent_answered=intent_answered,
+        is_demo=is_demo,
+        detection_module=str(inp.module),
+    )
+
+
+def ask(ctx: ActorContext, rules: RulesRuntime, ai: AiClient, inp: AskInput) -> AskResponse:
+    ctx.ensure_role(ASK_ROLES)
+    session = ctx.session
+    beneficiary = None
+    if inp.beneficiary_id is not None:
+        beneficiary = get_beneficiary(ctx, inp.beneficiary_id)
+        _check_consents(ctx, beneficiary, inp)
+
+    decision = _decide(session, ctx.settings, rules, ai, inp, _pregnancy_context(ctx, beneficiary))
+    detection, result, outcome = decision.detection, decision.result, decision.outcome
+    actions, severity, content = decision.actions, decision.severity, decision.content
+    fallback_reasons, is_demo, input_kind = (
+        decision.fallback_reasons,
+        decision.is_demo,
+        decision.input_kind,
     )
     site_id = beneficiary.site_id if beneficiary is not None else ctx.actor.site_id
     interaction = Interaction(
@@ -289,6 +406,7 @@ def ask(ctx: ActorContext, rules: RulesRuntime, ai: AiClient, inp: AskInput) -> 
         transcript=detection.transcript,
         transcript_needs_review=detection.needs_review,
         sign_codes=list(detection.sign_codes),
+        intent=detection.intent,
         detection_confidence=detection.confidence,
         ai_model=detection.ai_model,
         outcome=outcome,
@@ -299,11 +417,9 @@ def ask(ctx: ActorContext, rules: RulesRuntime, ai: AiClient, inp: AskInput) -> 
         ruleset_id=result.ruleset_id if result is not None else None,
         ruleset_version=result.ruleset_version if result is not None else None,
         fallback_reasons=fallback_reasons,
-        decision_trace=[t.model_dump() for t in result.trace] if result is not None else [],
+        decision_trace=decision.trace(),
         review_status=(
-            ReviewStatus.PENDING
-            if outcome in (Outcome.FALLBACK, Outcome.DANGER_SIGN)
-            else ReviewStatus.NOT_REQUIRED
+            ReviewStatus.PENDING if decision.review_required else ReviewStatus.NOT_REQUIRED
         ),
     )
     session.add(interaction)
@@ -369,14 +485,64 @@ def get_interaction(ctx: ActorContext, interaction_id: uuid.UUID) -> Interaction
     interaction = ctx.session.get(Interaction, interaction_id)
     if interaction is None:
         raise NotFoundError
-    ctx.scope.ensure_contains(interaction.site_id)
+    if interaction.channel != "public_app":
+        ctx.scope.ensure_contains(interaction.site_id)
     return interaction
 
 
-def review(ctx: ActorContext, interaction: Interaction, note: str) -> Interaction:
+# Alphabet du code de suivi : sans I, O, 0, 1 (confusions à l'oral et à l'écrit).
+_CODE_LETTERS = "ABCDEFGHJKLMNPQRSTUVWXYZ"
+_CODE_DIGITS = "23456789"
+
+
+def _new_follow_up_code(session) -> str:
+    """Code court, unique parmi les suivis en attente (ex. « K7-42 »)."""
+    import secrets
+
+    for _ in range(50):
+        code = (
+            secrets.choice(_CODE_LETTERS)
+            + secrets.choice(_CODE_DIGITS)
+            + "-"
+            + secrets.choice(_CODE_DIGITS)
+            + secrets.choice(_CODE_DIGITS)
+        )
+        taken = session.scalar(
+            select(Interaction.id).where(
+                Interaction.follow_up_code == code,
+                Interaction.follow_up_status == FollowUpStatus.EXPECTED,
+            )
+        )
+        if taken is None:
+            return code
+    raise StateConflictError("Impossible de générer un code de suivi.")  # pragma: no cover
+
+
+def review(
+    ctx: ActorContext,
+    interaction: Interaction,
+    note: str,
+    orientation_site_id: uuid.UUID | None = None,
+    triage: Triage | None = None,
+) -> Interaction:
     ctx.ensure_role(REVIEW_ROLES)
     if interaction.review_status is not ReviewStatus.PENDING:
         raise StateConflictError("Cette interaction n'est pas en attente de revue.")
+    triage = triage or Triage.INFO
+    if triage in (Triage.URGENT, Triage.FOLLOW_UP) and orientation_site_id is None:
+        raise InvalidDataError(
+            "Pour une situation urgente ou à suivre, choisissez le centre de santé où l'envoyer."
+        )
+    if orientation_site_id is not None:
+        site = ctx.session.get(Site, orientation_site_id)
+        if site is None or not site.is_active or site.kind is SiteKind.COMMUNITY_ZONE:
+            raise InvalidDataError("Centre de santé inconnu ou inactif.")
+        interaction.orientation_site_id = orientation_site_id
+    interaction.triage = triage
+    if triage in (Triage.URGENT, Triage.FOLLOW_UP):
+        # La personne est attendue au centre : le responsable du centre fait le suivi.
+        interaction.follow_up_code = _new_follow_up_code(ctx.session)
+        interaction.follow_up_status = FollowUpStatus.EXPECTED
     interaction.review_status = ReviewStatus.REVIEWED
     interaction.reviewed_by_user_id = ctx.actor.id
     interaction.reviewed_at = utcnow()

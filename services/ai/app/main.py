@@ -28,7 +28,7 @@ from app.audio import (
     check_size,
     wav_duration_seconds,
 )
-from app.config import Settings, get_settings
+from app.config import NluBackendName, Settings, get_settings
 from app.nlu.base import IntentClassifier
 from app.nlu.lexicon import LexiconIntentClassifier
 from app.schemas import ClassifyRequest, ClassifyResponse, HealthResponse, TranscribeResponse
@@ -60,9 +60,20 @@ def create_app(
             app.state.asr_backend = build_asr_backend(settings)
         else:
             app.state.asr_backend = asr_backend
-        app.state.classifier = classifier or LexiconIntentClassifier.from_path(
-            settings.intent_lexicon_path
-        )
+        if classifier is not None:
+            app.state.classifier = classifier
+        elif settings.nlu_backend is NluBackendName.OPENAI:
+            from app.nlu.lexicon import load_lexicon
+            from app.nlu.openai_classifier import OpenAiIntentClassifier
+            from app.openai_client import build_openai_client
+
+            app.state.classifier = OpenAiIntentClassifier(
+                build_openai_client(settings),
+                settings.openai_nlu_model,
+                load_lexicon(settings.intent_lexicon_path),
+            )
+        else:
+            app.state.classifier = LexiconIntentClassifier.from_path(settings.intent_lexicon_path)
         logger.info(
             "service IA prêt : asr=%s classifieur=%s",
             app.state.asr_backend.describe(),

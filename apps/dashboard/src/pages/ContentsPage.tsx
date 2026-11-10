@@ -1,4 +1,5 @@
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { Plus } from 'lucide-react';
 import { useState, type FormEvent } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useApi } from '../api/ApiProvider';
@@ -94,15 +95,15 @@ function ContentForm({
   }
 
   return (
-    <form className="panel stack" onSubmit={handleSubmit} noValidate aria-labelledby="content-form-title">
-      <h2 id="content-form-title">{isNew ? 'Nouveau brouillon' : `Modifier le brouillon ${initial?.code ?? ''}`}</h2>
-      <div className="grid-2">
+    <form className="editor" onSubmit={handleSubmit} noValidate aria-labelledby="content-form-title">
+      <div className="panel stack">
+        <h2 id="content-form-title">{isNew ? 'Éditeur de contenu · nouveau brouillon' : `Éditeur de contenu · ${initial?.code ?? ''}`}</h2>
         <div className="field">
-          <label htmlFor="cf-code">Code</label>
-          <input id="cf-code" className="mono" value={form.code} disabled={!isNew} onChange={(e) => set('code', e.target.value.toUpperCase())} required />
+          <label htmlFor="cf-title">Titre *</label>
+          <input id="cf-title" value={form.title} placeholder="Ex. : Signes de danger pendant la grossesse" onChange={(e) => set('title', e.target.value)} required />
         </div>
         <div className="field">
-          <label htmlFor="cf-module">Module</label>
+          <label htmlFor="cf-module">Catégorie (module)</label>
           <select id="cf-module" value={form.module} onChange={(e) => set('module', e.target.value as ContentCreate['module'])}>
             {CONTENT_MODULES.map((m) => (
               <option key={m} value={m}>
@@ -112,45 +113,60 @@ function ContentForm({
           </select>
         </div>
         <div className="field">
-          <label htmlFor="cf-language">Langue</label>
-          <select id="cf-language" value={form.language} onChange={(e) => set('language', e.target.value as ContentCreate['language'])}>
-            {CONTENT_LANGUAGES.map((l) => (
-              <option key={l} value={l}>
-                {LANGUAGE_LABELS[l]}
-              </option>
-            ))}
-          </select>
+          <label htmlFor="cf-body">Texte diffusé *</label>
+          <textarea id="cf-body" rows={9} value={form.body} onChange={(e) => set('body', e.target.value)} required />
+          <span className="muted xs">
+            Message court, simple, sans diagnostic ni prescription. Il sera lu ou enregistré en voix pour le téléphone.
+          </span>
+        </div>
+        {localError && (
+          <p className="error" role="alert">
+            {localError}
+          </p>
+        )}
+        <ErrorMessage error={save.error} />
+        <div className="row">
+          <button type="submit" className="btn btn-primary" disabled={save.isPending}>
+            Enregistrer le brouillon
+          </button>
+          <button type="button" className="btn btn-secondary" onClick={onCancel}>
+            Annuler
+          </button>
+        </div>
+      </div>
+      <div className="panel stack">
+        <div className="stack-sm">
+          <strong>Statut</strong>
+          <div className="status-pill" style={{ background: '#eef0ea', color: 'var(--color-muted)' }}>
+            Brouillon
+          </div>
+          <ol className="steps small">
+            <li>Brouillon (vous écrivez)</li>
+            <li>Soumis à validation</li>
+            <li>Validé par un responsable clinique (autre que l&apos;auteur), puis diffusé</li>
+          </ol>
+        </div>
+        <fieldset className="stack-sm">
+          <legend>Langue</legend>
+          {CONTENT_LANGUAGES.map((l) => (
+            <label key={l} className="radio">
+              <input type="radio" name="cf-language" checked={form.language === l} onChange={() => set('language', l)} />
+              {LANGUAGE_LABELS[l]}
+            </label>
+          ))}
+        </fieldset>
+        <div className="field">
+          <label htmlFor="cf-code">Code</label>
+          <input id="cf-code" className="mono" value={form.code} disabled={!isNew} onChange={(e) => set('code', e.target.value.toUpperCase())} required />
         </div>
         <div className="field">
           <label htmlFor="cf-source">Référence de la source (protocole)</label>
           <input id="cf-source" value={form.source_ref ?? ''} onChange={(e) => set('source_ref', e.target.value)} />
         </div>
-      </div>
-      <div className="field">
-        <label htmlFor="cf-title">Titre</label>
-        <input id="cf-title" value={form.title} onChange={(e) => set('title', e.target.value)} required />
-      </div>
-      <div className="field">
-        <label htmlFor="cf-body">Texte diffusé</label>
-        <textarea id="cf-body" rows={5} value={form.body} onChange={(e) => set('body', e.target.value)} required />
-      </div>
-      <div className="field">
-        <label htmlFor="cf-audio">URL de l&apos;audio (facultative)</label>
-        <input id="cf-audio" type="url" value={form.audio_url ?? ''} onChange={(e) => set('audio_url', e.target.value)} />
-      </div>
-      {localError && (
-        <p className="error" role="alert">
-          {localError}
-        </p>
-      )}
-      <ErrorMessage error={save.error} />
-      <div className="row">
-        <button type="submit" className="btn btn-primary" disabled={save.isPending}>
-          Enregistrer le brouillon
-        </button>
-        <button type="button" className="btn btn-secondary" onClick={onCancel}>
-          Annuler
-        </button>
+        <div className="field">
+          <label htmlFor="cf-audio">URL de l&apos;audio (facultative)</label>
+          <input id="cf-audio" type="url" value={form.audio_url ?? ''} onChange={(e) => set('audio_url', e.target.value)} />
+        </div>
       </div>
     </form>
   );
@@ -185,7 +201,10 @@ export function ContentsPage() {
   return (
     <section aria-labelledby="contents-title" className="stack">
       <div className="page-head">
-        <h1 id="contents-title">Contenus de santé</h1>
+        <div>
+          <h1 id="contents-title">Contenus de santé</h1>
+          <p className="subtitle">Les seuls messages que FANILO a le droit de diffuser.</p>
+        </div>
         <div className="row">
           <div className="field inline">
             <label htmlFor="content-status">Statut</label>
@@ -199,7 +218,7 @@ export function ContentsPage() {
             </select>
           </div>
           <button type="button" className="btn btn-primary" onClick={() => setEditing('new')}>
-            Nouveau brouillon
+            <Plus size={18} aria-hidden="true" /> Nouveau contenu
           </button>
         </div>
       </div>
@@ -233,8 +252,11 @@ export function ContentsPage() {
                     {item.title} <span className="mono muted small">{item.code}</span>
                   </h2>
                   <div>
-                    <Badge tone={STATUS_TONES[item.status]}>{CONTENT_STATUS_LABELS[item.status]}</Badge>{' '}
-                    {item.status === 'demo' && <Badge tone="info">DÉMO — non validé cliniquement</Badge>}
+                    {item.status === 'demo' ? (
+                      <Badge tone="info">DÉMO — non validé cliniquement</Badge>
+                    ) : (
+                      <Badge tone={STATUS_TONES[item.status]}>{CONTENT_STATUS_LABELS[item.status]}</Badge>
+                    )}
                   </div>
                 </div>
                 <p className="content-body">{item.body}</p>

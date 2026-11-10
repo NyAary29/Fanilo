@@ -57,6 +57,7 @@ class FakeAi:
         transcribe_error=None,
         classify_error=None,
         is_demo=True,
+        intent="report_danger_sign",
     ):
         self.text = text
         self.asr_confidence = asr_confidence
@@ -65,6 +66,7 @@ class FakeAi:
         self.transcribe_error = transcribe_error
         self.classify_error = classify_error
         self.is_demo = is_demo
+        self.intent = intent
         self.calls: list[tuple] = []
 
     def transcribe(self, audio: bytes, content_type: str, language: str) -> Transcription:
@@ -78,7 +80,7 @@ class FakeAi:
         if self.classify_error:
             raise AiServiceError(self.classify_error)
         return Classification(
-            intent="report_danger_sign",
+            intent=self.intent,
             sign_codes=self.sign_codes,
             confidence=self.confidence,
             model="lexique-fictif",

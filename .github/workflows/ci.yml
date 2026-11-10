@@ -28,6 +28,47 @@ jobs:
       - run: uv run ruff check .
       - run: uv run pytest
 
+  postgres:
+    name: Migrations et parcours de bout en bout (PostgreSQL)
+    runs-on: ubuntu-latest
+    services:
+      db:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_USER: fanilo
+          POSTGRES_PASSWORD: ci-only
+          POSTGRES_DB: fanilo
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U fanilo" --health-interval 5s --health-timeout 3s --health-retries 10
+    env:
+      FANILO_ENVIRONMENT: development
+      FANILO_DATABASE_URL: postgresql+psycopg://fanilo:ci-only@localhost:5432/fanilo
+      FANILO_ALLOW_DEMO_CONTENT: "true"
+      FANILO_AI_SERVICE_URL: http://127.0.0.1:8001
+    defaults:
+      run:
+        working-directory: services/api
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          version: "0.13.7"
+      - run: uv sync --frozen
+      - run: (cd ../ai && uv sync --frozen)
+      - run: uv run alembic upgrade head
+      - run: uv run alembic check
+      - run: uv run alembic downgrade base && uv run alembic upgrade head
+      - run: uv run python -m app.modules.devseed
+      - name: Démarrer le service IA et l'API
+        run: |
+          (cd ../ai && nohup uv run uvicorn app.main:app --port 8001 > /tmp/ai.log 2>&1 &)
+          nohup uv run uvicorn app.main:app --port 8000 > /tmp/api.log 2>&1 &
+          for i in $(seq 1 30); do curl -fsS localhost:8000/health && curl -fsS localhost:8001/health && break; sleep 1; done
+      - run: uv run python ../../scripts/smoke_e2e.py
+      - if: failure()
+        run: tail -n 100 /tmp/api.log /tmp/ai.log
+
   dashboard:
     name: Dashboard (React)
     runs-on: ubuntu-latest
@@ -56,9 +97,25 @@ jobs:
       - uses: actions/checkout@v4
       - uses: subosito/flutter-action@v2
         with:
-          flutter-version: "3.29.3"
+          flutter-version: "3.47.6"
           channel: stable
       - run: flutter pub get
       - run: dart run build_runner build --delete-conflicting-outputs
+      - run: flutter analyze
+      - run: flutter test
+
+  femmes:
+    name: Application Femmes & Adolescentes (Flutter)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/femmes
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: "3.47.6"
+          channel: stable
+      - run: flutter pub get
       - run: flutter analyze
       - run: flutter test

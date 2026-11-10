@@ -72,3 +72,149 @@ items:
     body: >-
       [DÉMO] Une consultation prénatale est prévue prochainement au CSB.
       Rendez-vous au CSB à la date convenue avec votre agent communautaire.
+
+  # --- Réponses informatives et menus vocaux (config/information.demo.yaml) ---
+  # Messages d'ORIENTATION neutres : ils renvoient vers l'AC ou le CSB et ne
+  # contiennent aucune information médicale.
+
+  - code: MSG_DEMO_INFO_ANC
+    module: reny
+    language: fr
+    title: "[DÉMO] Consultations prénatales"
+    body: >-
+      [DÉMO] Les dates de vos consultations prénatales sont fixées avec votre
+      agent communautaire et le CSB. Demandez-leur votre prochain rendez-vous.
+
+  - code: MSG_DEMO_INFO_NUTRITION
+    module: common
+    language: fr
+    title: "[DÉMO] Questions sur l'alimentation"
+    body: >-
+      [DÉMO] Pour des conseils sur l'alimentation adaptés à votre situation,
+      parlez-en à votre agent communautaire ou au personnel du CSB.
+
+  - code: MSG_DEMO_INFO_MENSTRUATION
+    module: tanora
+    language: fr
+    title: "[DÉMO] Questions sur les règles"
+    body: >-
+      [DÉMO] Vous pouvez poser vos questions sur les règles, en toute
+      confidentialité, à un conseiller FANILO ou au personnel du CSB.
+
+  - code: MSG_DEMO_TANORA_COUNSELOR
+    module: tanora
+    language: fr
+    title: "[DÉMO] Parler à un conseiller"
+    body: >-
+      [DÉMO] Un conseiller peut vous écouter en toute confidentialité. Votre
+      demande lui est transmise ; aucun délai de rappel n'est garanti. En cas
+      d'urgence, rendez-vous au centre de santé le plus proche.
+
+  # --- Application anonyme : l'utilisatrice ne peut pas être rappelée ---------
+
+  - code: MSG_DEMO_PUBLIC_TRANSFER
+    module: common
+    language: fr
+    title: "[DÉMO] Question transmise à un conseiller"
+    body: >-
+      [DÉMO] Votre question est transmise à un conseiller. Revenez voir sa réponse
+      dans « Mes questions ». En cas d'urgence, n'attendez pas : rendez-vous
+      directement au centre de santé le plus proche.
+
+  # --- Versions MALGACHES de démonstration ---------------------------------
+  # Rédigées par l'équipe technique, NON RELUES par des locuteurs natifs ni
+  # validées cliniquement : à faire relire avant tout usage réel.
+
+  - code: MSG_DEMO_CRITICAL
+    module: reny
+    language: mg
+    title: "[DEMO] Mandehana any amin'ny hopitaly"
+    body: >-
+      [DEMO] Mandehana avy hatrany any amin'ny toeram-pitsaboana lehibe akaiky
+      indrindra, miaraka amin'olona raha azo atao. Ampahafantaro ny mpiasan'ny
+      fahasalamana eny ifotony.
+
+  - code: MSG_DEMO_URGENT
+    module: reny
+    language: mg
+    title: "[DEMO] Mandehana any amin'ny CSB"
+    body: >-
+      [DEMO] Mandehana any amin'ny CSB haingana araka izay azo atao. Afaka
+      manoro anao ny CSB akaiky indrindra ny mpiasan'ny fahasalamana eny ifotony.
+
+  - code: MSG_DEMO_URGENT_PREGNANCY
+    module: reny
+    language: mg
+    title: "[DEMO] Antsoy ny mpiasan'ny fahasalamana"
+    body: >-
+      [DEMO] Antsoy haingana ny mpiasan'ny fahasalamana eny ifotony. Raha tsy
+      tratra izy, mandehana mivantana any amin'ny tobim-pahasalamana akaiky indrindra.
+
+  - code: MSG_DEMO_ROUTINE
+    module: reny
+    language: mg
+    title: "[DEMO] Resaho amin'ny mpiasan'ny fahasalamana"
+    body: >-
+      [DEMO] Resaho amin'ny mpiasan'ny fahasalamana eny ifotony izany rehefa
+      mitsidika anao izy, na any amin'ny CSB rehefa mandalo any ianao.
+
+  - code: MSG_DEMO_TRANSFER_COUNSELOR
+    module: common
+    language: mg
+    title: "[DEMO] Nalefa tany amin'ny mpanolotsaina ny fanontanianao"
+    body: >-
+      [DEMO] Nalefa tany amin'ny mpanolotsaina ny fanontanianao. Raha maika,
+      mandehana avy hatrany any amin'ny tobim-pahasalamana akaiky indrindra.
+
+  - code: MSG_DEMO_ANC_REMINDER
+    module: reny
+    language: mg
+    title: "[DEMO] Fampahatsiahivana fizahana mialoha ny fiterahana"
+    body: >-
+      [DEMO] Misy fizahana mialoha ny fiterahana kasaina atao tsy ho ela ao amin'ny
+      CSB. Mandehana any amin'ny CSB amin'ny daty nifanarahana tamin'ny mpiasan'ny
+      fahasalamana eny ifotony.
+
+  - code: MSG_DEMO_INFO_ANC
+    module: reny
+    language: mg
+    title: "[DEMO] Fizahana mialoha ny fiterahana"
+    body: >-
+      [DEMO] Ny mpiasan'ny fahasalamana eny ifotony sy ny CSB no mamaritra ny daty
+      hanaovana ny fizahanao mialoha ny fiterahana. Anontanio azy ireo ny fotoana
+      manaraka.
+
+  - code: MSG_DEMO_INFO_NUTRITION
+    module: common
+    language: mg
+    title: "[DEMO] Fanontaniana momba ny sakafo"
+    body: >-
+      [DEMO] Raha mila torohevitra momba ny sakafo mifanaraka amin'ny toe-javatra
+      misy anao ianao, resaho amin'ny mpiasan'ny fahasalamana eny ifotony na amin'ny
+      mpiasan'ny CSB.
+
+  - code: MSG_DEMO_INFO_MENSTRUATION
+    module: tanora
+    language: mg
+    title: "[DEMO] Fanontaniana momba ny fadimbolana"
+    body: >-
+      [DEMO] Afaka mametraka ny fanontanianao momba ny fadimbolana amin'ny
+      mpanolotsain'ny FANILO na amin'ny mpiasan'ny CSB ianao, ary tsiambaratelo izany.
+
+  - code: MSG_DEMO_TANORA_COUNSELOR
+    module: tanora
+    language: mg
+    title: "[DEMO] Hiresaka amin'ny mpanolotsaina"
+    body: >-
+      [DEMO] Misy mpanolotsaina afaka mihaino anao amin'ny tsiambaratelo. Nalefa
+      tany aminy ny fangatahanao; tsy misy fe-potoana voatoky. Raha maika, mandehana
+      any amin'ny tobim-pahasalamana akaiky indrindra.
+
+  - code: MSG_DEMO_PUBLIC_TRANSFER
+    module: common
+    language: mg
+    title: "[DEMO] Nalefa tany amin'ny mpanolotsaina ny fanontanianao"
+    body: >-
+      [DEMO] Nalefa tany amin'ny mpanolotsaina ny fanontanianao. Jereo ao amin'ny
+      « Ny fanontaniako » ny valiny. Raha maika, aza miandry: mandehana avy hatrany
+      any amin'ny tobim-pahasalamana akaiky indrindra.

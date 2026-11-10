@@ -13,7 +13,13 @@ import { errorMessage } from './QueryState';
  * nominatif peut la demander explicitement (lecture auditée côté serveur). Les rôles
  * admin, data_officer et technical ne voient jamais le bouton.
  */
-export function BeneficiaryRef({ beneficiaryId, allowIdentity = false }: { beneficiaryId: string; allowIdentity?: boolean }) {
+export function BeneficiaryRef({ beneficiaryId, allowIdentity = false }: { beneficiaryId: string | null; allowIdentity?: boolean }) {
+  // Question anonyme (TANORA, canal vocal) : aucune bénéficiaire, rien à charger.
+  if (beneficiaryId === null) return <span className="muted">Sans bénéficiaire (question anonyme)</span>;
+  return <KnownBeneficiaryRef beneficiaryId={beneficiaryId} allowIdentity={allowIdentity} />;
+}
+
+function KnownBeneficiaryRef({ beneficiaryId, allowIdentity }: { beneficiaryId: string; allowIdentity: boolean }) {
   const api = useApi();
   const { user } = useAuth();
   const [showIdentity, setShowIdentity] = useState(false);

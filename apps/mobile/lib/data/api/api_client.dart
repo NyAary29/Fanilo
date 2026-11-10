@@ -61,6 +61,21 @@ abstract interface class InteractionApi {
   });
 }
 
+/// Référentiels distribués aux applications (contrat, section 8 bis).
+/// Les réponses sont renvoyées brutes (JSON) pour être mises en cache telles
+/// quelles.
+abstract interface class ReferenceApi {
+  /// `GET /reference/sign-codes?module=`.
+  Future<Map<String, dynamic>> signCodes(String module);
+
+  /// `GET /reference/consent-information`.
+  Future<Map<String, dynamic>> consentInformation();
+
+  /// `GET /contents/published?module=` (contenus validés, plus `demo` si le
+  /// serveur l'autorise). Réponse paginée `{items, total}`.
+  Future<Map<String, dynamic>> publishedContents(String module);
+}
+
 /// Fournit un jeton d'accès valide et sait le renouveler (voir `AuthRepository`).
 abstract interface class AccessTokenProvider {
   /// Jeton valide (rafraîchi de manière proactive s'il expire bientôt).
@@ -175,7 +190,7 @@ class HttpAuthApi implements AuthApi {
 }
 
 /// Appels authentifiés, avec un nouvel essai unique après refresh sur 401.
-class HttpFaniloApi implements SyncApi, InteractionApi {
+class HttpFaniloApi implements SyncApi, InteractionApi, ReferenceApi {
   HttpFaniloApi(this._t, this._tokens);
   final ApiTransport _t;
   final AccessTokenProvider _tokens;
@@ -225,5 +240,26 @@ class HttpFaniloApi implements SyncApi, InteractionApi {
       'sign_codes': signCodes,
     });
     return AskResponse.fromJson((json as Map).cast());
+  }
+
+  @override
+  Future<Map<String, dynamic>> signCodes(String module) async {
+    final json =
+        await _authed('GET', '/reference/sign-codes', query: {'module': module});
+    return (json as Map).cast<String, dynamic>();
+  }
+
+  @override
+  Future<Map<String, dynamic>> consentInformation() async {
+    final json = await _authed('GET', '/reference/consent-information');
+    return (json as Map).cast<String, dynamic>();
+  }
+
+  @override
+  Future<Map<String, dynamic>> publishedContents(String module) async {
+    final json = await _authed('GET', '/contents/published',
+        // Malgache d'abord : seuls les messages destinés aux femmes sont servis.
+        query: {'module': module, 'language': 'mg', 'limit': '200'});
+    return (json as Map).cast<String, dynamic>();
   }
 }

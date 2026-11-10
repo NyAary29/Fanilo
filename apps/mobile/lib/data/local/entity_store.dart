@@ -129,6 +129,19 @@ class EntityStore {
               version: Value(version),
               deletedAt: Value(d['deleted_at'] as String?),
             ));
+      case SyncEntity.site:
+        await db.into(db.sites).insertOnConflictUpdate(SitesCompanion.insert(
+              id: id,
+              name: d['name'] as String? ?? '',
+              kind: d['kind'] as String? ?? '',
+              code: Value(d['code'] as String?),
+              district: Value(d['district'] as String?),
+              region: Value(d['region'] as String?),
+              parentSiteId: Value(d['parent_site_id'] as String?),
+              isActive: Value(d['is_active'] as bool? ?? true),
+              version: Value(version),
+              deletedAt: Value(d['deleted_at'] as String?),
+            ));
     }
   }
 
@@ -158,6 +171,16 @@ class EntityStore {
     );
   }
 
+  /// Supprime la ligne locale (entité jamais confirmée par le serveur).
+  Future<void> deleteLocal(SyncEntity entity, String id) async {
+    await db.customUpdate(
+      'DELETE FROM ${_table(entity)} WHERE ${_idColumn(entity)} = ?',
+      variables: [Variable(id)],
+      updates: {_tableInfo(entity)},
+      updateKind: UpdateKind.delete,
+    );
+  }
+
   String _table(SyncEntity e) => _tableInfo(e).actualTableName;
 
   String _idColumn(SyncEntity e) =>
@@ -171,5 +194,6 @@ class EntityStore {
         SyncEntity.ancVisit => db.ancVisits,
         SyncEntity.referral => db.referrals,
         SyncEntity.alert => db.alerts,
+        SyncEntity.site => db.sites,
       };
 }

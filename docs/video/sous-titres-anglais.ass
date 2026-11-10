@@ -1,0 +1,23 @@
+[Script Info]
+ScriptType: v4.00+
+PlayResX: 1920
+PlayResY: 1080
+WrapStyle: 0
+
+[V4+ Styles]
+Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
+Style: Sub,Noto Sans,46,&H00FFFFFF,&H00FFFFFF,&H00000000,&HB4141414,-1,0,0,0,100,100,0,0,3,14,0,2,160,160,60,1
+
+[Events]
+Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
+Dialogue: 0,0:00:00.50,0:00:06.80,Sub,,0,0,0,,FANILO — Health for everyone, by voice, in Malagasy.
+Dialogue: 0,0:00:07.00,0:00:17.00,Sub,,0,0,0,,No account. No name. Hanta, 16, simply asks her question in Malagasy.
+Dialogue: 0,0:00:17.00,0:00:28.30,Sub,,0,0,0,,She gets an answer drawn only from messages approved by health professionals.
+Dialogue: 0,0:00:28.50,0:00:43.33,Sub,,0,0,0,,When a question needs a human, a counselor answers from the dashboard.
+Dialogue: 0,0:00:43.53,0:00:56.93,Sub,,0,0,0,,The reply comes back in the app. Still anonymous. Still private.
+Dialogue: 0,0:00:57.13,0:01:17.73,Sub,,0,0,0,,Lova, a community health worker, registers Voahirana. Consent comes first — even without network.
+Dialogue: 0,0:01:17.93,0:01:37.80,Sub,,0,0,0,,Her pregnancy is recorded. Antenatal visits and reminders are scheduled automatically.
+Dialogue: 0,0:01:38.00,0:01:57.40,Sub,,0,0,0,,During a visit, Lova reports a danger sign. One tap alerts the health centre.
+Dialogue: 0,0:01:57.60,0:02:12.40,Sub,,0,0,0,,A named person receives the alert, with a deadline and a backup — and acknowledges it.
+Dialogue: 0,0:02:12.60,0:02:30.03,Sub,,0,0,0,,Health centres follow pregnancies, missed visits, alerts and referrals — anonymised data only.
+Dialogue: 0,0:02:30.73,0:02:36.03,Sub,,0,0,0,,FANILO never diagnoses and never replaces a health worker.

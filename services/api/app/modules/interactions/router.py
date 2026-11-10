@@ -14,14 +14,14 @@ import uuid
 from fastapi import APIRouter, Depends, HTTPException, Request
 from fastapi.concurrency import run_in_threadpool
 from pydantic import ValidationError
-from sqlalchemy import select
+from sqlalchemy import case, or_, select
 from starlette.datastructures import UploadFile
 
 from app.core.pagination import Page, PageParams, page_params, paginate
 from app.modules.contents.models import ContentLanguage
 from app.modules.interactions import service
 from app.modules.interactions.ai_client import AiClient, get_ai_client
-from app.modules.interactions.models import Interaction, InteractionModule, ReviewStatus
+from app.modules.interactions.models import Interaction, InteractionModule, Outcome, ReviewStatus
 from app.modules.interactions.rules_runtime import RulesRuntime, get_rules_runtime
 from app.modules.interactions.schemas import AskJson, AskResponse, InteractionOut, ReviewBody
 from app.modules.sites.scope import ActorContext, get_actor_context
@@ -128,12 +128,32 @@ def list_interactions(
     ctx: ActorContext = Depends(get_actor_context),  # noqa: B008
 ) -> dict:
     ctx.ensure_role(service.REVIEW_ROLES)
-    stmt = select(Interaction).where(ctx.scope.filter(Interaction.site_id))
+    # Les questions anonymes (application publique) ne contiennent aucune donnée
+    # nominative : tous les rôles de revue les voient, quelle que soit la zone
+    # choisie par l'utilisatrice (sinon une question peut rester sans réponse).
+    stmt = select(Interaction).where(
+        or_(
+            ctx.scope.filter(Interaction.site_id),
+            Interaction.channel == "public_app",
+        )
+    )
     if review_status is not None:
         stmt = stmt.where(Interaction.review_status == review_status)
     if module is not None:
         stmt = stmt.where(Interaction.module == module)
-    stmt = stmt.order_by(Interaction.created_at, Interaction.id)
+    # Urgences d'abord (signe de danger décidé ou soupçonné), puis les plus anciennes.
+    urgent = case(
+        (
+            or_(
+                Interaction.outcome == Outcome.DANGER_SIGN,
+                Interaction.severity.is_not(None),
+                Interaction.intent == "report_danger_sign",
+            ),
+            0,
+        ),
+        else_=1,
+    )
+    stmt = stmt.order_by(urgent, Interaction.created_at, Interaction.id)
     items, total = paginate(ctx.session, stmt, page)
     return {"items": items, "total": total}
 
@@ -146,6 +166,12 @@ def review(
     body: ReviewBody,
     ctx: ActorContext = Depends(get_actor_context),  # noqa: B008
 ) -> Interaction:
-    interaction = service.review(ctx, service.get_interaction(ctx, interaction_id), body.note)
+    interaction = service.review(
+        ctx,
+        service.get_interaction(ctx, interaction_id),
+        body.note,
+        body.orientation_site_id,
+        body.triage,
+    )
     ctx.session.commit()
     return interaction

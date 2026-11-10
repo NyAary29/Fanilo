@@ -36,13 +36,6 @@ extension Labels on AppLocalizations {
         _ => wire,
       };
 
-  String severity(String? wire) => switch (wire) {
-        'critical' => severityCritical,
-        'urgent' => severityUrgent,
-        'routine' => severityRoutine,
-        _ => '—',
-      };
-
   String consentScope(String wire) => switch (ConsentScope.fromWire(wire)) {
         ConsentScope.reny => scopeReny,
         ConsentScope.tanora => scopeTanora,
@@ -75,6 +68,7 @@ extension Labels on AppLocalizations {
         SyncEntity.ancVisit => entityAncVisit,
         SyncEntity.referral => entityReferral,
         SyncEntity.alert => entityAlert,
+        SyncEntity.site => entitySite,
         null => wire,
       };
 
@@ -86,10 +80,19 @@ extension Labels on AppLocalizations {
       };
 
   /// Orientation lisible pour une action du moteur de règles (jamais un
-  /// diagnostic).
+  /// diagnostic). Énumération fermée du contrat (section 8 bis).
   String action(String code) => switch (code) {
         'refer_csb' => actionReferCsb,
-        'refer_advisor' || 'transfer_advisor' => actionReferAdvisor,
+        'transfer_counselor' => actionReferAdvisor,
+        'refer_community_agent' => actionReferCommunityAgent,
+        'refer_reference_facility' => actionReferFacility,
         _ => actionOther(code),
+      };
+
+  String siteKind(String wire) => switch (SiteKind.fromWire(wire)) {
+        SiteKind.csb => siteKindCsb,
+        SiteKind.referenceFacility => siteKindReference,
+        SiteKind.communityZone => siteKindCommunity,
+        null => wire,
       };
 }

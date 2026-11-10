@@ -68,7 +68,7 @@ Le `code` `FAN-XXXXXX` est **toujours attribué par le serveur**, y compris pour
 
 | Méthode | Chemin | Notes |
 |---|---|---|
-| GET / POST | `/beneficiaries/{id}/pregnancies` | à la création, le calendrier CPN est généré à partir du **calendrier configuré** |
+| GET / POST | `/beneficiaries/{id}/pregnancies` | à la création, le calendrier CPN est généré à partir du **calendrier configuré**, **à condition** qu'une date de référence soit connue (`lmp_date` ou `estimated_due_date`). Sans date, la grossesse est créée sans visite ; le calendrier est généré dès que l'une de ces dates est renseignée (PATCH ou sync), tant qu'aucune visite n'existe |
 | GET / PATCH | `/pregnancies/{id}` | |
 | GET | `/pregnancies/{id}/anc-visits` | |
 | PATCH | `/anc-visits/{id}` | marquer `done` ou `missed`, ou replanifier |
@@ -102,7 +102,7 @@ Si le calendrier n'est pas `validated` et que le mode démo est inactif, la cré
 | GET | `/interactions?review_status=pending` | `clinical_advisor`, `clinical_lead` : questions transférées ou non couvertes, pour revue |
 | POST | `/interactions/{id}/review` | `clinical_advisor`, `clinical_lead`. Corps `{note}` : le conseiller documente sa réponse ou son orientation |
 
-`Interaction` (lecture) : `{id, created_at, module, beneficiary_id|null, site_id|null, asked_by_user_id, transcript|null, outcome, actions, severity|null, content_code|null, alert_id|null, is_demo, review_status: "pending"|"reviewed"|"not_required", reviewed_by_user_id|null, reviewed_at|null, review_note|null}`. `review_status` vaut `pending` dès que `outcome = fallback` ou `danger_sign`.
+`Interaction` (lecture) : `{id, created_at, module, beneficiary_id|null, site_id|null, asked_by_user_id, transcript|null, sign_codes, intent|null, outcome, actions, severity|null, content_code|null, alert_id|null, is_demo, review_status: "pending"|"reviewed"|"not_required", reviewed_by_user_id|null, reviewed_at|null, review_note|null}`. `review_status` vaut `pending` dès que `outcome = fallback` ou `danger_sign`.
 
 `POST /interactions/ask`, deux formes possibles :
 - `multipart/form-data` avec `audio` (fichier), `module` et `beneficiary_id?` : transcription par le service IA ;
@@ -128,6 +128,7 @@ Réponse :
 
 Règles :
 - La décision vient du moteur de règles (`services/rules`), jamais du modèle IA.
+- **Question informative** : si aucun signe n'est détecté et qu'aucune règle n'est déclenchée, l'intention proposée par l'IA peut être servie par un contenu publié, selon la configuration versionnée `information*.yaml` (`outcome = "answer"`, `actions = []`). Les modules listés dans `counselor_confirmation_modules` (TANORA) passent toujours en `review_status = pending`. Voir [sécurité médicale §2 bis](securite-medicale.md).
 - Un `danger_sign` n'est **jamais** rétrogradé en fallback : si le contenu associé n'est pas publié, l'alerte est conservée, le contenu de fallback est servi et `transfer_counselor` est ajouté.
 - Si le service IA est indisponible ou peu fiable, ou si l'entrée n'est pas couverte, la réponse est `outcome = "fallback"` avec un transfert au conseiller.
 - **L'audio brut n'est jamais stocké** par l'API. Le transcript est conservé selon la politique de rétention.
@@ -140,7 +141,7 @@ Règles :
 
 | Méthode | Chemin | Notes |
 |---|---|---|
-| GET | `/alerts?status=open` | lecture : `community_agent`, `csb_head`, `clinical_advisor`, `clinical_lead`, dans le périmètre du site |
+| GET | `/alerts?status=open&sort=due\|recent` | lecture : `community_agent`, `csb_head`, `clinical_advisor`, `clinical_lead`, dans le périmètre du site |
 | GET | `/alerts/{id}` | inclut `events` |
 | POST | `/alerts/{id}/acknowledge` | destinataire, suppléant, ou `csb_head` du site |
 | POST | `/alerts/{id}/resolve` | `{note}` |
@@ -187,13 +188,17 @@ Réponse de `push` : `{results: [{change_id, status: "applied"|"conflict"|"rejec
 - **Idempotence :** un `change_id` déjà traité renvoie le même résultat sans réappliquer la modification.
 - **Conflit :** si `base_version` ≠ version serveur, le serveur n'écrase rien et renvoie l'état serveur. Le client décide (par défaut, la version serveur l'emporte et la modification locale est conservée pour revue).
 - Pour une ligne supprimée, le pull renvoie `deleted_at` renseigné et `data: null`.
+- **Périmètre du pull** : les entités de suivi (bénéficiaires, identités, consentements, grossesses, CPN, références, alertes) suivent le périmètre du site de l'utilisateur. **Exception : `site`**, référentiel non nominatif, est envoyé en entier (sites actifs et inactifs) pour permettre de choisir hors ligne une structure de destination de référence hors de son périmètre.
 - Le curseur est opaque. Il repose sur une **séquence de modification côté serveur** (`sync_seq`, strictement croissante et attribuée à chaque écriture), et non sur l'horloge. Le périmètre suit le site de l'utilisateur.
 
 ## 8 bis. Référentiels distribués aux applications
 
+Ces référentiels répondent **503** lorsqu'aucune version utilisable n'est servie (fichier absent ou invalide, ou statut non `validated` hors mode démo). Les applications conservent alors leur dernière copie en cache.
+
 | Méthode | Chemin | Notes |
 |---|---|---|
 | GET | `/reference/sign-codes?module=` | référentiel des codes de signes utilisé par le moteur de règles : `{catalog_id, version, status, is_demo, items: [{code, label_fr, label_mg\|null, modules}]}`. Il n'est servi que s'il est `validated`, ou si `FANILO_ALLOW_DEMO_CONTENT=true` |
+| GET | `/reference/menus?module=reny\|tanora&language=mg` | menu vocal (IVR/USSD, simulateur) : `{config_id, version, is_demo, module, items: [{key, code, title, body, audio_url, status}]}`. Seuls les contenus publiés sont proposés ; 503 si la configuration n'est pas servie (statut non `validated` hors mode démo) |
 | GET | `/reference/consent-information` | versions de l'information présentée lors du consentement : `{items: [{scope, version, status, summary_fr, summary_mg\|null}]}`, depuis un fichier de configuration versionné |
 
 **Énumération fermée des `actions`** (moteur de règles) : `refer_community_agent`, `transfer_counselor`, `refer_csb`, `refer_reference_facility`.
@@ -212,6 +217,18 @@ Réponse de `push` : `{results: [{change_id, status: "applied"|"conflict"|"rejec
 ```
 
 Réponse **agrégée uniquement**, sans aucun nominatif, accessible à `csb_head`, `clinical_lead`, `admin` et `data_officer`.
+
+`GET /dashboard/topics?days=30&site_id=` (F-16, mêmes rôles et même périmètre) → `{period_days, min_cell_size, total, suppressed_cells, suppressed_total, items: [{module, intent|null, outcome, content_code|null, count}], generated_at}`. Toute cellule de moins de `FANILO_STATS_MIN_CELL_SIZE` questions (5 par défaut) est masquée et seulement comptée dans `suppressed_*`.
+
+`GET /dashboard/activity?months=6&site_id=` (mêmes rôles) → `{months: [{month: "AAAA-MM", pregnancies, alerts, questions, anc_done}], sites: [{site_id, name, code, region, active_pregnancies, open_alerts}], generated_at}`. Agrégats uniquement ; une zone communautaire est comptée dans son CSB parent.
+
+## 9 ter. Espace agent : liste de travail
+
+`GET /followup/patients?q=&status=a_jour|a_suivre` : rôles nominatifs (`NOMINATIVE_DATA_ROLES`), périmètre du site. → `{items: [{beneficiary_id, code, site_id, site_name, age|null, display_name|null, village|null, pregnancy|null: {id, month|null, lmp_date, estimated_due_date}, next_anc|null: {visit_id, sequence, scheduled_date, days}, anc_done, anc_total, missed_anc, open_alerts, latest_alert_id|null, status, reasons: ["alerte_ouverte"|"cpn_manquee"|"dates_inconnues"]}], total}`. Les « à suivre » viennent en premier. **Chaque identité renvoyée produit un événement d'audit `identity.read`.** `month` est indicatif (calculé depuis la DDR), jamais une donnée clinique.
+
+## 9 bis. Interopérabilité (F-17, préparatoire)
+
+`GET /interop/dhis2/data-value-set?period=AAAAMM&include_small_cells=false` : `data_officer` uniquement, audité (`export.aggregates`). Export agrégé mensuel par CSB au format DHIS2 `dataValueSet`. Rien n'est transmis à un système tiers. Voir [interoperabilite.md](interoperabilite.md).
 
 ## 10. Audit (F-12)
 

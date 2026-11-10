@@ -11,13 +11,16 @@ const _identity = IdentityInput(displayName: 'Personne fictive');
 ConsentInput _consent({
   Set<ConsentScope> scopes = const {ConsentScope.reny},
   ConsentMethod? method = ConsentMethod.written,
-  String? version = 'INFO-DEMO-0.1',
+  String? version = 'demo-0.1',
   bool presented = true,
 }) =>
     ConsentInput(
         scopes: scopes,
         method: method,
-        informationVersion: version,
+        informationVersions: {
+          for (final s in ConsentScope.values)
+            if (version != null) s: version,
+        },
         informationPresented: presented);
 
 void main() {
@@ -28,6 +31,18 @@ void main() {
       expect(_consent(method: null).isComplete, isFalse);
       expect(_consent(version: ' ').isComplete, isFalse);
       expect(_consent(presented: false).isComplete, isFalse);
+    });
+
+    test('une version d\'information est exigée pour chaque portée cochée', () {
+      const partial = ConsentInput(
+        scopes: {ConsentScope.reny, ConsentScope.reminders},
+        method: ConsentMethod.oral,
+        informationVersions: {ConsentScope.reny: 'demo-0.1'},
+        informationPresented: true,
+      );
+      expect(partial.isComplete, isFalse, reason: 'rappels sans information servie');
+      expect(partial.versionFor(ConsentScope.reny), 'demo-0.1');
+      expect(partial.versionFor(ConsentScope.reminders), isNull);
     });
 
     test('pas d\'identité sans consentement complet', () {
@@ -81,6 +96,7 @@ void main() {
       expect(consents.map((c) => c.scope).toSet(), {'reny', 'reminders'});
       expect(consents.every((c) => c.collectedByUserId == testUser.id), isTrue);
       expect(consents.every((c) => c.method == 'written'), isTrue);
+      expect(consents.every((c) => c.informationVersion == 'demo-0.1'), isTrue);
       final outbox = await db.select(db.outbox).get();
       expect(outbox.map((o) => o.entity).toList(),
           ['beneficiary', 'consent', 'consent', 'beneficiary_identity']);

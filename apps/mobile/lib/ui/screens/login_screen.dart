@@ -4,7 +4,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../data/api/api_client.dart';
 import '../../data/auth/auth_repository.dart';
 import '../providers.dart';
+import '../theme.dart';
 import '../widgets/common.dart';
+import '../widgets/logo.dart';
 
 /// Connexion. Utilisé au premier lancement et pour se reconnecter quand la
 /// session a expiré (dans ce cas, l'écran est fermé après succès).
@@ -69,48 +71,78 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     final l = context.l10n;
-    return FaniloScaffold(
-      title: l.loginTitle,
-      body: ListView(
-        padding: const EdgeInsets.all(24),
+    final form = SoftCard(
+      padding: const EdgeInsets.all(20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Text(l.appTitle,
-              textAlign: TextAlign.center,
-              style: Theme.of(context).textTheme.displaySmall),
-          const SizedBox(height: 32),
+          Text(widget.isReauth ? l.reauthButton : l.loginTitle,
+              style: Theme.of(context)
+                  .textTheme
+                  .titleLarge
+                  ?.copyWith(color: FaniloColors.forestDark)),
+          const SizedBox(height: 16),
           TextField(
             key: const Key('login-field'),
             controller: _login,
             enabled: !widget.isReauth,
             autocorrect: false,
             textInputAction: TextInputAction.next,
-            decoration: InputDecoration(labelText: l.loginField),
+            decoration: InputDecoration(
+                labelText: l.loginField, prefixIcon: const Icon(Icons.person_outline)),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 14),
           TextField(
             key: const Key('password-field'),
             controller: _password,
             obscureText: true,
             onSubmitted: (_) => _submit(),
-            decoration: InputDecoration(labelText: l.passwordField),
+            decoration: InputDecoration(
+                labelText: l.passwordField, prefixIcon: const Icon(Icons.lock_outline)),
           ),
-          const SizedBox(height: 24),
+          const SizedBox(height: 18),
           if (_error != null)
-            Padding(
-              padding: const EdgeInsets.only(bottom: 16),
-              child: Text(_error!,
-                  style: TextStyle(
-                      color: Theme.of(context).colorScheme.error, fontSize: 16)),
-            ),
-          FilledButton(
+            NoticeCard(tone: NoticeTone.alert, text: _error!),
+          FilledButton.icon(
             key: const Key('login-button'),
             onPressed: _busy ? null : _submit,
-            child: _busy
+            icon: _busy
                 ? const SizedBox(
-                    height: 24, width: 24, child: CircularProgressIndicator())
-                : Text(l.loginButton),
+                    height: 22,
+                    width: 22,
+                    child: CircularProgressIndicator(strokeWidth: 2.5, color: Colors.white))
+                : const Icon(Icons.login),
+            label: Text(l.loginButton),
           ),
         ],
+      ),
+    );
+    return Scaffold(
+      appBar: widget.isReauth ? AppBar() : null,
+      bottomNavigationBar: const DisclaimerFooter(),
+      body: SafeArea(
+        child: ListView(
+          padding: const EdgeInsets.fromLTRB(20, 24, 20, 24),
+          children: [
+            Container(
+              padding: const EdgeInsets.fromLTRB(20, 28, 20, 28),
+              decoration: BoxDecoration(
+                color: FaniloColors.forest,
+                borderRadius: BorderRadius.circular(24),
+              ),
+              child: Column(children: [
+                FaniloLogo(size: 64, onDark: true, tagline: l.appTagline),
+                const SizedBox(height: 16),
+                Text(l.loginWelcome,
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(
+                        color: Colors.white, fontSize: 17, fontWeight: FontWeight.w600)),
+              ]),
+            ),
+            const SizedBox(height: 16),
+            form,
+          ],
+        ),
       ),
     );
   }

@@ -1,0 +1,40 @@
+# ============================================================================
+# DÉMONSTRATION — NON VALIDÉ — à relire juridiquement et cliniquement
+# ============================================================================
+# Information présentée dans l'application ANONYME « Femmes & Adolescentes »
+# (GET /public/information). Aucun compte, aucun dossier : ces textes ne parlent
+# donc ni de dossier de suivi ni de retrait de consentement nominatif.
+# Versions malgaches à rédiger par des locuteurs natifs (summary_mg: null).
+# ============================================================================
+
+catalog_id: fanilo-public-information-demo
+version: 0.1.0
+status: demo
+source: "DÉMO — textes fictifs, non relus juridiquement"
+
+items:
+  - scope: reny
+    version: public-demo-0.1
+    summary_fr: >-
+      [DÉMO] Vous pouvez poser vos questions sur la grossesse sans créer de compte.
+      FANILO ne vous demande ni votre nom ni votre numéro. Les réponses viennent de
+      messages validés par des professionnels de santé ; FANILO ne remplace pas une
+      consultation.
+    summary_mg: null
+
+  - scope: tanora
+    version: public-demo-0.1
+    summary_fr: >-
+      [DÉMO] Vos questions restent anonymes : ni nom, ni numéro. Si un conseiller doit
+      vous répondre, retrouvez sa réponse dans « Mes questions ». Vous pouvez effacer
+      vos questions à tout moment.
+    summary_mg: null
+
+  - scope: voice_processing
+    version: public-demo-0.1
+    summary_fr: >-
+      [DÉMO] Si vous parlez, votre voix est transformée en texte pour comprendre la
+      question, puis l'enregistrement est effacé : FANILO ne le conserve jamais. Selon
+      la configuration, la transcription peut être faite par un service externe
+      (OpenAI, hors de Madagascar), sans votre nom ni votre numéro.
+    summary_mg: null

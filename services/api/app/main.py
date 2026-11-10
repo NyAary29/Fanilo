@@ -14,10 +14,13 @@ from app.modules.auth.router import router as auth_router
 from app.modules.beneficiaries.router import router as beneficiaries_router
 from app.modules.contents.router import router as contents_router
 from app.modules.dashboard.router import router as dashboard_router
+from app.modules.followup.router import router as followup_router
 from app.modules.interactions.ai_client import AiClient, HttpAiClient
 from app.modules.interactions.router import MULTIPART_OVERHEAD_BYTES
 from app.modules.interactions.router import router as interactions_router
 from app.modules.interactions.rules_runtime import load_rules_runtime
+from app.modules.interop.router import router as interop_router
+from app.modules.public.router import router as public_router
 from app.modules.reference.router import router as reference_router
 from app.modules.referrals.router import router as referrals_router
 from app.modules.reny.router import router as reny_router
@@ -94,6 +97,9 @@ def create_app(settings: Settings | None = None, *, ai_client: AiClient | None =
     app.include_router(referrals_router)
     app.include_router(dashboard_router)
     app.include_router(reference_router)
+    app.include_router(interop_router)
+    app.include_router(followup_router)
+    app.include_router(public_router)
     return app
 
 

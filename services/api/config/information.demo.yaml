@@ -1,0 +1,47 @@
+# ============================================================================
+# DÉMONSTRATION — NON VALIDÉ CLINIQUEMENT — NE PAS UTILISER EN SOINS
+# ============================================================================
+# Association FICTIVE intention -> contenu et menus vocaux de démonstration.
+# - Les intentions viennent du lexique de démo du service IA
+#   (services/ai/lexicons/intents.demo.yaml).
+# - Les codes de contenu renvoient au catalogue de démo
+#   (config/contents.demo.yaml) : messages d'orientation neutres uniquement.
+# - Le seuil de confiance est une valeur technique de démonstration.
+# - TANORA : toute réponse est soumise à confirmation d'un conseiller
+#   (counselor_confirmation_modules), en attendant le protocole retenu.
+# La version réelle doit être rédigée et validée par le responsable clinique
+# dans un NOUVEAU fichier (status: validated), désigné par
+# FANILO_INFORMATION_CONFIG_PATH.
+# ============================================================================
+
+config_id: fanilo-information-demo
+version: 0.1.0
+status: demo
+source: "DÉMO — associations fictives, non validées cliniquement"
+min_intent_confidence: 0.6
+counselor_confirmation_modules: [tanora]
+
+intent_answers:
+  - intent: ask_anc_schedule
+    modules: [reny]
+    message_code: MSG_DEMO_INFO_ANC
+  - intent: ask_nutrition
+    modules: [reny, tanora]
+    message_code: MSG_DEMO_INFO_NUTRITION
+  - intent: ask_menstruation
+    modules: [tanora]
+    message_code: MSG_DEMO_INFO_MENSTRUATION
+
+menus:
+  reny:
+    - key: 1
+      message_code: MSG_DEMO_INFO_ANC
+    - key: 2
+      message_code: MSG_DEMO_INFO_NUTRITION
+  tanora:
+    - key: 1
+      message_code: MSG_DEMO_INFO_MENSTRUATION
+    - key: 2
+      message_code: MSG_DEMO_INFO_NUTRITION
+    - key: 3
+      message_code: MSG_DEMO_TANORA_COUNSELOR

@@ -99,7 +99,8 @@ def test_new_version_retires_previous_on_validation(client, world, lead2, db):
     published = client.get("/contents/published", headers=world.headers("ac_a")).json()
     assert [(i["id"], i["version"]) for i in published["items"]] == [(v1["id"], 1)]
     client.patch(
-        f"/contents/{v2['id']}", json={"body": "Nouveau texte fictif."},
+        f"/contents/{v2['id']}",
+        json={"body": "Nouveau texte fictif."},
         headers=world.headers("lead2"),
     )
     _post(client, world, lead2, f"/contents/{v2['id']}/submit")
@@ -112,9 +113,9 @@ def test_new_version_retires_previous_on_validation(client, world, lead2, db):
         (v2["id"], "Nouveau texte fictif.")
     ]
     retire_events = db.scalar(
-        select(func.count()).select_from(AuditEvent).where(
-            AuditEvent.action == "content.retire", AuditEvent.entity_id == v1["id"]
-        )
+        select(func.count())
+        .select_from(AuditEvent)
+        .where(AuditEvent.action == "content.retire", AuditEvent.entity_id == v1["id"])
     )
     assert retire_events == 1
 
@@ -122,9 +123,10 @@ def test_new_version_retires_previous_on_validation(client, world, lead2, db):
 def test_validation_does_not_retire_other_language(client, world, lead2):
     fr = _validated(client, world, "lead", lead2)
     mg = _validated(client, world, "lead", lead2, language="mg", title="Lohateny", body="Votoaty")
-    assert client.get(f"/contents/{fr['id']}", headers=world.headers("lead")).json()[
-        "status"
-    ] == "validated"
+    assert (
+        client.get(f"/contents/{fr['id']}", headers=world.headers("lead")).json()["status"]
+        == "validated"
+    )
     assert mg["status"] == "validated"
 
 
@@ -153,9 +155,9 @@ def test_management_roles(client, world):
         "/contents?status=draft&module=reny&language=fr", headers=world.headers("lead")
     ).json()
     assert listed["total"] == 1 and listed["items"][0]["id"] == item["id"]
-    assert client.get("/contents?status=validated", headers=world.headers("lead")).json()[
-        "total"
-    ] == 0
+    assert (
+        client.get("/contents?status=validated", headers=world.headers("lead")).json()["total"] == 0
+    )
 
 
 def test_published_respects_demo_mode(client, world, session_factory, settings, app):
@@ -170,22 +172,34 @@ def test_published_respects_demo_mode(client, world, session_factory, settings, 
     reny = client.get("/contents/published?module=reny", headers=headers).json()["items"]
     assert "MSG_DEMO_TRANSFER_COUNSELOR" in {i["code"] for i in reny}
     tanora = client.get("/contents/published?module=tanora", headers=headers).json()["items"]
-    assert {i["code"] for i in tanora} == {"MSG_DEMO_TRANSFER_COUNSELOR"}
+    # Filtre module : contenus tanora + communs, jamais ceux réservés à reny.
+    tanora_codes = {i["code"] for i in tanora}
+    assert {"MSG_DEMO_TRANSFER_COUNSELOR", "MSG_DEMO_INFO_MENSTRUATION"} <= tanora_codes
+    assert "MSG_DEMO_CRITICAL" not in tanora_codes
 
 
 def test_validated_content_preferred_over_demo(client, world, session_factory, settings, db):
     import_demo_contents(session_factory)
     settings.allow_demo_content = True
-    demo = db.scalar(select(ContentItem).where(ContentItem.code == "MSG_DEMO_ROUTINE"))
+    demo = db.scalar(
+        select(ContentItem).where(
+            ContentItem.code == "MSG_DEMO_ROUTINE", ContentItem.language == "fr"
+        )
+    )
     db.add(
         ContentItem(
-            code=demo.code, module=demo.module, language=demo.language, title="Validé fictif",
-            body="Texte validé fictif.", version=2, status=ContentStatus.VALIDATED,
+            code=demo.code,
+            module=demo.module,
+            language=demo.language,
+            title="Validé fictif",
+            body="Texte validé fictif.",
+            version=2,
+            status=ContentStatus.VALIDATED,
         )
     )
     db.commit()
     items = client.get("/contents/published", headers=world.headers("ac_a")).json()["items"]
-    routine = [i for i in items if i["code"] == "MSG_DEMO_ROUTINE"]
+    routine = [i for i in items if i["code"] == "MSG_DEMO_ROUTINE" and i["language"] == "fr"]
     assert [(i["status"], i["title"]) for i in routine] == [("validated", "Validé fictif")]
 
 
@@ -201,11 +215,19 @@ def test_demo_catalog_covers_rules_and_is_marked_demo():
     required = {r["message_code"] for r in ruleset["rules"]} | {ruleset["fallback_message_code"]}
     assert required <= catalog.codes
     for item in catalog.items:
-        assert item.body.startswith("[DÉMO]")
+        assert item.body.startswith(("[DÉMO]", "[DEMO]"))
         # Orientation uniquement : ni médicament, ni dosage, ni promesse de prise en charge.
         lowered = item.body.lower()
-        for forbidden in ("médicament", " mg ", "comprimé", "dose", "va vous rappeler",
-                          "pris en charge", "prise en charge", "immédiatement"):
+        for forbidden in (
+            "médicament",
+            " mg ",
+            "comprimé",
+            "dose",
+            "va vous rappeler",
+            "pris en charge",
+            "prise en charge",
+            "immédiatement",
+        ):
             assert forbidden not in lowered, (item.code, forbidden)
     fallback = next(i for i in catalog.items if i.code == ruleset["fallback_message_code"])
     assert re.search(r"aucun délai .* garanti", fallback.body)
@@ -223,9 +245,9 @@ def _file_settings(settings, tmp_path: Path):
 def test_cli_import_demo_is_idempotent(settings, tmp_path, capsys):
     local = _file_settings(settings, tmp_path)
     assert contents_cli.import_demo(DEFAULT_CONTENTS_DEMO_PATH, local) == 0
-    assert "importés : 6" in capsys.readouterr().out
+    assert "importés : 22" in capsys.readouterr().out
     assert contents_cli.import_demo(DEFAULT_CONTENTS_DEMO_PATH, local) == 0
-    assert "importés : 0, déjà présents : 6" in capsys.readouterr().out
+    assert "importés : 0, déjà présents : 22" in capsys.readouterr().out
     engine = make_engine(local.database_url)
     try:
         with engine.connect() as conn:

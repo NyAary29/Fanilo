@@ -16,7 +16,8 @@ Future<void> main() async {
     db = AppDatabase(await openEncryptedExecutor(secureStore));
     // Force l'ouverture maintenant : échoue si SQLCipher est absent.
     await db.customSelect('SELECT 1').get();
-  } on Object catch (e) {
+  } on Object catch (e, st) {
+    debugPrint('FANILO: ouverture de la base chiffrée refusée : $e\n$st');
     runApp(_FatalErrorApp(error: e));
     return;
   }

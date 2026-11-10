@@ -1,4 +1,4 @@
-import { Navigate } from 'react-router-dom';
+import { Link, Navigate } from 'react-router-dom';
 import { useCurrentUser } from '../auth/AuthContext';
 import { homePathFor, ROLE_LABELS } from '../auth/permissions';
 
@@ -11,8 +11,8 @@ export function HomePage() {
     <section className="panel">
       <h1>Bienvenue</h1>
       <p>
-        Aucun écran du tableau de bord n&apos;est prévu pour le rôle « {ROLE_LABELS[user.role]} ». Les agents
-        communautaires utilisent l&apos;application mobile.
+        Aucun écran du tableau de bord n&apos;est prévu pour le rôle « {ROLE_LABELS[user.role]} ». Voir{' '}
+        <Link to="/aide">l&apos;aide : qui fait quoi ?</Link>
       </p>
     </section>
   );

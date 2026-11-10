@@ -1,6 +1,7 @@
 """Endpoints des alertes (section 7 du contrat)."""
 
 import uuid
+from typing import Literal
 
 from fastapi import APIRouter, Depends
 from sqlalchemy import select
@@ -24,6 +25,7 @@ def _detail(ctx: ActorContext, alert: Alert) -> AlertDetail:
 @router.get("", response_model=Page[AlertOut], summary="Lister (périmètre du site)")
 def list_alerts(
     status: AlertStatus | None = None,
+    sort: Literal["due", "recent"] = "due",
     page: PageParams = Depends(page_params),  # noqa: B008
     ctx: ActorContext = Depends(get_actor_context),  # noqa: B008
 ) -> dict:
@@ -31,7 +33,10 @@ def list_alerts(
     stmt = select(Alert).where(Alert.deleted_at.is_(None), ctx.scope.filter(Alert.site_id))
     if status is not None:
         stmt = stmt.where(Alert.status == status)
-    stmt = stmt.order_by(Alert.due_at, Alert.id)
+    # « due » : échéance la plus proche d'abord (liste de travail) ; « recent » : dernières créées.
+    stmt = stmt.order_by(
+        *((Alert.created_at.desc(), Alert.id) if sort == "recent" else (Alert.due_at, Alert.id))
+    )
     items, total = paginate(ctx.session, stmt, page)
     return {"items": items, "total": total}
 

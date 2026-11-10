@@ -88,3 +88,95 @@ describe('Données nominatives', () => {
     expect(screen.queryByRole('button', { name: /Afficher l'identité/ })).not.toBeInTheDocument();
   });
 });
+
+describe('Simulateur vocal', () => {
+  it('pose une question écrite et affiche la réponse, sans promesse de prise en charge', async () => {
+    const user = userEvent.setup();
+    await renderApp('/simulateur', { login: 'agent' });
+    expect(await screen.findByRole('heading', { name: 'Assistant vocal' })).toBeInTheDocument();
+    await user.click(screen.getByRole('tab', { name: 'Question écrite' }));
+    await user.type(screen.getByLabelText(/Question \(malgache ou français\)/), 'fanontaniana');
+    await user.click(screen.getByRole('button', { name: 'Envoyer la question' }));
+    expect(await screen.findByText('Transfert à un conseiller humain')).toBeInTheDocument();
+    expect(screen.getByText('Transférer à un conseiller')).toBeInTheDocument();
+    expect(screen.getByText('FANILO ne remplace pas un professionnel de santé.', { selector: 'strong' })).toBeInTheDocument();
+  });
+
+  it("signale un signe de danger : l'alerte reste en attente d'accusé de réception", async () => {
+    const user = userEvent.setup();
+    await renderApp('/simulateur', { login: 'agent' });
+    await user.click(await screen.findByRole('tab', { name: 'Signes (AC)' }));
+    await user.click(await screen.findByRole('checkbox', { name: /Signe fictif n° 1/ }));
+    await user.click(screen.getByRole('button', { name: 'Signaler' }));
+    expect(await screen.findByText(/en attente d'accusé de réception/)).toBeInTheDocument();
+  });
+
+  it('affiche le menu à touches et le contenu choisi', async () => {
+    const user = userEvent.setup();
+    await renderApp('/simulateur', { login: 'agent' });
+    await user.click(await screen.findByRole('button', { name: /Consultations prénatales/ }));
+    expect(await screen.findByText(/Touche 1/)).toBeInTheDocument();
+  });
+});
+
+describe('Statistiques', () => {
+  it("affiche les cellules agrégées ; l'export DHIS2 est réservé au responsable données", async () => {
+    await renderApp('/statistiques', { login: 'admin' });
+    expect(await screen.findByText('MSG_DEMO_INFO_ANC')).toBeInTheDocument();
+    expect(screen.queryByText('Export agrégé (format DHIS2)')).not.toBeInTheDocument();
+  });
+
+  it('le responsable données voit l’export', async () => {
+    await renderApp('/statistiques', { login: 'donnees' });
+    expect(await screen.findByText('Export agrégé (format DHIS2)')).toBeInTheDocument();
+  });
+});
+
+describe('Espace agent et tableau de bord', () => {
+  it('liste les patientes, les « à suivre » en tête, et ouvre le détail', async () => {
+    const user = userEvent.setup();
+    await renderApp('/patientes', { login: 'chef.csb' });
+    expect(await screen.findByRole('heading', { name: 'Mes patientes' })).toBeInTheDocument();
+    expect(await screen.findByText('Prochain rappel')).toBeInTheDocument();
+    expect(screen.getAllByText('À suivre', { selector: '.badge' }).length).toBeGreaterThan(0);
+    await user.click(screen.getByRole('radio', { name: /À suivre/ }));
+    expect(screen.queryAllByText('À jour', { selector: '.badge' })).toHaveLength(0);
+  });
+
+  it('affiche le graphique d’activité avec sa vue tableau', async () => {
+    const user = userEvent.setup();
+    await renderApp('/tableau-de-bord', { login: 'admin' });
+    expect(await screen.findByRole('heading', { name: 'Activité sur 6 mois' })).toBeInTheDocument();
+    await user.click(await screen.findByRole('button', { name: 'Voir les données' }));
+    expect(screen.getByRole('table')).toBeInTheDocument();
+    expect(screen.getByText('Par centre de santé')).toBeInTheDocument();
+  });
+});
+
+describe('Aide et orientation depuis une alerte', () => {
+  it("explique le rôle de l'utilisateur", async () => {
+    await renderApp('/aide', { login: 'chef.csb' });
+    expect(await screen.findByRole('heading', { name: 'Votre rôle' })).toBeInTheDocument();
+    expect(screen.getByText(/montre son code/)).toBeInTheDocument();
+  });
+
+  it('crée une référence depuis une alerte', async () => {
+    const user = userEvent.setup();
+    await renderApp(`/alertes/${ALERT_DEMO}`, { login: 'chef.csb' });
+    const select = await screen.findByLabelText('Vers');
+    const option = (await within(select).findByRole('option', { name: /Centre de référence fictif/ })) as HTMLOptionElement;
+    await user.selectOptions(select, option.value);
+    await user.click(screen.getByRole('button', { name: 'Créer la référence' }));
+    expect(await screen.findByRole('heading', { name: 'Référence créée' })).toBeInTheDocument();
+  });
+});
+
+describe('Suivi des orientations', () => {
+  it('le responsable du centre retrouve la personne par son code', async () => {
+    const user = userEvent.setup();
+    await renderApp('/suivi', { login: 'chef.csb' });
+    expect(await screen.findByText('K7-42')).toBeInTheDocument();
+    await user.type(screen.getByLabelText('Code montré par la personne'), 'ZZ-99');
+    expect(await screen.findByText(/Aucune personne avec le code ZZ-99/)).toBeInTheDocument();
+  });
+});

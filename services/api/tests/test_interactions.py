@@ -358,7 +358,7 @@ def test_language_preference_and_fallback(client, world, contents, fake_ai, db):
     db.add(
         ContentItem(
             code="MSG_DEMO_ROUTINE", module=ContentModule.RENY, language=ContentLanguage.MG,
-            title="Lohateny fictif", body="Votoaty fictif.", version=1,
+            title="Lohateny fictif", body="Votoaty fictif.", version=2,
             status=ContentStatus.VALIDATED,
         )
     )

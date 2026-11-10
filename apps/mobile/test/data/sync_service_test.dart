@@ -15,7 +15,7 @@ RegistrationDraft _draft() => RegistrationDraft(
       consent: const ConsentInput(
         scopes: {ConsentScope.reny},
         method: ConsentMethod.oral,
-        informationVersion: 'INFO-DEMO-0.1',
+        informationVersions: {ConsentScope.reny: 'demo-0.1'},
         informationPresented: true,
       ),
       identity: const IdentityInput(displayName: 'Personne fictive'),

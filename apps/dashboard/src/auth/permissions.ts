@@ -26,22 +26,45 @@ export const ROLE_LABELS: Readonly<Record<Role, string>> = {
   technical: 'Équipe technique',
 };
 
-export type Section = 'dashboard' | 'alerts' | 'referrals' | 'contents' | 'users' | 'sites' | 'interactions' | 'audit';
+export type Section =
+  | 'dashboard'
+  | 'patients'
+  | 'stats'
+  | 'alerts'
+  | 'referrals'
+  | 'contents'
+  | 'users'
+  | 'sites'
+  | 'interactions'
+  | 'orientations'
+  | 'simulator'
+  | 'audit';
 
 /** Rôles autorisés par écran (dérivés du contrat ; voir README pour les hypothèses). */
 export const SECTION_ROLES: Readonly<Record<Section, readonly Role[]>> = {
   dashboard: ['csb_head', 'clinical_lead', 'admin', 'data_officer'],
+  stats: ['csb_head', 'clinical_lead', 'admin', 'data_officer'],
+  // Suivi des personnes orientées vers le centre (GET /followup/orientations).
+  orientations: ['csb_head', 'clinical_advisor', 'clinical_lead'],
+  // Liste de travail nominative (GET /followup/patients) : rôles de soin.
+  patients: ['community_agent', 'csb_head', 'clinical_advisor', 'clinical_lead'],
   alerts: ['csb_head', 'clinical_advisor', 'clinical_lead'],
   referrals: ['csb_head', 'clinical_advisor', 'clinical_lead'],
   contents: ['clinical_lead', 'admin'],
   users: ['admin'],
   sites: ['admin'],
   interactions: ['clinical_advisor', 'clinical_lead'],
+  // Rôles de soin autorisés par l'API à poser une question (POST /interactions/ask).
+  simulator: ['community_agent', 'csb_head', 'clinical_advisor', 'clinical_lead'],
   audit: ['data_officer'],
 };
 
 export const SECTION_PATHS: Readonly<Record<Section, string>> = {
   dashboard: '/tableau-de-bord',
+  stats: '/statistiques',
+  patients: '/patientes',
+  orientations: '/suivi',
+  simulator: '/simulateur',
   alerts: '/alertes',
   referrals: '/references',
   contents: '/contenus',
@@ -53,20 +76,28 @@ export const SECTION_PATHS: Readonly<Record<Section, string>> = {
 
 export const SECTION_LABELS: Readonly<Record<Section, string>> = {
   dashboard: 'Tableau de bord',
+  stats: 'Statistiques',
+  patients: 'Mes patientes',
+  orientations: 'Suivi des orientations',
+  simulator: 'Assistant vocal',
   alerts: 'Alertes',
   referrals: 'Références',
   contents: 'Contenus',
   users: 'Utilisateurs',
   sites: 'Sites',
-  interactions: 'Questions à revoir',
+  interactions: 'Questions des femmes',
   audit: "Journal d'audit",
 };
 
 export const SECTION_ORDER: readonly Section[] = [
   'dashboard',
+  'interactions',
+  'orientations',
+  'patients',
   'alerts',
   'referrals',
-  'interactions',
+  'simulator',
+  'stats',
   'contents',
   'users',
   'sites',

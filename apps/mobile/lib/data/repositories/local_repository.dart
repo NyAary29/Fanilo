@@ -17,6 +17,18 @@ class NoActiveRenyConsentException implements Exception {
       'Consentement RENY actif requis avant de déclarer une grossesse.';
 }
 
+/// Dates de grossesse incohérentes (même garde-fou de saisie que le
+/// serveur, non clinique) : dernières règles dans le futur ou trop
+/// anciennes, terme prévu avant les dernières règles.
+enum PregnancyDatesError { lmpInFuture, lmpTooOld, dueBeforeLmp }
+
+class InvalidPregnancyDatesException implements Exception {
+  const InvalidPregnancyDatesException(this.error);
+  final PregnancyDatesError error;
+  @override
+  String toString() => 'Dates de grossesse incohérentes : ${error.name}';
+}
+
 class InvalidStateException implements Exception {
   const InvalidStateException(this.message);
   final String message;
@@ -90,7 +102,7 @@ class LocalRepository {
           beneficiaryId: beneficiaryId,
           scope: scope.wire,
           method: consent.method!.wire,
-          informationVersion: consent.informationVersion!.trim(),
+          informationVersion: consent.versionFor(scope)!,
           collectedByUserId: user.id,
           collectedAt: now,
           withdrawnAt: null,
@@ -169,11 +181,13 @@ class LocalRepository {
   Future<String> createPregnancy({
     required String beneficiaryId,
     String? lmpDate,
+    String? estimatedDueDate,
     DatesConfirmedBy confirmedBy = DatesConfirmedBy.acDeclared,
   }) async {
     if (!await hasActiveRenyConsent(beneficiaryId)) {
       throw const NoActiveRenyConsentException();
     }
+    checkPregnancyDates(lmpDate, estimatedDueDate);
     final id = _uuid.v4();
     final now = _ts();
     await db.transaction(() async {
@@ -182,7 +196,7 @@ class LocalRepository {
         beneficiaryId: beneficiaryId,
         status: PregnancyStatus.active.wire,
         lmpDate: lmpDate,
-        estimatedDueDate: null,
+        estimatedDueDate: estimatedDueDate,
         datesConfirmedBy: confirmedBy.wire,
         version: 0,
         createdAt: now,
@@ -199,6 +213,59 @@ class LocalRepository {
       );
     });
     return id;
+  }
+
+  /// Garde-fou de saisie identique à celui du serveur (`_check_dates`) :
+  /// évite un refus prévisible. Ne calcule rien.
+  void checkPregnancyDates(String? lmpDate, String? estimatedDueDate) {
+    final today = DateTime.parse(_today());
+    final lmp = lmpDate == null ? null : DateTime.parse(lmpDate);
+    final due = estimatedDueDate == null ? null : DateTime.parse(estimatedDueDate);
+    if (lmp != null && lmp.isAfter(today)) {
+      throw const InvalidPregnancyDatesException(PregnancyDatesError.lmpInFuture);
+    }
+    if (lmp != null && lmp.isBefore(today.subtract(const Duration(days: 320)))) {
+      throw const InvalidPregnancyDatesException(PregnancyDatesError.lmpTooOld);
+    }
+    if (lmp != null && due != null && !due.isAfter(lmp)) {
+      throw const InvalidPregnancyDatesException(PregnancyDatesError.dueBeforeLmp);
+    }
+  }
+
+  /// Renseigne ou corrige les dates d'une grossesse **active** (dernières
+  /// règles, terme prévu saisi par l'AC, source des dates). Part par l'outbox
+  /// (upsert `pregnancy`). Si la grossesse n'a pas encore de visites, le
+  /// serveur génère alors le calendrier CPN, reçu au pull suivant :
+  /// l'application ne calcule ni le calendrier ni le terme.
+  Future<void> updatePregnancyDates(
+    String pregnancyId, {
+    required String? lmpDate,
+    required String? estimatedDueDate,
+    required DatesConfirmedBy confirmedBy,
+  }) async {
+    checkPregnancyDates(lmpDate, estimatedDueDate);
+    await db.transaction(() async {
+      final row = await (db.select(db.pregnancies)
+            ..where((p) => p.id.equals(pregnancyId)))
+          .getSingle();
+      if (row.status != PregnancyStatus.active.wire || row.deletedAt != null) {
+        throw const InvalidStateException('Seule une grossesse en cours peut être modifiée.');
+      }
+      final updated = row.copyWith(
+        lmpDate: Value(lmpDate),
+        estimatedDueDate: Value(estimatedDueDate),
+        datesConfirmedBy: confirmedBy.wire,
+        updatedAt: Value(_ts()),
+      );
+      await db.update(db.pregnancies).replace(updated);
+      await outbox.enqueue(
+        entity: SyncEntity.pregnancy,
+        op: SyncOp.upsert,
+        id: pregnancyId,
+        baseVersion: _base(row.version),
+        data: pregnancyJson(updated),
+      );
+    });
   }
 
   /// Marque une CPN réalisée ou manquée (seulement depuis `planned`).
@@ -263,6 +330,80 @@ class LocalRepository {
       );
     });
   }
+
+  /// Crée une référence (statut `proposed`, contrat section 7) vers un site
+  /// synchronisé. `from_site_id` = site de la bénéficiaire, à défaut celui de
+  /// l'utilisateur. Envoyée par l'outbox comme les autres entités.
+  Future<String> createReferral({
+    required String beneficiaryId,
+    required String toSiteId,
+    String? reason,
+    String? alertId,
+    required UserProfile user,
+  }) async {
+    final id = _uuid.v4();
+    final now = _ts();
+    await db.transaction(() async {
+      final ben = await (db.select(db.beneficiaries)
+            ..where((b) => b.id.equals(beneficiaryId)))
+          .getSingleOrNull();
+      if (ben == null || ben.deletedAt != null) {
+        throw const InvalidStateException('Bénéficiaire introuvable.');
+      }
+      final site = await (db.select(db.sites)..where((s) => s.id.equals(toSiteId)))
+          .getSingleOrNull();
+      if (site == null || site.deletedAt != null || !site.isActive) {
+        throw const InvalidStateException('Site destinataire inconnu ou inactif.');
+      }
+      final row = ReferralRow(
+        id: id,
+        beneficiaryId: beneficiaryId,
+        alertId: alertId,
+        fromSiteId: ben.siteId ?? user.siteId,
+        toSiteId: toSiteId,
+        status: ReferralStatus.proposed.wire,
+        reason: _blankToNull(reason),
+        outcomeNote: null,
+        version: 0,
+        createdAt: now,
+        updatedAt: now,
+        deletedAt: null,
+      );
+      await db.into(db.referrals).insert(row);
+      await outbox.enqueue(
+        entity: SyncEntity.referral,
+        op: SyncOp.upsert,
+        id: id,
+        baseVersion: null,
+        data: referralJson(row),
+      );
+    });
+    return id;
+  }
+
+  /// Sites actifs pouvant recevoir une référence : CSB et structures de
+  /// référence d'abord, puis zones communautaires, par nom.
+  Stream<List<SiteRow>> watchReferralSites({String? excludeSiteId}) =>
+      (db.select(db.sites)
+            ..where((s) => s.isActive.equals(true) & s.deletedAt.isNull()))
+          .watch()
+          .map((rows) {
+        final list = rows.where((s) => s.id != excludeSiteId).toList();
+        int rank(SiteRow s) => switch (SiteKind.fromWire(s.kind)) {
+              SiteKind.csb => 0,
+              SiteKind.referenceFacility => 1,
+              SiteKind.communityZone => 2,
+              null => 3,
+            };
+        list.sort((a, b) {
+          final r = rank(a).compareTo(rank(b));
+          return r != 0 ? r : a.name.compareTo(b.name);
+        });
+        return list;
+      });
+
+  Stream<Map<String, SiteRow>> watchSitesById() =>
+      db.select(db.sites).watch().map((rows) => {for (final r in rows) r.id: r});
 
   // ============================================================ conflits
 
@@ -341,6 +482,18 @@ class LocalRepository {
             ..where((v) => v.pregnancyId.equals(pregnancyId) & v.deletedAt.isNull())
             ..orderBy([(v) => OrderingTerm.asc(v.sequence)]))
           .watch();
+
+  /// Toutes les grossesses (vue d'ensemble « Mes patientes »).
+  Stream<List<PregnancyRow>> watchAllPregnancies() => (db.select(db.pregnancies)
+        ..where((p) => p.deletedAt.isNull())
+        ..orderBy([(p) => OrderingTerm.desc(p.createdAt)]))
+      .watch();
+
+  /// Toutes les CPN reçues du serveur (vue d'ensemble « Mes patientes »).
+  Stream<List<AncVisitRow>> watchAllAncVisits() => (db.select(db.ancVisits)
+        ..where((v) => v.deletedAt.isNull())
+        ..orderBy([(v) => OrderingTerm.asc(v.sequence)]))
+      .watch();
 
   /// CPN planifiées jusqu'à [days] jours (en retard incluses).
   Stream<List<AncVisitRow>> watchUpcomingAnc({int days = 7}) {

@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../data/local/database.dart';
+import '../../data/repositories/outbox_repository.dart';
 import '../labels.dart';
 import '../providers.dart';
 import '../widgets/common.dart';
@@ -126,7 +127,19 @@ class _RejectedCard extends ConsumerWidget {
                 child: OutlinedButton(
                   onPressed: () async {
                     if (!await confirmDialog(context, '${l.discard} ?')) return;
-                    await ref.read(outboxRepositoryProvider).discard(row.changeId);
+                    final outcome =
+                        await ref.read(outboxRepositoryProvider).discard(row.changeId);
+                    if (!context.mounted) return;
+                    switch (outcome) {
+                      case DiscardOutcome.reloadFromServer:
+                        showSnack(context, l.discardedReload);
+                        // Recharge l'état serveur (curseur remis à zéro).
+                        ref.read(syncServiceProvider).sync(force: true);
+                      case DiscardOutcome.removedLocal:
+                        showSnack(context, l.discardedLocal);
+                      case DiscardOutcome.none:
+                        break;
+                    }
                   },
                   child: Text(l.discard),
                 ),

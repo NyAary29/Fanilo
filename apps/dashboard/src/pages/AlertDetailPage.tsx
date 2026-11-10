@@ -3,10 +3,11 @@ import { useState, type FormEvent } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { useApi } from '../api/ApiProvider';
 import { useCurrentUser } from '../auth/AuthContext';
-import { canAcknowledgeAlert } from '../auth/permissions';
+import { canAcknowledgeAlert, hasRole } from '../auth/permissions';
 import { Badge } from '../components/Badge';
 import { BeneficiaryRef } from '../components/BeneficiaryRef';
 import { DemoBanner } from '../components/DemoBanner';
+import { useSites } from '../components/hooks';
 import { ErrorMessage, QueryState } from '../components/QueryState';
 import { ALERT_EVENT_LABELS, ALERT_STATUS_LABELS, canResolveStatus, isAlertOverdue, SEVERITY_LABELS, severityTone } from '../domain/alerts';
 import { formatDateTime, shortId } from '../domain/format';
@@ -52,6 +53,73 @@ function NoteForm({ label, submitLabel, onSubmit, pending, error }: {
       <div>
         <button type="submit" className="btn btn-secondary" disabled={pending}>
           {submitLabel}
+        </button>
+      </div>
+    </form>
+  );
+}
+
+/** Rôles autorisés par l'API à créer une référence (lecture seule pour clinical_lead). */
+const REFERRAL_CREATORS = ['community_agent', 'csb_head', 'clinical_advisor'] as const;
+
+/** Orienter la patiente vers une autre structure, directement depuis l'alerte. */
+function ReferForm({ alertId, beneficiaryId }: { alertId: string; beneficiaryId: string }) {
+  const api = useApi();
+  const queryClient = useQueryClient();
+  const { sites } = useSites();
+  const [toSite, setToSite] = useState('');
+  const [reason, setReason] = useState('');
+  const create = useMutation({
+    mutationFn: () => api.createReferral({ beneficiary_id: beneficiaryId, alert_id: alertId, to_site_id: toSite, reason: reason.trim() || null }),
+    onSuccess: () => void queryClient.invalidateQueries({ queryKey: ['referrals'] }),
+  });
+  const choices = [...sites.filter((s) => s.is_active && s.kind !== 'community_zone')].sort((x, y) =>
+    x.kind === y.kind ? x.name.localeCompare(y.name) : x.kind === 'reference_facility' ? -1 : 1,
+  );
+  if (create.data) {
+    return (
+      <div className="panel stack-sm" role="status">
+        <h2>Référence créée</h2>
+        <p>
+          La patiente est orientée. Suivez son arrivée dans{' '}
+          <Link to={`/references/${create.data.id}`}>la fiche de la référence</Link>.
+        </p>
+      </div>
+    );
+  }
+  return (
+    <form
+      className="panel stack-sm"
+      onSubmit={(e) => {
+        e.preventDefault();
+        if (toSite) create.mutate();
+      }}
+    >
+      <h2>Orienter la patiente (référence)</h2>
+      <p className="muted small">
+        Si la patiente doit aller dans une autre structure (hôpital de référence, autre CSB), créez une référence : vous
+        suivrez ensuite son arrivée.
+      </p>
+      <div className="field">
+        <label htmlFor="refer-site">Vers</label>
+        <select id="refer-site" required value={toSite} onChange={(e) => setToSite(e.target.value)}>
+          <option value="">Choisir une structure…</option>
+          {choices.map((s) => (
+            <option key={s.id} value={s.id}>
+              {s.name}
+              {s.kind === 'reference_facility' ? ' (structure de référence)' : ''}
+            </option>
+          ))}
+        </select>
+      </div>
+      <div className="field">
+        <label htmlFor="refer-reason">Motif (facultatif)</label>
+        <input id="refer-reason" value={reason} maxLength={1000} onChange={(e) => setReason(e.target.value)} />
+      </div>
+      <ErrorMessage error={create.error} />
+      <div>
+        <button type="submit" className="btn btn-primary" disabled={!toSite || create.isPending}>
+          Créer la référence
         </button>
       </div>
     </form>
@@ -146,6 +214,10 @@ export function AlertDetailPage() {
                 error={addNote.error}
               />
             </div>
+
+            {a.beneficiary_id && hasRole(user, REFERRAL_CREATORS) && (
+              <ReferForm alertId={a.id} beneficiaryId={a.beneficiary_id} />
+            )}
 
             <div className="panel">
               <h2>Journal des événements</h2>

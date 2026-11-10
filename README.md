@@ -12,34 +12,45 @@ Projet porté par Havanana Impact. Développement : Creatic. Statut : **pré-pil
 ```text
 services/api/     Backend FastAPI (Python 3.12, PostgreSQL)
 services/rules/   Moteur de règles médicales déterministe (sans IA)
-docs/             Exigences, sécurité médicale, IA, architecture
-apps/             (à venir) application Flutter AC, dashboard React
+services/ai/      Transcription (interface ASR) et classification d'intentions, banc d'évaluation
+apps/dashboard/   Interface web CSB, clinique et administration (React + TypeScript)
+apps/mobile/      Application de l'agent communautaire (Flutter, hors connexion, SQLCipher)
+apps/femmes/      Application anonyme « Femmes & Adolescentes » (Flutter, sans compte)
+scripts/          Démarrage local, test de bout en bout, sauvegarde et restauration
+docs/             Exigences, contrat d'API, sécurité médicale, IA, interopérabilité, exploitation
 ```
 
-## Démarrage rapide (backend)
+## Démarrage local (tout en une commande)
 
-Prérequis : [uv](https://docs.astral.sh/uv/). Il installe lui-même Python 3.12.
+Prérequis : Docker (compose v2), [uv](https://docs.astral.sh/uv/), Node 22+ ; Flutter pour le mobile.
 
 ```bash
-cp .env.example .env            # puis adapter les valeurs
-cd services/api
-uv sync
-uv run uvicorn app.main:app --reload
-# http://localhost:8000/health  ·  http://localhost:8000/docs
+scripts/dev.sh start
 ```
 
-### Avec Docker (développement)
+Le script crée `.env` (secrets générés, mode démo), lance PostgreSQL, applique les
+migrations, charge le jeu de démonstration, puis démarre le service IA, l'API, le
+dashboard et les tâches planifiées (escalade des alertes, rappels).
 
-```bash
-cp .env.example .env
-docker compose up --build
-```
+- Dashboard : http://localhost:5174, API : http://localhost:8000 (`/docs`)
+- Comptes de démo (mot de passe `fanilo-demo-2026`) : `admin`, `donnees`, `responsable`,
+  `conseiller`, `chef.csb.a`, `ac.a1`… (liste complète dans [docs/exploitation.md](docs/exploitation.md))
+- Mobile agent : `cd apps/mobile && flutter run --dart-define=FANILO_API_URL=http://localhost:8000`
+- App femmes (sans compte) : `cd apps/femmes && flutter run --dart-define=FANILO_API_URL=http://localhost:8000` ; API publique décrite dans [docs/api-publique.md](docs/api-publique.md)
+- Téléphone Android branché en USB : `adb reverse tcp:8000 tcp:8000` d'abord
+- Vérification de bout en bout : `scripts/dev.sh smoke`. Arrêt : `scripts/dev.sh stop`.
+
+Toutes les données et tous les contenus chargés sont **fictifs** et marqués « DÉMO ».
 
 ## Tests et qualité
 
 ```bash
 cd services/api   && uv run pytest && uv run ruff check .
 cd services/rules && uv run pytest && uv run ruff check .
+cd services/ai    && uv run pytest && uv run ruff check .
+cd apps/dashboard && npm test -- --run && npm run lint && npm run build
+cd apps/mobile    && flutter analyze && flutter test
+cd apps/femmes    && flutter analyze && flutter test
 ```
 
 La CI GitHub Actions exécute ces mêmes commandes à chaque pull request.
@@ -55,10 +66,16 @@ Toute la configuration passe par des variables d'environnement préfixées `FANI
 
 - [Matrice des exigences](docs/exigences.md) : correspondance entre le cahier des charges et les lots techniques
 - [Sécurité médicale](docs/securite-medicale.md)
+- [Contrat d'API](docs/api-contrat.md) et [architecture](docs/architecture.md)
 - [Benchmark ASR malgache](docs/ia/benchmark-asr-malgache.md)
+- [Interopérabilité (DHIS2/CommCare)](docs/interoperabilite.md)
+- [Installation, exploitation, sauvegarde et reprise](docs/exploitation.md)
 
 ## Limites connues
 
 - La reconnaissance vocale du malgache **n'a pas encore été évaluée** sur un corpus réel. Aucune performance n'est revendiquée.
-- Aucun contenu médical validé n'est encore intégré.
+- Aucun contenu médical validé n'est encore intégré : règles, signes, contenus, calendrier CPN,
+  information de consentement et menus vocaux sont des fichiers de **démonstration**.
+- Canaux IVR/SMS/USSD : simulés dans le dashboard (« Simulateur vocal ») ; aucune passerelle
+  opérateur n'est branchée.
 - Licence open source à définir.

@@ -5,7 +5,7 @@ from functools import lru_cache
 from pathlib import Path
 from typing import Annotated
 
-from pydantic import Field, field_validator
+from pydantic import Field, SecretStr, field_validator
 from pydantic_settings import BaseSettings, NoDecode, SettingsConfigDict
 
 SERVICE_ROOT = Path(__file__).resolve().parent.parent
@@ -31,6 +31,12 @@ class AsrBackendName(StrEnum):
     NONE = "none"
     WHISPER = "whisper"  # TransformersWhisperBackend
     CTC = "ctc"  # CtcBackend (wav2vec2 / XLS-R / w2v-BERT / MMS-like)
+    OPENAI = "openai"  # API OpenAI (gpt-4o-transcribe), secours local facultatif
+
+
+class NluBackendName(StrEnum):
+    LEXICON = "lexicon"  # mots-clés (baseline, hors ligne)
+    OPENAI = "openai"  # GPT contraint à une liste fermée, secours lexical
 
 
 # Modèles suggérés par backend. Aucun n'est sous licence non commerciale (voir README,
@@ -67,6 +73,18 @@ class Settings(BaseSettings):
     # Taux d'échantillonnage cible du décodage ffmpeg.
     asr_sampling_rate: int = Field(default=16_000, ge=8_000, le=48_000)
 
+    # --- OpenAI (facultatif) ------------------------------------------------------
+    # Clé API : à mettre dans .env, jamais dans le code ni dans un commit.
+    openai_api_key: SecretStr | None = None
+    openai_base_url: str = "https://api.openai.com/v1"
+    openai_asr_model: str = "gpt-4o-transcribe"
+    openai_nlu_model: str = "gpt-4o-mini"
+    # Court : en cas d'échec, le secours local doit encore tenir dans le délai de l API.
+    openai_timeout_seconds: float = Field(default=15.0, gt=0, le=120)
+    # Secours local si OpenAI échoue (réseau, quota) : whisper, ctc ou none.
+    openai_asr_fallback: AsrBackendName = AsrBackendName.WHISPER
+    nlu_backend: NluBackendName = NluBackendName.LEXICON
+
     # --- Limites audio ---------------------------------------------------------------
     max_audio_bytes: int = Field(default=5 * 1024 * 1024, ge=1_024, le=50 * 1024 * 1024)
     max_audio_seconds: float = Field(default=60.0, gt=0, le=600)
@@ -89,6 +107,8 @@ class Settings(BaseSettings):
     def resolved_asr_model(self) -> str | None:
         if self.asr_backend is AsrBackendName.NONE:
             return None
+        if self.asr_backend is AsrBackendName.OPENAI:
+            return self.openai_asr_model
         return self.asr_model or DEFAULT_MODELS[self.asr_backend]
 
 

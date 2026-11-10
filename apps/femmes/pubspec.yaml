@@ -1,0 +1,31 @@
+name: fanilo_femmes
+description: "FANILO Femmes & Adolescentes : application anonyme (RENY, TANORA)."
+publish_to: 'none'
+version: 0.1.0+1
+
+environment:
+  sdk: ^3.13.5
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+  flutter_riverpod: ^2.6.1
+  http: ^1.6.0
+  http_parser: ^4.1.2
+  intl: any
+  just_audio: ^0.10.6
+  path_provider: ^2.1.6
+  record: ^7.1.2
+  shared_preferences: ^2.5.6
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+  integration_test:
+    sdk: flutter
+
+flutter:
+  generate: true
+  uses-material-design: true

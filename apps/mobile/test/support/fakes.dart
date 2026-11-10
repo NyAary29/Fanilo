@@ -1,4 +1,6 @@
 import 'dart:async';
+import 'dart:ffi';
+import 'dart:io';
 
 import 'package:drift/drift.dart';
 import 'package:drift/native.dart';
@@ -6,8 +8,23 @@ import 'package:fanilo_mobile/data/api/api_client.dart';
 import 'package:fanilo_mobile/data/api/dto.dart';
 import 'package:fanilo_mobile/data/local/database.dart';
 import 'package:fanilo_mobile/data/sync/sync_scheduler.dart';
+import 'package:sqlite3/open.dart';
+
+/// SQLite **système** (non chiffré) pour les tests de logique. Sur Linux,
+/// seul `libsqlite3.so.0` est présent sans le paquet `-dev` : on l'accepte.
+void useSystemSqliteForTests() {
+  if (!Platform.isLinux) return;
+  open.overrideFor(OperatingSystem.linux, () {
+    try {
+      return DynamicLibrary.open('libsqlite3.so');
+    } on ArgumentError {
+      return DynamicLibrary.open('libsqlite3.so.0');
+    }
+  });
+}
 
 AppDatabase newTestDb() {
+  useSystemSqliteForTests();
   driftRuntimeOptions.dontWarnAboutMultipleDatabases = true;
   return AppDatabase(NativeDatabase.memory());
 }
@@ -45,6 +62,9 @@ class FakeSyncServer implements SyncApi {
   /// Erreur réseau avant traitement.
   bool offline = false;
 
+  /// Erreur HTTP renvoyée pour tout le lot (ex. 422 d'enveloppe).
+  ApiException? pushError;
+
   /// Traite le lot puis « perd » la réponse (erreur réseau).
   bool loseNextResponse = false;
 
@@ -66,6 +86,8 @@ class FakeSyncServer implements SyncApi {
   Future<List<PushResult>> push(String deviceId, List<PushChange> changes) async {
     pushCalls.add(changes);
     if (offline) throw const NetworkException('hors ligne (fake)');
+    final err = pushError;
+    if (err != null) throw err;
     final results = <PushResult>[];
     for (final c in changes) {
       final cached = _processed[c.changeId];
@@ -183,6 +205,116 @@ class FakeInteractionApi implements InteractionApi {
         });
   }
 }
+
+/// Réponses réelles de l'API locale (relevées avec curl, mode démo).
+Map<String, dynamic> demoSignCodes({String status = 'demo', bool isDemo = true}) => {
+      'catalog_id': 'fanilo-demo-signs',
+      'version': '0.1.0',
+      'status': status,
+      'is_demo': isDemo,
+      'items': [
+        {
+          'code': 'SIGN_DEMO_01',
+          'label_fr': '[DÉMO] Signe fictif n° 1 — libellé de démonstration',
+          'label_mg': null,
+          'modules': ['reny'],
+        },
+        {
+          'code': 'SIGN_DEMO_02',
+          'label_fr': '[DÉMO] Signe fictif n° 2 — libellé de démonstration',
+          'label_mg': null,
+          'modules': ['reny'],
+        },
+        {
+          'code': 'SIGN_DEMO_05',
+          'label_fr': '[DÉMO] Signe fictif n° 5 — libellé de démonstration',
+          'label_mg': null,
+          'modules': ['reny', 'tanora'],
+        },
+      ],
+    };
+
+Map<String, dynamic> demoConsentInformation({String status = 'demo'}) => {
+      'items': [
+        for (final scope in ['reny', 'tanora', 'reminders', 'voice_processing'])
+          {
+            'scope': scope,
+            'version': 'demo-0.1',
+            'status': status,
+            'summary_fr': '[DÉMO] Information fictive ($scope).',
+            'summary_mg': null,
+          },
+      ],
+    };
+
+class FakeReferenceApi implements ReferenceApi {
+  bool offline = false;
+  Object? error;
+  Map<String, dynamic> signs = demoSignCodes();
+  Map<String, dynamic> consent = demoConsentInformation();
+  Map<String, dynamic> contents = demoPublishedContents();
+  final List<String> calls = [];
+
+  Future<Map<String, dynamic>> _answer(String call, Map<String, dynamic> body) async {
+    calls.add(call);
+    if (offline) throw const NetworkException('hors ligne (fake)');
+    final e = error;
+    if (e != null) throw e;
+    return body;
+  }
+
+  @override
+  Future<Map<String, dynamic>> signCodes(String module) =>
+      _answer('sign-codes:$module', signs);
+
+  @override
+  Future<Map<String, dynamic>> consentInformation() =>
+      _answer('consent-information', consent);
+
+  @override
+  Future<Map<String, dynamic>> publishedContents(String module) =>
+      _answer('contents:$module', contents);
+}
+
+/// Forme réelle de `GET /contents/published` (contenus fictifs).
+Map<String, dynamic> demoPublishedContents() => {
+      'items': [
+        {
+          'id': 'c-1',
+          'code': 'MSG_DEMO_INFO_ANC',
+          'module': 'reny',
+          'language': 'fr',
+          'title': '[DÉMO] Consultations prénatales',
+          'body': '[DÉMO] Contenu fictif sur les consultations.',
+          'audio_url': null,
+          'version': 1,
+          'status': 'demo',
+        },
+        {
+          'id': 'c-2',
+          'code': 'MSG_DEMO_INFO_ANC',
+          'module': 'reny',
+          'language': 'mg',
+          'title': '[DÉMO] Fitsaboana',
+          'body': '[DÉMO] Votoatiny fictif.',
+          'audio_url': null,
+          'version': 1,
+          'status': 'demo',
+        },
+        {
+          'id': 'c-3',
+          'code': 'MSG_DEMO_TANORA',
+          'module': 'tanora',
+          'language': 'fr',
+          'title': '[DÉMO] Autre module',
+          'body': '[DÉMO] Ne doit pas apparaître pour RENY.',
+          'audio_url': null,
+          'version': 1,
+          'status': 'demo',
+        },
+      ],
+      'total': 3,
+    };
 
 class FakeAuthApi implements AuthApi {
   int refreshCalls = 0;

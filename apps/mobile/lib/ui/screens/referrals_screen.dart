@@ -3,13 +3,14 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../data/local/database.dart';
 import '../../domain/enums.dart';
+import '../../data/repositories/local_repository.dart';
 import '../../domain/referral_rules.dart';
 import '../labels.dart';
 import '../providers.dart';
 import '../widgets/common.dart';
 
-/// Références : seules les transitions autorisées par le contrat sont
-/// proposées ; « non aboutie » exige un motif.
+/// Références : création (statut `proposed`, vers un site synchronisé) et
+/// transitions autorisées par le contrat ; « non aboutie » exige un motif.
 class ReferralsScreen extends ConsumerWidget {
   const ReferralsScreen({super.key});
 
@@ -21,9 +22,16 @@ class ReferralsScreen extends ConsumerWidget {
     final identities = ref.watch(identitiesProvider).valueOrNull ?? const {};
     final pending = ref.watch(pendingKeysProvider).valueOrNull ?? const {};
     final codes = {for (final b in beneficiaries) b.id: b.code};
+    final sites = ref.watch(sitesByIdProvider).valueOrNull ?? const {};
 
     return FaniloScaffold(
       title: l.referralsTitle,
+      floatingActionButton: FloatingActionButton.extended(
+        key: const Key('new-referral'),
+        onPressed: () => showNewReferralSheet(context),
+        icon: const Icon(Icons.add),
+        label: Text(l.referralNew),
+      ),
       body: referrals.isEmpty
           ? EmptyState(l.noReferrals)
           : ListView.builder(
@@ -40,6 +48,7 @@ class ReferralsScreen extends ConsumerWidget {
                         style: const TextStyle(fontSize: 18)),
                     subtitle: Text([
                       l.referralStatus(r.status),
+                      l.referralTo(sites[r.toSiteId]?.name ?? '—'),
                       if (r.reason != null) r.reason!,
                       if (pending.contains('referral/${r.id}')) l.pendingSync,
                     ].join(' · ')),
@@ -154,6 +163,153 @@ class _SheetState extends ConsumerState<ReferralTransitionSheet> {
               onPressed: _target == null ? null : _apply,
               child: Text(l.save),
             ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Ouvre le formulaire de nouvelle référence (bénéficiaire facultativement
+/// présélectionnée).
+Future<void> showNewReferralSheet(BuildContext context, {String? beneficiaryId}) =>
+    showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      builder: (_) => NewReferralSheet(beneficiaryId: beneficiaryId),
+    );
+
+/// Nouvelle référence : bénéficiaire, site destinataire (parmi les sites
+/// synchronisés, utilisables hors ligne) et motif facultatif. La référence est
+/// créée au statut `proposed` et part par l'outbox.
+class NewReferralSheet extends ConsumerStatefulWidget {
+  const NewReferralSheet({super.key, this.beneficiaryId});
+  final String? beneficiaryId;
+
+  @override
+  ConsumerState<NewReferralSheet> createState() => _NewReferralState();
+}
+
+class _NewReferralState extends ConsumerState<NewReferralSheet> {
+  String? _beneficiaryId;
+  String? _siteId;
+  final _reason = TextEditingController();
+  String? _error;
+  bool _saving = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _beneficiaryId = widget.beneficiaryId;
+  }
+
+  @override
+  void dispose() {
+    _reason.dispose();
+    super.dispose();
+  }
+
+  Future<void> _save() async {
+    final l = context.l10n;
+    final user = ref.read(authProvider).user;
+    final b = _beneficiaryId;
+    final s = _siteId;
+    if (user == null) return;
+    if (b == null || s == null) {
+      setState(() => _error = l.referralSelectBoth);
+      return;
+    }
+    setState(() => _saving = true);
+    try {
+      await ref.read(localRepositoryProvider).createReferral(
+          beneficiaryId: b, toSiteId: s, reason: _reason.text, user: user);
+      if (!mounted) return;
+      final messenger = ScaffoldMessenger.of(context);
+      Navigator.pop(context);
+      messenger.showSnackBar(SnackBar(content: Text(l.referralCreated)));
+      ref.read(syncServiceProvider).sync();
+    } on InvalidStateException catch (e) {
+      setState(() => _error = e.message);
+    } finally {
+      if (mounted) setState(() => _saving = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l = context.l10n;
+    final beneficiaries = ref.watch(beneficiariesProvider).valueOrNull ?? const [];
+    final identities = ref.watch(identitiesProvider).valueOrNull ?? const {};
+    final sites = ref.watch(referralSitesProvider).valueOrNull ?? const [];
+    return Padding(
+      padding: EdgeInsets.fromLTRB(
+          16, 16, 16, 16 + MediaQuery.of(context).viewInsets.bottom),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Text(l.referralNew, style: Theme.of(context).textTheme.titleLarge),
+          const SizedBox(height: 12),
+          DropdownButtonFormField<String>(
+            key: const Key('referral-beneficiary'),
+            initialValue: _beneficiaryId,
+            isExpanded: true,
+            decoration: InputDecoration(labelText: l.referralBeneficiary),
+            items: [
+              for (final b in beneficiaries)
+                DropdownMenuItem(
+                  value: b.id,
+                  child: Text(identities[b.id]?.displayName ?? b.code ?? l.codePending,
+                      overflow: TextOverflow.ellipsis),
+                ),
+            ],
+            onChanged: (v) => setState(() {
+              _beneficiaryId = v;
+              _error = null;
+            }),
+          ),
+          const SizedBox(height: 12),
+          if (sites.isEmpty)
+            Text(l.referralNoSites,
+                key: const Key('referral-no-sites'),
+                style: TextStyle(color: Theme.of(context).colorScheme.error))
+          else
+            DropdownButtonFormField<String>(
+              key: const Key('referral-site'),
+              initialValue: _siteId,
+              isExpanded: true,
+              decoration: InputDecoration(labelText: l.referralToSite),
+              items: [
+                for (final s in sites)
+                  DropdownMenuItem(
+                    value: s.id,
+                    child: Text('${s.name} · ${l.siteKind(s.kind)}',
+                        overflow: TextOverflow.ellipsis),
+                  ),
+              ],
+              onChanged: (v) => setState(() {
+                _siteId = v;
+                _error = null;
+              }),
+            ),
+          const SizedBox(height: 12),
+          TextField(
+            key: const Key('referral-reason'),
+            controller: _reason,
+            decoration: InputDecoration(labelText: l.referralReason),
+          ),
+          if (_error != null)
+            Padding(
+              padding: const EdgeInsets.only(top: 8),
+              child: Text(_error!,
+                  key: const Key('referral-error'),
+                  style: TextStyle(color: Theme.of(context).colorScheme.error)),
+            ),
+          const SizedBox(height: 12),
+          FilledButton(
+            key: const Key('save-referral'),
+            onPressed: _saving || sites.isEmpty ? null : _save,
+            child: Text(l.save),
+          ),
         ],
       ),
     );

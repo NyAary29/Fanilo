@@ -4,11 +4,13 @@ import '../config/app_config.dart';
 import '../data/api/api_client.dart';
 import '../data/auth/auth_repository.dart';
 import '../data/local/database.dart';
+import '../data/reference/reference_repository.dart';
 import '../data/repositories/local_repository.dart';
 import '../data/repositories/outbox_repository.dart';
 import '../data/secure/secure_store.dart';
 import '../data/sync/sync_scheduler.dart';
 import '../data/sync/sync_service.dart';
+import '../domain/reference_data.dart';
 
 /// Graphe de dépendances. Les feuilles « plateforme » (base, stockage
 /// sécurisé, API, réseau) sont surchargées dans `main.dart` et dans les tests.
@@ -41,6 +43,13 @@ final syncApiProvider = Provider<SyncApi>((ref) => ref.watch(_httpApiProvider));
 final interactionApiProvider =
     Provider<InteractionApi>((ref) => ref.watch(_httpApiProvider));
 
+final referenceApiProvider =
+    Provider<ReferenceApi>((ref) => ref.watch(_httpApiProvider));
+
+final referenceRepositoryProvider = Provider<ReferenceRepository>((ref) =>
+    ReferenceRepository(ref.watch(databaseProvider), ref.watch(referenceApiProvider),
+        modules: const [AppConfig.askModule]));
+
 final outboxRepositoryProvider =
     Provider<OutboxRepository>((ref) => OutboxRepository(ref.watch(databaseProvider)));
 
@@ -48,7 +57,10 @@ final localRepositoryProvider = Provider<LocalRepository>((ref) => LocalReposito
     ref.watch(databaseProvider), ref.watch(outboxRepositoryProvider)));
 
 final syncServiceProvider = Provider<SyncService>((ref) {
-  final s = SyncService(db: ref.watch(databaseProvider), api: ref.watch(syncApiProvider));
+  final s = SyncService(
+      db: ref.watch(databaseProvider),
+      api: ref.watch(syncApiProvider),
+      references: ref.watch(referenceRepositoryProvider));
   ref.onDispose(s.dispose);
   return s;
 });
@@ -135,3 +147,40 @@ final pendingKeysProvider = StreamProvider<Set<String>>((ref) {
       .watch()
       .map((rows) => {for (final r in rows) '${r.entity}/${r.entityId}'});
 });
+
+/// Sites pouvant recevoir une référence (hors site de l'utilisateur).
+final referralSitesProvider = StreamProvider<List<SiteRow>>((ref) => ref
+    .watch(localRepositoryProvider)
+    .watchReferralSites(excludeSiteId: ref.watch(authProvider).user?.siteId));
+
+final sitesByIdProvider = StreamProvider<Map<String, SiteRow>>(
+    (ref) => ref.watch(localRepositoryProvider).watchSitesById());
+
+/// Codes de signes (copie locale du référentiel serveur), null si jamais reçu.
+final signCatalogProvider = StreamProvider<SignCatalog?>((ref) => ref
+    .watch(referenceRepositoryProvider)
+    .watchSignCatalog(AppConfig.askModule));
+
+/// Information de consentement (copie locale), null si jamais reçue.
+final consentInformationProvider = StreamProvider<ConsentInformationSet?>(
+    (ref) => ref.watch(referenceRepositoryProvider).watchConsentInformation());
+
+/// Contenus publiés (copie locale) pour les conseils de visite, null si
+/// jamais reçus.
+final publishedContentsProvider = StreamProvider<PublishedContents?>((ref) => ref
+    .watch(referenceRepositoryProvider)
+    .watchContents(AppConfig.askModule));
+
+final allPregnanciesProvider =
+    StreamProvider((ref) => ref.watch(localRepositoryProvider).watchAllPregnancies());
+
+final allAncVisitsProvider =
+    StreamProvider((ref) => ref.watch(localRepositoryProvider).watchAllAncVisits());
+
+/// Date du jour `YYYY-MM-DD` (heure locale du téléphone), surchargeable dans
+/// les tests.
+final todayProvider =
+    Provider<String>((_) => DateTime.now().toIso8601String().substring(0, 10));
+
+/// Onglet affiché par l'écran principal (0 Accueil, 1 Mes visites, 2 Alerter).
+final homeTabProvider = StateProvider<int>((_) => 0);

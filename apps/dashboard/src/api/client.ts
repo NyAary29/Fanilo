@@ -118,6 +118,16 @@ export class ApiClient {
 
   async request<T>(method: string, path: string, options: RequestOptions = {}): Promise<T> {
     const auth = options.auth ?? true;
+    // Après un rechargement, seul le jeton de rafraîchissement subsiste : on
+    // rafraîchit d'abord plutôt que d'envoyer une requête vouée au 401.
+    if (auth && this.tokens.getAccessToken() === null && this.tokens.getRefreshToken() !== null) {
+      const outcome = await this.refresh();
+      if (outcome === 'network') throw new ApiError(0, null);
+      if (outcome === 'rejected') {
+        this.expireSession();
+        throw new ApiError(401, null);
+      }
+    }
     let response = await this.send(method, path, options, auth);
 
     if (response.status === 401 && auth) {
@@ -223,7 +233,9 @@ export class ApiClient {
 
   private async send(method: string, path: string, options: RequestOptions, auth: boolean): Promise<Response> {
     const headers: Record<string, string> = { Accept: 'application/json' };
-    if (options.body !== undefined) headers['Content-Type'] = 'application/json';
+    // FormData (audio) : le navigateur fixe lui-même le Content-Type multipart.
+    const isForm = typeof FormData !== 'undefined' && options.body instanceof FormData;
+    if (options.body !== undefined && !isForm) headers['Content-Type'] = 'application/json';
     if (auth) {
       const token = this.tokens.getAccessToken();
       if (token) headers.Authorization = `Bearer ${token}`;
@@ -232,7 +244,7 @@ export class ApiClient {
       return await this.fetchImpl(this.buildUrl(path, options.query), {
         method,
         headers,
-        body: options.body !== undefined ? JSON.stringify(options.body) : undefined,
+        body: isForm ? (options.body as FormData) : options.body !== undefined ? JSON.stringify(options.body) : undefined,
         signal: options.signal,
       });
     } catch (error) {

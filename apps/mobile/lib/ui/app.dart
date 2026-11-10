@@ -7,29 +7,10 @@ import '../l10n/gen/app_localizations.dart';
 import 'providers.dart';
 import 'screens/home_screen.dart';
 import 'screens/login_screen.dart';
+import 'theme.dart';
+import 'widgets/logo.dart';
 
-/// Thème : grandes cibles tactiles (≥ 56 px), texte lisible.
-ThemeData buildTheme() {
-  final base = ThemeData(
-    colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF00796B)),
-    useMaterial3: true,
-  );
-  const minSize = Size(64, 56);
-  const text = TextStyle(fontSize: 17, fontWeight: FontWeight.w600);
-  return base.copyWith(
-    filledButtonTheme: FilledButtonThemeData(
-        style: FilledButton.styleFrom(minimumSize: minSize, textStyle: text)),
-    outlinedButtonTheme: OutlinedButtonThemeData(
-        style: OutlinedButton.styleFrom(minimumSize: minSize, textStyle: text)),
-    textButtonTheme: TextButtonThemeData(
-        style: TextButton.styleFrom(minimumSize: const Size(48, 48), textStyle: text)),
-    inputDecorationTheme: const InputDecorationTheme(
-      border: OutlineInputBorder(),
-      contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 18),
-    ),
-    listTileTheme: const ListTileThemeData(minTileHeight: 56),
-  );
-}
+export 'theme.dart' show buildTheme;
 
 class FaniloApp extends StatelessWidget {
   const FaniloApp({super.key});
@@ -76,7 +57,7 @@ class _AuthGateState extends ConsumerState<AuthGate> {
     final status = ref.watch(authProvider.select((s) => s.status));
     return switch (status) {
       AuthStatus.unknown =>
-        const Scaffold(body: Center(child: CircularProgressIndicator())),
+        const Scaffold(body: Center(child: FaniloMark(size: 96))),
       AuthStatus.signedOut => const LoginScreen(),
       AuthStatus.signedIn => const HomeScreen(),
     };

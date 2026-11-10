@@ -3,12 +3,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../config/app_config.dart';
 import '../../data/api/dto.dart';
-import '../../domain/sign_catalog.dart';
 import '../labels.dart';
 import '../providers.dart';
+import '../theme.dart';
 import '../widgets/common.dart';
-
-final signCatalogProvider = Provider<SignCatalog>((_) => SignCatalog.demo);
 
 /// Signalement de signes cochés par l'AC (saisie déterministe).
 ///
@@ -17,9 +15,19 @@ final signCatalogProvider = Provider<SignCatalog>((_) => SignCatalog.demo);
 ///   que l'orientation et le contenu validé renvoyés, **jamais un diagnostic**.
 /// - Hors ligne : aucun envoi différé ; message demandant de contacter
 ///   directement le CSB selon la procédure locale.
+///
+/// Sert d'onglet « Alerter » ([embedded]) et d'écran ouvert depuis une fiche
+/// ou une visite (bénéficiaire présélectionnée).
 class SignsScreen extends ConsumerStatefulWidget {
-  const SignsScreen({super.key, this.beneficiaryId});
+  const SignsScreen({super.key, this.beneficiaryId, this.embedded = false, this.onSent});
   final String? beneficiaryId;
+
+  /// Onglet de l'écran principal (pas de retour, mention affichée par l'écran
+  /// principal).
+  final bool embedded;
+
+  /// Appelé quand le serveur a répondu au signalement.
+  final VoidCallback? onSent;
 
   @override
   ConsumerState<SignsScreen> createState() => _SignsScreenState();
@@ -36,6 +44,13 @@ class _SignsScreenState extends ConsumerState<SignsScreen> {
   void initState() {
     super.initState();
     _beneficiaryId = widget.beneficiaryId;
+    // Référentiel à jour si le réseau est là ; sinon, copie locale.
+    Future.microtask(() async {
+      if (!mounted) return;
+      if (await ref.read(networkSourceProvider).isOnline()) {
+        await ref.read(referenceRepositoryProvider).refresh();
+      }
+    });
   }
 
   Future<void> _send() async {
@@ -60,6 +75,7 @@ class _SignsScreenState extends ConsumerState<SignsScreen> {
             signCodes: _selected.toList()..sort(),
           );
       setState(() => _response = r);
+      widget.onSent?.call();
       // Une alerte a pu être créée : on la récupère.
       ref.read(syncServiceProvider).sync();
     } on Object {
@@ -72,98 +88,161 @@ class _SignsScreenState extends ConsumerState<SignsScreen> {
   @override
   Widget build(BuildContext context) {
     final l = context.l10n;
-    final catalog = ref.watch(signCatalogProvider);
+    final catalogState = ref.watch(signCatalogProvider);
+    final catalog = catalogState.valueOrNull;
     final online = ref.watch(onlineProvider).valueOrNull ?? false;
     final beneficiaries = ref.watch(beneficiariesProvider).valueOrNull ?? const [];
     final identities = ref.watch(identitiesProvider).valueOrNull ?? const {};
     final response = _response;
+    final signs = catalog?.forModule(AppConfig.askModule) ?? const [];
 
-    return FaniloScaffold(
-      title: l.signsTitle,
-      body: ListView(
-        children: [
-          if (!catalog.isValidated) DemoBanner(text: l.demoBanner),
-          if (!online)
-            Container(
-              key: const Key('signs-offline'),
-              width: double.infinity,
-              color: Theme.of(context).colorScheme.errorContainer,
-              padding: const EdgeInsets.all(16),
-              child: Row(children: [
-                const Icon(Icons.phone_in_talk, size: 32),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Text(l.signsOffline,
-                      style: const TextStyle(fontSize: 17, fontWeight: FontWeight.bold)),
-                ),
-              ]),
-            ),
-          if (response != null)
-            _ResultCard(
-              response: response,
-              onReset: () => setState(() {
-                _response = null;
-                _selected.clear();
-              }),
+    final content = ListView(
+      key: const Key('signs-list'),
+      padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
+      children: [
+        Text(l.signsLead,
+            style: const TextStyle(fontSize: 16, color: FaniloColors.inkSoft)),
+        const SizedBox(height: 6),
+        if (catalog != null && catalog.showDemoBanner) DemoBanner(text: l.demoBanner),
+        if (!online)
+          NoticeCard(
+            key: const Key('signs-offline'),
+            tone: NoticeTone.alert,
+            icon: Icons.phone_in_talk,
+            title: l.offline,
+            text: l.signsOffline,
+          )
+        else if (response == null)
+          NoticeCard(tone: NoticeTone.ok, icon: Icons.wifi, text: l.signsOnline),
+        if (response != null)
+          _ResultCard(
+            response: response,
+            onReset: () => setState(() {
+              _response = null;
+              _selected.clear();
+            }),
+          )
+        else if (signs.isEmpty)
+          if (catalogState.isLoading)
+            const Padding(
+                padding: EdgeInsets.all(24),
+                child: Center(child: CircularProgressIndicator()))
+          else
+            NoticeCard(
+              tone: NoticeTone.warning,
+              textKey: const Key('signs-catalog-missing'),
+              text: l.signsCatalogMissing,
             )
-          else ...[
-            Padding(
-              padding: const EdgeInsets.all(16),
-              child: DropdownButtonFormField<String?>(
-                value: _beneficiaryId,
-                isExpanded: true,
-                decoration: InputDecoration(labelText: l.signsBeneficiary),
-                items: [
-                  DropdownMenuItem<String?>(value: null, child: Text(l.noneSelected)),
-                  for (final b in beneficiaries)
-                    DropdownMenuItem<String?>(
-                      value: b.id,
-                      child: Text(identities[b.id]?.displayName ?? b.code ?? l.codePending,
-                          overflow: TextOverflow.ellipsis),
-                    ),
-                ],
-                onChanged: (v) => setState(() => _beneficiaryId = v),
-              ),
+        else ...[
+          SectionHeader(l.signsWho, icon: Icons.person_outline),
+          DropdownButtonFormField<String?>(
+            key: const Key('signs-beneficiary'),
+            initialValue: _beneficiaryId,
+            isExpanded: true,
+            decoration: InputDecoration(
+                labelText: l.signsBeneficiary,
+                prefixIcon: const Icon(Icons.pregnant_woman)),
+            items: [
+              DropdownMenuItem<String?>(value: null, child: Text(l.noneSelected)),
+              for (final b in beneficiaries)
+                DropdownMenuItem<String?>(
+                  value: b.id,
+                  child: Text(identities[b.id]?.displayName ?? b.code ?? l.codePending,
+                      overflow: TextOverflow.ellipsis),
+                ),
+            ],
+            onChanged: (v) => setState(() => _beneficiaryId = v),
+          ),
+          SectionHeader(l.signsIntro, icon: Icons.checklist_rounded),
+          for (final s in signs)
+            _SignTile(
+              key: Key('sign-${s.code}'),
+              label: s.label,
+              selected: _selected.contains(s.code),
+              onTap: () => setState(() {
+                _selected.contains(s.code) ? _selected.remove(s.code) : _selected.add(s.code);
+                _message = null;
+              }),
             ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: Text(l.signsIntro, style: Theme.of(context).textTheme.titleMedium),
+          if (_message != null)
+            NoticeCard(
+              tone: NoticeTone.alert,
+              textKey: const Key('signs-message'),
+              text: _message!,
             ),
-            for (final s in catalog.forModule(AppConfig.askModule))
-              CheckboxListTile(
-                key: Key('sign-${s.code}'),
-                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-                value: _selected.contains(s.code),
-                title: Text(s.label, style: const TextStyle(fontSize: 18)),
-                onChanged: (v) => setState(() {
-                  v == true ? _selected.add(s.code) : _selected.remove(s.code);
-                  _message = null;
-                }),
-              ),
-            if (_message != null)
-              Padding(
-                padding: const EdgeInsets.all(16),
-                child: Text(_message!,
-                    key: const Key('signs-message'),
+          const SizedBox(height: 8),
+          FilledButton.icon(
+            key: const Key('signs-send'),
+            style: FilledButton.styleFrom(
+                backgroundColor: FaniloColors.alert, minimumSize: const Size(64, 60)),
+            onPressed: _sending ? null : _send,
+            icon: _sending
+                ? const SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+                : const Icon(Icons.send_rounded),
+            label: Text(l.signsSend),
+          ),
+        ],
+      ],
+    );
+
+    final title = Row(children: [
+      const Icon(Icons.campaign_rounded, color: FaniloColors.alert),
+      const SizedBox(width: 10),
+      Flexible(child: Text(l.signsTitle)),
+    ]);
+    if (widget.embedded) {
+      return Scaffold(
+        appBar: AppBar(title: title, automaticallyImplyLeading: false),
+        body: content,
+      );
+    }
+    return FaniloScaffold(title: l.signsTitle, body: content);
+  }
+}
+
+/// Grande case à cocher pour un signe (toute la carte est cliquable).
+class _SignTile extends StatelessWidget {
+  const _SignTile({super.key, required this.label, required this.selected, required this.onTap});
+  final String label;
+  final bool selected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final radius = BorderRadius.circular(kRadius);
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 5),
+      child: Material(
+        color: selected ? FaniloColors.alertSoft : Colors.white,
+        borderRadius: radius,
+        child: InkWell(
+          borderRadius: radius,
+          onTap: onTap,
+          child: Container(
+            constraints: const BoxConstraints(minHeight: 64),
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+            decoration: BoxDecoration(
+              borderRadius: radius,
+              border: Border.all(
+                  color: selected ? FaniloColors.alert : FaniloColors.line,
+                  width: selected ? 2 : 1),
+            ),
+            child: Row(children: [
+              Icon(selected ? Icons.check_box_rounded : Icons.check_box_outline_blank_rounded,
+                  size: 34, color: selected ? FaniloColors.alert : FaniloColors.forest),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(label,
                     style: TextStyle(
                         fontSize: 17,
-                        fontWeight: FontWeight.bold,
-                        color: Theme.of(context).colorScheme.error)),
+                        fontWeight: selected ? FontWeight.w800 : FontWeight.w600)),
               ),
-            Padding(
-              padding: const EdgeInsets.all(16),
-              child: FilledButton.icon(
-                key: const Key('signs-send'),
-                onPressed: _sending ? null : _send,
-                icon: _sending
-                    ? const SizedBox(
-                        width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))
-                    : const Icon(Icons.send),
-                label: Text(l.signsSend),
-              ),
-            ),
-          ],
-        ],
+            ]),
+          ),
+        ),
       ),
     );
   }
@@ -178,55 +257,51 @@ class _ResultCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final l = context.l10n;
     final content = response.content;
-    return Padding(
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        key: const Key('signs-result'),
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          if (response.isDemo || content?.status == 'demo')
-            DemoBanner(text: l.demoContent),
-          const SizedBox(height: 8),
-          Text(l.signsResultTitle, style: Theme.of(context).textTheme.headlineSmall),
-          const SizedBox(height: 8),
-          for (final a in response.actions)
-            Card(
-              color: Theme.of(context).colorScheme.primaryContainer,
-              child: ListTile(
-                leading: const Icon(Icons.directions, size: 32),
-                title: Text(l.action(a),
-                    style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+    return Column(
+      key: const Key('signs-result'),
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        if (response.isDemo || content?.status == 'demo') DemoBanner(text: l.demoContent),
+        SectionHeader(l.signsResultTitle, icon: Icons.directions),
+        for (final a in response.actions)
+          SoftCard(
+            color: FaniloColors.forest,
+            child: Row(children: [
+              const Icon(Icons.directions, size: 32, color: Colors.white),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(l.action(a),
+                    style: const TextStyle(
+                        fontSize: 18, fontWeight: FontWeight.w800, color: Colors.white)),
               ),
+            ]),
+          ),
+        if (response.outcome == 'fallback')
+          NoticeCard(icon: Icons.support_agent, text: l.fallbackOutcome),
+        if (response.alertId != null)
+          NoticeCard(
+              tone: NoticeTone.warning,
+              icon: Icons.notifications_active,
+              text: l.alertCreated),
+        if (content != null && (content.title.isNotEmpty || content.body.isNotEmpty))
+          SoftCard(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(content.title,
+                    style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w800)),
+                const SizedBox(height: 4),
+                Text(content.body, style: const TextStyle(fontSize: 16)),
+              ],
             ),
-          if (response.outcome == 'fallback')
-            Card(child: ListTile(
-                leading: const Icon(Icons.support_agent),
-                title: Text(l.fallbackOutcome))),
-          if (response.alertId != null)
-            Card(child: ListTile(
-                leading: const Icon(Icons.notifications_active),
-                title: Text(l.alertCreated))),
-          if (content != null && (content.title.isNotEmpty || content.body.isNotEmpty))
-            Card(
-              child: Padding(
-                padding: const EdgeInsets.all(12),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(content.title,
-                        style: const TextStyle(fontSize: 17, fontWeight: FontWeight.bold)),
-                    const SizedBox(height: 4),
-                    Text(content.body, style: const TextStyle(fontSize: 16)),
-                  ],
-                ),
-              ),
-            ),
-          const SizedBox(height: 8),
-          Text(response.disclaimer, style: const TextStyle(fontStyle: FontStyle.italic)),
-          const SizedBox(height: 16),
-          OutlinedButton(onPressed: onReset, child: Text(l.newReport)),
-        ],
-      ),
+          ),
+        const SizedBox(height: 8),
+        Text(response.disclaimer,
+            style: const TextStyle(fontStyle: FontStyle.italic, color: FaniloColors.inkSoft)),
+        const SizedBox(height: 16),
+        OutlinedButton.icon(
+            onPressed: onReset, icon: const Icon(Icons.refresh), label: Text(l.newReport)),
+      ],
     );
   }
 }

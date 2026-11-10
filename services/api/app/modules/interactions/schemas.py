@@ -8,10 +8,12 @@ from pydantic import BaseModel, ConfigDict, Field, StringConstraints, model_vali
 
 from app.modules.contents.models import ContentLanguage, ContentStatus
 from app.modules.interactions.models import (
+    FollowUpStatus,
     InteractionModule,
     Outcome,
     ReviewStatus,
     Severity,
+    Triage,
 )
 
 DISCLAIMER = "FANILO ne remplace pas un professionnel de santé."
@@ -69,10 +71,12 @@ class InteractionOut(BaseModel):
     module: InteractionModule
     beneficiary_id: uuid.UUID | None
     site_id: uuid.UUID | None
-    asked_by_user_id: uuid.UUID
+    asked_by_user_id: uuid.UUID | None
+    channel: str = "agent"
     transcript: str | None
     transcript_needs_review: bool
     sign_codes: list[str]
+    intent: str | None = None
     detection_confidence: float | None
     outcome: Outcome
     actions: list[str]
@@ -86,9 +90,20 @@ class InteractionOut(BaseModel):
     reviewed_by_user_id: uuid.UUID | None
     reviewed_at: datetime | None
     review_note: str | None
+    orientation_site_id: uuid.UUID | None = None
+    triage: Triage | None = None
+    follow_up_code: str | None = None
+    follow_up_status: FollowUpStatus | None = None
+    follow_up_at: datetime | None = None
+    follow_up_note: str | None = None
 
 
 class ReviewBody(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     note: str = Field(min_length=1, max_length=2_000)
+    # Centre de santé conseillé (CSB ou structure de référence), facultatif.
+    orientation_site_id: uuid.UUID | None = None
+    # Classement : urgent / à suivre / information. « urgent » et « à suivre »
+    # exigent un centre : la personne y est attendue (suivi par le centre).
+    triage: Triage | None = None

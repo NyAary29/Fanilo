@@ -63,7 +63,7 @@ function requireRoles(ctx: Ctx, roles: readonly Role[]) {
 }
 
 function paginate<T>(items: T[], query: URLSearchParams) {
-  const limit = Math.min(Number(query.get('limit') ?? 50) || 50, 500);
+  const limit = Math.min(Number(query.get('limit') ?? 50) || 50, 200);
   const offset = Number(query.get('offset') ?? 0) || 0;
   return { items: items.slice(offset, offset + limit), total: items.length };
 }
@@ -131,11 +131,11 @@ export function createMockServer(options: { db?: MockDb; latencyMs?: number } = 
     return ids;
   }
 
-  function beneficiarySite(beneficiaryId: string): string | undefined {
+  function beneficiarySite(beneficiaryId: string | null): string | undefined {
     return db.beneficiaries.find((b) => b.id === beneficiaryId)?.site_id;
   }
 
-  function inScope(user: MockUser, beneficiaryId: string): boolean {
+  function inScope(user: MockUser, beneficiaryId: string | null): boolean {
     const scope = scopeSiteIds(user);
     if (!scope) return true;
     const site = beneficiarySite(beneficiaryId);
@@ -399,6 +399,25 @@ export function createMockServer(options: { db?: MockDb; latencyMs?: number } = 
     if (!r || !inScope(ctx.user, r.beneficiary_id)) throw new HttpError(404, 'Introuvable');
     return r;
   });
+  route('POST', '/referrals', (ctx) => {
+    requireRoles(ctx, ['community_agent', 'csb_head', 'clinical_advisor']);
+    const referral = {
+      id: crypto.randomUUID(),
+      beneficiary_id: String(ctx.body.beneficiary_id),
+      alert_id: (ctx.body.alert_id as string | null) ?? null,
+      from_site_id: null,
+      to_site_id: String(ctx.body.to_site_id),
+      status: 'proposed' as const,
+      reason: (ctx.body.reason as string | null) ?? null,
+      outcome_note: null,
+      version: 1,
+      created_at: nowIso(),
+      updated_at: nowIso(),
+      deleted_at: null,
+    };
+    db.referrals.push(referral);
+    return [201, referral];
+  });
   route('POST', '/referrals/:id/transition', (ctx) => {
     requireRoles(ctx, ALERT_ROLES);
     const r = db.referrals.find((x) => x.id === ctx.params[0]);
@@ -421,7 +440,7 @@ export function createMockServer(options: { db?: MockDb; latencyMs?: number } = 
     requireRoles(ctx, ['csb_head', 'clinical_lead', 'admin', 'data_officer']);
     const siteFilter = ctx.query.get('site_id');
     const scope = scopeSiteIds(ctx.user);
-    const keep = (beneficiaryId: string) => {
+    const keep = (beneficiaryId: string | null) => {
       const site = beneficiarySite(beneficiaryId);
       if (scope && (!site || !scope.has(site))) return false;
       return !siteFilter || site === siteFilter;
@@ -443,6 +462,133 @@ export function createMockServer(options: { db?: MockDb; latencyMs?: number } = 
       generated_at: nowIso(),
     };
     return summary;
+  });
+
+  // --- Activité mensuelle et espace agent (données fictives)
+  route('GET', '/dashboard/activity', (ctx) => {
+    requireRoles(ctx, ['csb_head', 'clinical_lead', 'admin', 'data_officer']);
+    const months = ['2026-06', '2026-07', '2026-08', '2026-09', '2026-10', '2026-11'];
+    return {
+      months: months.map((month, i) => ({ month, pregnancies: 4 + i * 2, alerts: 1 + (i % 3), questions: 10 + i * 3, anc_done: 6 + i })),
+      sites: db.sites.filter((s) => s.kind === 'csb').map((s, i) => ({ site_id: s.id, name: s.name, code: s.code, region: s.region, active_pregnancies: 12 - i * 3, open_alerts: 2 - (i % 2) })),
+      generated_at: nowIso(),
+    };
+  });
+  route('GET', '/followup/patients', (ctx) => {
+    requireRoles(ctx, ['community_agent', 'csb_head', 'clinical_advisor', 'clinical_lead']);
+    const q = (ctx.query.get('q') ?? '').toLowerCase();
+    const items = db.beneficiaries
+      .filter((b) => inScope(ctx.user, b.id))
+      .map((b, i) => {
+        const identity = db.identities.find((x) => x.beneficiary_id === b.id);
+        const alert = db.alerts.find((a) => a.beneficiary_id === b.id && (a.status === 'open' || a.status === 'escalated'));
+        return {
+          beneficiary_id: b.id,
+          code: b.code,
+          site_id: b.site_id,
+          site_name: db.sites.find((s) => s.id === b.site_id)?.name ?? '',
+          age: 20 + i,
+          display_name: identity?.display_name ?? null,
+          village: identity?.village ?? null,
+          pregnancy: { id: `p-${b.id}`, month: 3 + (i % 6), lmp_date: null, estimated_due_date: null },
+          next_anc: { visit_id: `v-${b.id}`, sequence: 2 + (i % 3), scheduled_date: '2026-11-20', days: 7 + i },
+          anc_done: 1 + (i % 3),
+          anc_total: 8,
+          missed_anc: 0,
+          open_alerts: alert ? 1 : 0,
+          latest_alert_id: alert?.id ?? null,
+          status: alert ? 'a_suivre' : 'a_jour',
+          reasons: alert ? ['alerte_ouverte'] : [],
+        };
+      })
+      .filter((p) => !q || (p.display_name ?? '').toLowerCase().includes(q) || p.code.toLowerCase().includes(q));
+    return { items, total: items.length };
+  });
+
+  // --- Suivi des orientations (fictif)
+  route('GET', '/followup/orientations', (ctx) => {
+    requireRoles(ctx, ['csb_head', 'clinical_advisor', 'clinical_lead']);
+    const item = {
+      id: 'or-1', created_at: nowIso(), module: 'reny', channel: 'public_app', question: 'Mandeha ra aho',
+      triage: 'urgent', answer: 'Allez au CSB sans attendre.', reviewed_at: nowIso(),
+      orientation_site_id: db.sites[1]?.id ?? '', site_name: db.sites[1]?.name ?? '', follow_up_code: 'K7-42',
+      follow_up_status: 'expected', follow_up_at: null, follow_up_note: null,
+    };
+    const code = ctx.query.get('code');
+    const items = code && code !== 'K7-42' ? [] : [item];
+    return { items, total: items.length, counts: { expected: 1, came: 0, no_show: 0 } };
+  });
+  route('POST', '/followup/orientations/:id', (ctx) => ({
+    id: ctx.params[0], follow_up_status: ctx.body.status, follow_up_code: 'K7-42',
+  }));
+
+  // --- Statistiques thématiques (agrégats fictifs)
+  route('GET', '/dashboard/topics', (ctx) => {
+    requireRoles(ctx, ['csb_head', 'clinical_lead', 'admin', 'data_officer']);
+    return {
+      period_days: Number(ctx.query.get('days') ?? 30),
+      min_cell_size: 5,
+      total: 31,
+      suppressed_cells: 2,
+      suppressed_total: 4,
+      items: [
+        { module: 'reny', intent: 'ask_anc_schedule', outcome: 'answer', content_code: 'MSG_DEMO_INFO_ANC', count: 14 },
+        { module: 'tanora', intent: 'ask_menstruation', outcome: 'answer', content_code: 'MSG_DEMO_INFO_MENSTRUATION', count: 7 },
+        { module: 'reny', intent: 'out_of_scope', outcome: 'fallback', content_code: 'MSG_DEMO_TRANSFER_COUNSELOR', count: 6 },
+      ],
+      generated_at: nowIso(),
+    };
+  });
+  route('GET', '/interop/dhis2/data-value-set', (ctx) => {
+    requireRoles(ctx, ['data_officer']);
+    const period = ctx.query.get('period') ?? '';
+    return {
+      dataSet: 'FANILO_MONTHLY',
+      period,
+      completeDate: nowIso().slice(0, 10),
+      generated_at: nowIso(),
+      min_cell_size: 5,
+      suppressed_values: 1,
+      data_elements: { FANILO_QUESTIONS: 'Questions posées' },
+      dataValues: [{ dataElement: 'FANILO_QUESTIONS', orgUnit: 'CSB-DEMO-A', period, value: '12' }],
+    };
+  });
+
+  // --- Simulateur vocal (référentiels et question, réponses fictives)
+  const CARE: Role[] = ['community_agent', 'csb_head', 'clinical_advisor', 'clinical_lead'];
+  route('GET', '/reference/menus', (ctx) => ({
+    config_id: 'mock-information',
+    version: '0.1.0',
+    is_demo: true,
+    module: ctx.query.get('module') ?? 'reny',
+    items: [
+      { key: 1, code: 'MSG_DEMO_INFO_ANC', title: '[DÉMO] Consultations prénatales', body: '[DÉMO] Demandez votre prochain rendez-vous à votre AC.', audio_url: null, status: 'demo' },
+      { key: 2, code: 'MSG_DEMO_INFO_NUTRITION', title: "[DÉMO] Questions sur l'alimentation", body: '[DÉMO] Parlez-en à votre AC ou au CSB.', audio_url: null, status: 'demo' },
+    ],
+  }));
+  route('GET', '/reference/sign-codes', (ctx) => ({
+    catalog_id: 'mock-signs',
+    version: '0.1.0',
+    status: 'demo',
+    is_demo: true,
+    items: [1, 2, 3].map((n) => ({ code: `SIGN_DEMO_0${n}`, label_fr: `[DÉMO] Signe fictif n° ${n}`, label_mg: null, modules: [ctx.query.get('module') ?? 'reny'] })),
+  }));
+  route('POST', '/interactions/ask', (ctx) => {
+    requireRoles(ctx, CARE);
+    const signs = Array.isArray(ctx.body.sign_codes) ? (ctx.body.sign_codes as string[]) : [];
+    const danger = signs.includes('SIGN_DEMO_01');
+    return {
+      interaction_id: crypto.randomUUID(),
+      transcript: typeof ctx.body.text === 'string' ? ctx.body.text : null,
+      transcript_needs_review: false,
+      outcome: danger ? 'danger_sign' : 'fallback',
+      actions: danger ? ['refer_reference_facility'] : ['transfer_counselor'],
+      severity: danger ? 'critical' : null,
+      content: { code: 'MSG_DEMO_TRANSFER_COUNSELOR', title: '[DÉMO] Question transmise à un conseiller', body: '[DÉMO] Votre question est transmise à un conseiller.', audio_url: null, status: 'demo' },
+      alert_id: danger ? crypto.randomUUID() : null,
+      is_demo: true,
+      disclaimer: 'FANILO ne remplace pas un professionnel de santé.',
+    };
   });
 
   // --- Audit
